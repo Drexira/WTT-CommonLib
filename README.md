@@ -240,7 +240,7 @@ de.json - German
 
 etc.
 
-`
+```
 {
 "my_custom_weapon_001 Name": "Custom Assault Rifle", 
 "my_custom_weapon_001 ShortName": "CAR",
@@ -248,7 +248,7 @@ etc.
 "my_custom_quest_001 name": "Custom Quest Name", 
 "my_custom_quest_001 description": "Quest description here"
 }
-`
+```
 
 CustomQuestService
 
@@ -287,7 +287,7 @@ wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly);
 
 Configuration: Place zone files in  db/CustomQuestZones/. I recommend you use the in-game zone editor to create them:
 
-`
+```
   {
     "ZoneId": "deadbody_1",
     "ZoneName": "deadbody_1",
@@ -313,7 +313,7 @@ Configuration: Place zone files in  db/CustomQuestZones/. I recommend you use th
       "W": "0"
     }
   }
-`
+```
 
 In-game zone editor: Press F12 in-game, navigate to WTT -ClientCommonLib settings to create and position zones visually  .
 
@@ -331,7 +331,7 @@ wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
 
 Configuration: Create voice config files in  config/voices/:
 
-`
+```
 {
     "6747aa4495b4845a0f3d9f98": {
         "locales": {
@@ -342,7 +342,7 @@ Configuration: Create voice config files in  config/voices/:
         "addVoiceToPlayer": true
     },
 }
-`
+```
 
 Asset requirements: Package voice audio into a Unity AssetBundle and place it in your mod's bundles/ folder and your bundles.json.
 
@@ -359,7 +359,7 @@ wttCommon.CustomHeadService.CreateCustomHeads(assembly);
 `
 
 Configuration: Create head config files in  config/heads/:
-`
+```
 {
     "6747aa715be2c2e443264f32":{
         "path": "heads/chrishead.bundle",
@@ -370,7 +370,7 @@ Configuration: Create head config files in  config/heads/:
         }
     },
 }
-`
+```
 Asset requirements: Package head models into Unity  AssetBundles and place them in your mod's bundles/ folder.
 
 CustomClothingService
@@ -385,7 +385,7 @@ wttCommon.CustomClothingService.CreateCustomClothing(assembly);
 
 Configuration: Create clothing config files in  db/CustomClothing/:
 
-`
+```
 {
 	{
 		"type": "top",
@@ -406,7 +406,7 @@ Configuration: Create clothing config files in  db/CustomClothing/:
 		"price": 150
 	}
 }
-`
+```
 
 CustomBotLoadoutService
 
@@ -420,7 +420,7 @@ wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly);
 
 Configuration: Create bot loadout files in config/bots/:
 
-`
+```
 {
 	"chances": {
 		"equipment": {
@@ -481,7 +481,7 @@ Configuration: Create bot loadout files in config/bots/:
 		}
 	}
 }
-`
+```
 
 
 CustomLootspawnService
