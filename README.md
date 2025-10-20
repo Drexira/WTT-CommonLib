@@ -26,7 +26,7 @@ Basic Mod Structure
 
 Here's a simple example of a mod using WTT -CommonLib:
 
-
+```
 using System.Reflection;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
@@ -67,7 +67,7 @@ public class WTTTheLongLostHeadsOfYojenkz(
         return Task.CompletedTask;
     }
 }
-
+```
 
 
 - Inject WTTServerCommonLib.WTTServerCommonLib through the constructor
@@ -88,17 +88,19 @@ What it does: Creates custom items (weapons, armor  , consumables, etc.) and int
 
 How to use:
 
-
+`
 wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
+`
 
 or alternatively you can pass it your custom path to your item .jsons like this:
 
+`
 wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly, Path.Join("db", "MyCustomItemFolder"));
-
+`
 
 Configuration: Create JSON files in  db/CustomItems/ in your mod folder (or use your custom path to your .jsons):
 
-
+```
   "6761b213607f9a6f79017aef": {
     "itemTplToClone": "572b7adb24597762ae139821",
     "parentId": "6815465859b8c6ff13f94026",
@@ -185,7 +187,7 @@ Configuration: Create JSON files in  db/CustomItems/ in your mod folder (or use 
     },
     "masterySections": []
   }
-
+```
 
 Key features:
 
@@ -225,9 +227,9 @@ What it does: Handles translations for all your custom content.
 
 How to use:
 
-
+`
 wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
-
+`
 
 Configuration: Create locale files in  db/CustomLocales/:
 en.json - English
@@ -238,12 +240,15 @@ de.json - German
 
 etc.
 
-
+`
 {
-"my_custom_weapon_001 Name": "Custom Assault Rifle", "my_custom_weapon_001 ShortName": "CAR",
-"my_custom_weapon_001 Description": "A powerful custom rifle", "my_custom_quest_001 name": "Custom Quest Name", "my_custom_quest_001 description": "Quest description here"
+"my_custom_weapon_001 Name": "Custom Assault Rifle", 
+"my_custom_weapon_001 ShortName": "CAR",
+"my_custom_weapon_001 Description": "A powerful custom rifle", 
+"my_custom_quest_001 name": "Custom Quest Name", 
+"my_custom_quest_001 description": "Quest description here"
 }
-
+`
 
 CustomQuestService
 
@@ -251,9 +256,9 @@ What it does: Adds custom quests to the database
 
 How to use:
 
-
+`
 wttCommon.CustomQuestService.CreateCustomQuests(assembly);
-
+`
 
 Configuration: Create quest files in  db/CustomQuests/:
 
@@ -276,22 +281,39 @@ What it does: Manages custom quest zones for Visit, PlaceItem, and other locatio
 
 How to use:
 
-
+`
 wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly);
-
+`
 
 Configuration: Place zone files in  db/CustomQuestZones/. I recommend you use the in-game zone editor to create them:
 
-
-{
-"zoneId": "custom_zone_001", "zoneName": "My Custom Zone", "zoneLocation": "factory4_day", "zoneType": "Visit", "flareType": "",
-"position": { "x": "100.5", "y": "2.0", "z": "50.3"
-}, "scale": {
-"x": "5.0", "y": "3.0", "z": "5.0"
-}, "rotation": {
-"x": "0", "y": "0", "z": "0", "w": "1"
-} }
-
+`
+  {
+    "ZoneId": "deadbody_1",
+    "ZoneName": "deadbody_1",
+    "ZoneLocation": "woods",
+    "ZoneType": "placeitem",
+    "FlareType": "",
+    "Position": {
+      "X": "91.6219",
+      "Y": "16.7",
+      "Z": "-845.9562",
+      "W": "0"
+    },
+    "Rotation": {
+      "X": "0",
+      "Y": "0",
+      "Z": "0",
+      "W": "1"
+    },
+    "Scale": {
+      "X": "1.5",
+      "Y": "3.25",
+      "Z": "1.75",
+      "W": "0"
+    }
+  }
+`
 
 In-game zone editor: Press F12 in-game, navigate to WTT -ClientCommonLib settings to create and position zones visually  .
 
@@ -303,21 +325,24 @@ What it does: Adds custom character voices for players and bots.
 
 How to use:
 
-
+`
 wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
-
+`
 
 Configuration: Create voice config files in  config/voices/:
 
-
+`
 {
-"name": "CustomVoice_Operator",
-"bundlePath": "Assets/Voices/operator_voice", "addVoiceToPlayer": true, "sideSpecificVoice": ["Bear", "Usec"], "addToBotTypes": {
-"assault": 20, "pmcbot": 15
-}, "locales": {
-"en": "Special Operator Voice" }
+    "6747aa4495b4845a0f3d9f98": {
+        "locales": {
+            "en": "Duke"
+        },
+        "name": "Duke",
+        "bundlePath": "voices/Duke/Voices/duke_voice.bundle",
+        "addVoiceToPlayer": true
+    },
 }
-
+`
 
 Asset requirements: Package voice audio into a Unity AssetBundle and place it in your mod's bundles/ folder and your bundles.json.
 
@@ -329,20 +354,23 @@ What it does: Adds custom character head models for player customization.
 
 How to use:
 
-
+`
 wttCommon.CustomHeadService.CreateCustomHeads(assembly);
-
+`
 
 Configuration: Create head config files in  config/heads/:
-
-
+`
 {
-"path": "Assets/Heads/custom_head_01", "addHeadToPlayer": true,
-"side": ["Bear", "Usec"], "locales": {
-"en": "Custom Operator Head"
-} }
-
-
+    "6747aa715be2c2e443264f32":{
+        "path": "heads/chrishead.bundle",
+        "addHeadToPlayer": true,
+        "side": ["Bear", "Usec"],
+        "locales": {
+            "en": "Chris Redfield"
+        }
+    },
+}
+`
 Asset requirements: Package head models into Unity  AssetBundles and place them in your mod's bundles/ folder.
 
 CustomClothingService
@@ -351,21 +379,34 @@ What it does: Adds custom clothing sets (outfits, tops, bottoms) for players.
 
 How to use:
 
-
+`
 wttCommon.CustomClothingService.CreateCustomClothing(assembly);
+`
 
+Configuration: Create clothing config files in  db/CustomClothing/:
 
-Configuration: Create clothing config files in  config/clothing/:
-
-
+`
 {
-"type": "top",
-"suiteId": "custom_outfit_001", "side": ["Bear", "Usec"],
-"topBundlePath": "Assets/Clothing/top_tactical", "handsBundlePath": "Assets/Clothing/hands_tactical", "bottomBundlePath": "Assets/Clothing/bottom_tactical", "traderId": "ragman",
-"loyaltyLevel": 2, "profileLevel": 15, "standing": 0.2, "currencyId": "ROUBLES", "price": 50000, "locales": {
-"en": "Tactical Operator Outfit" }
+	{
+		"type": "top",
+		"suiteId": "6748037e298128d377dfffd0",
+		"outfitId": "67480381bd1eb568c78598df",
+		"topId": "67480383b253d50226f3becd",
+		"handsId": "67480396eda19f232a648533",
+		"locales": {
+			"en": "Lara's Tattered Tank Top"
+		},
+		"topBundlePath": "clothing/lara_top.bundle",
+		"handsBundlePath": "clothing/lara_hands.bundle",
+		"traderId": "RAGMAN",
+		"loyaltyLevel": 1,
+		"profileLevel": 1,
+		"standing": 0,
+		"currencyId": "ROUBLES",
+		"price": 150
+	}
 }
-
+`
 
 CustomBotLoadoutService
 
@@ -373,30 +414,74 @@ What it does: Customizes  AI bot equipment, weapons, and appearance.
 
 How to use:
 
-
+`
 wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly);
-
+`
 
 Configuration: Create bot loadout files in config/bots/:
 
-
+`
 {
-"chances": { "equipment": {
-"FirstPrimaryWeapon": 100, "Headwear": 80, "ArmorVest": 90
-}, "weaponMods": {
-"mod_scope": 60, "mod_silencer": 40
-} },
-"inventory": { "equipment": {
-"FirstPrimaryWeapon": ["my_custom_weapon_001", "5447a9cd4bdc2dbd208b4567"], "Headwear": ["my_custom_helmet_001"]
-}, "mods": {
-"mod_scope": ["my_custom_scope_001"] },
-"Ammo": {
-"Caliber556x45NATO": ["my_custom_ammo_001"] }
-}, "appearance": {
-"body": { "custom_body_001": 50
-}, "voice": {
-"CustomVoice_Operator": 30 }
-} }
+	"chances": {
+		"equipment": {
+			"FirstPrimaryWeapon": 100
+		},
+		"weaponMods": {
+			"mod_stock": 100,
+			"mod_magazine": 100,
+			"mod_mount_000": 100,
+			"mod_charge": 70,
+			"mod_foregrip": 70,
+			"mod_tactical_002": 65,
+			"mod_pistol_grip": 100
+		}
+	},
+	"inventory": {
+		"equipment": {
+			"FirstPrimaryWeapon": {
+				"679a6a534f3d279c99b135b9": 500
+			}
+		},
+		"mods": {
+			"679a6a534f3d279c99b135b9": {
+				"mod_stock": [
+					"679a6e58085b54fdd56f5d0d"
+				],
+				"mod_magazine": [
+					"679a702c47bb7fa666fe618e"
+				],
+				"mod_mount_000": [
+					"57486e672459770abd687134"
+				],
+				"mod_charge": [
+					"5648ac824bdc2ded0b8b457d"
+				],
+				"mod_foregrip": [
+					"588226e62459776e3e094af7"
+				],
+				"mod_tactical_002": [
+					"5c5952732e2216398b5abda2"
+				],
+				"mod_pistol_grip": [
+					"679a766855f7e9fa7b1abfdf"
+				]
+			},
+			"679a6e58085b54fdd56f5d0d": {
+				"mod_stock": [
+					"5a0c59791526d8dba737bba7"
+				]
+			}
+		},
+		"Ammo": {
+			"Caliber545x39": {
+				"61962b617c6c7b169525f168": 1,
+				"56dff061d2720bb5668b4567": 1,
+				"56dfef82d2720bbd668b4567": 1
+			}
+		}
+	}
+}
+`
 
 
 CustomLootspawnService
@@ -405,9 +490,9 @@ What it does: Controls where and how often your custom items spawn as loot, and 
 
 How to use:
 
-
+`
 wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly);
-
+`
 
 
 CustomAssortSchemeService
@@ -416,9 +501,9 @@ What it does: Adds complex items to trader inventory and barter schemes.
 
 How to use:
 
-
+`
 wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
-
+`
 
 Configuration: Usually reserved for complex items like weapons, you can create standalone assort files in db/CustomAssortSchemes/
 
@@ -429,24 +514,11 @@ What it does: Creates crafting recipes for the hideout.
 
 How to use:
 
-
+`
 wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly);
+`
 
-
-Configuration: Create recipe files in  config/hideout/:
-
-
-{
-"areaType": "WorkBench", "requiredLevel": 2, "craftTime": 3600, "requirements": [
-{
-"templateId": "5449016a4bdc2d6f028b456f", "count": 50000,
-"type": "Item" },
-{
-"templateId": "my_component_001", "count": 5,
-"type": "Item" }
-], "output": {
-"templateId": "my_custom_weapon_001", "count": 1
-} }
+Configuration: Create recipe files in  db/CustomHideoutRecipes/:
 
 
 CustomRigLayoutService
@@ -455,9 +527,9 @@ What it does: Creates custom rig layouts and sends them to the client for your i
 
 How to use:
 
-
+`
 wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly);
-
+`
 
 Asset requirements: Package rig layout GameObjects with  ContainedGridsView components into Unity AssetBundles and place them in   db/CustomRigLayouts/.
 
@@ -466,8 +538,10 @@ CustomSlotImageService
 What it does: Provides custom inventory slot icons for unique items.
 
 How to use:
-wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly);
 
+`
+wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly);
+`
 
 Configuration: Place images in  db/CustomSlotImages/ in your mod folder. Name them according to the slot ID you want to customize. This will also be the key you use if you want to support multiple Locales.
 
@@ -493,7 +567,7 @@ MyWeaponMod/
 
 
 Code:
-
+```
 using System.Reflection;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Controllers;
@@ -537,7 +611,7 @@ public class MyWeaponMod(
         return Task.CompletedTask;
     }
 }
-
+```
 
 
 
