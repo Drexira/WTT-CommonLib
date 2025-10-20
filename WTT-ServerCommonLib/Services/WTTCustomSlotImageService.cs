@@ -10,7 +10,7 @@ namespace WTTServerCommonLib.Services
     {
         private readonly Dictionary<string, string> _imagePaths = new();
 
-        public void LoadSlotImages(Assembly assembly, string? relativePath = null)
+        public void CreateSlotImages(Assembly assembly, string? relativePath = null)
         {
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
             string defaultDir = Path.Combine("db", "CustomSlotImages");

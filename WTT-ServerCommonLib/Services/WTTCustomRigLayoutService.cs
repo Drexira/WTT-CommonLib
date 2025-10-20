@@ -18,7 +18,7 @@ namespace WTTServerCommonLib.Services
             this.logger = logger;
         }
 
-        public void LoadRigLayouts(Assembly assembly, string? relativePath = null)
+        public void CreateRigLayouts(Assembly assembly, string? relativePath = null)
         {
             string modKey = assembly.GetName().Name;
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
