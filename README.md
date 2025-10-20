@@ -1,30 +1,43 @@
 # WTT-CommonLib
 
-WTT-CommonLib Modding Guide
+A comprehensive modding library for SPT that simplifies adding custom content to Escape from Tarkov. WTT-CommonLib handles both server-side database modifications and client-side resource loading automatically - you just configure your content and call the appropriate services.
+
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Available Services](#available-services)
+  - [CustomItemServiceExtended](#customitemserviceextended)
+  - [CustomLocaleService](#customlocaleservice)
+  - [CustomQuestService](#customquestservice)
+  - [CustomQuestZoneService](#customquestzoneservice)
+  - [CustomVoiceService](#customvoiceservice)
+  - [CustomHeadService](#customheadservice)
+  - [CustomClothingService](#customclothingservice)
+  - [CustomBotLoadoutService](#custombotloadoutservice)
+  - [CustomLootspawnService](#customlootspawnservice)
+  - [CustomAssortSchemeService](#customassortschemeservice)
+  - [CustomHideoutRecipeService](#customhideoutrecipeservice)
+  - [CustomRigLayoutService](#customriglayoutservice)
+  - [CustomSlotImageService](#customslotimageservice)
+- [Example Mod Structure](#example-mod-structure)
+- [Debugging](#debugging)
+- [Support](#support)
+
+## Features
+
+**Simplified Item Creation** - Clone and modify items with JSON configs  
+**Quest System** - Create custom quests with zone-based objectives  
+**Character Customization** - Add heads, voices, and clothing  
+**Bot Configuration** - Customize AI loadouts and equipment  
+**Loot Management** - Control item spawns and distributions  
+**Hideout Integration** - Add crafting recipes  
+**Multi-language Support** - Easy localization system  
 
 
-Overview
+## Quick Start
 
-WTT-CommonLib is a modding library for SPT that simplifies adding custom content to Escape from Tarkov. Instead of manually editing game databases and creating complex integrations, you can    use WTT -CommonLib's services to automatically handle everything from items, quests, voices, clothing, and more!
-
-
-The library handles both server-side database modifications and client-side resource loading automatically. You just need to configure your content and call the appropriate services.
-
-Getting Started
-
-
-Installation
-
-1. Download WTT-CommonLib from GitHub/Forge
-
-2. Install the client component to  BepInEx/plugins/
-
-3. Install the server component to  SPT/user/mods/
-
-
-Basic Mod Structure
-
-Here's a simple example of a mod using WTT -CommonLib:
+Here's a minimal example showing how to use WTT-CommonLib:
 
 ```
 using System.Reflection;
@@ -33,74 +46,67 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using Range = SemanticVersioning.Range;
 
-namespace WTTTheLongLostHeadsOfYojenkz;
+namespace YourModName;
 
 public record ModMetadata : AbstractModMetadata
 {
-    public override string ModGuid { get; init; } = "com.GrooveypenguinX.WTT-TheLongLostHeadsOfYojenkz";
-    public override string Name { get; init; } = "WTT-TheLongLostHeadsOfYojenkz";
-    public override string Author { get; init; } = "GrooveypenguinX";
-    public override List<string>? Contributors { get; init; } = null;
+    public override string ModGuid { get; init; } = "com.yourname.yourmod";
+    public override string Name { get; init; } = "Your Mod Name";
+    public override string Author { get; init; } = "Your Name";
     public override SemanticVersioning.Version Version { get; init; } = new("1.0.0");
     public override Range SptVersion { get; init; } = new("4.0.1");
-    public override List<string>? Incompatibilities { get; init; }
-    public override Dictionary<string, Range>? ModDependencies { get; init; }
-    public override string? Url { get; init; }
-    public override bool? IsBundleMod { get; init; } = true;
     public override string License { get; init; } = "MIT";
 }
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 20)]
-public class WTTTheLongLostHeadsOfYojenkz(
+public class YourMod(
     WTTServerCommonLib.WTTServerCommonLib wttCommon
 ) : IOnLoad
 {
-
     public Task OnLoad()
     {
-        
         Assembly assembly = Assembly.GetExecutingAssembly();
         
-        wttCommon.CustomHeadService.CreateCustomHeads(assembly);
-        wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
+        // Use WTT-CommonLib services
+        wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
+        wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
         
         return Task.CompletedTask;
     }
 }
 ```
 
-
-- Inject WTTServerCommonLib.WTTServerCommonLib through the constructor
-
-- Set TypePriority = OnLoadOrder.PostDBModLoader + 20 to load after the database
-
-- Get your assembly with  Assembly.GetExecutingAssembly()
-
+### Key Points:
+- Inject `WTTServerCommonLib.WTTServerCommonLib` through the constructor
+- Set `TypePriority = OnLoadOrder.PostDBModLoader + 20` to load after the database
+- Get your assembly with `Assembly.GetExecutingAssembly()`
 - Pass your assembly to the services you want to use
 
+---
 
-Available Services
+## Available Services
 
+### CustomItemServiceExtended
 
-CustomItemServiceExtended
+**Purpose**: Creates custom items (weapons, armor, consumables, etc.) and integrates them into traders, loot tables, and bot loadouts.
 
-What it does: Creates custom items (weapons, armor  , consumables, etc.) and integrates them into traders, loot tables, and bot loadouts.
-
-How to use:
-
-`
+**Usage**:
+```
+// Use default path (db/CustomItems/)
 wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
-`
 
-or alternatively you can pass it your custom path to your item .jsons like this:
+// Or specify custom path
+wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly, 
+    Path.Join("db", "MyCustomItemFolder"));
+```
 
-`
-wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly, Path.Join("db", "MyCustomItemFolder"));
-`
+**Configuration**: Place JSON files in `db/CustomItems/` (or your custom path):
 
-Configuration: Create JSON files in  db/CustomItems/ in your mod folder (or use your custom path to your .jsons):
+<details>
+<summary> Example Item Configuration (Click to expand)</summary>
 
 ```
+{
   "6761b213607f9a6f79017aef": {
     "itemTplToClone": "572b7adb24597762ae139821",
     "parentId": "6815465859b8c6ff13f94026",
@@ -124,17 +130,10 @@ Configuration: Create JSON files in  db/CustomItems/ in your mod folder (or use 
             "cellsV": 2,
             "filters": [
               {
-                "Filter": [
-                  "54009119af1c881c07000029"
-                ]
+                "Filter": ["54009119af1c881c07000029"]
               }
-            ],
-            "isSortingTable": false,
-            "maxCount": 0,
-            "maxWeight": 0,
-            "minCount": 0
-          },
-          "_proto": "55d329c24bdc2d892f8b4567"
+            ]
+          }
         }
       ]
     },
@@ -142,32 +141,13 @@ Configuration: Create JSON files in  db/CustomItems/ in your mod folder (or use 
       "en": {
         "name": "Fanny Pack",
         "shortName": "Fanny Pack",
-        "description": "A fanny pack that can be worn at the waist and carry a moderate amount of items."
+        "description": "A fanny pack that can be worn at the waist."
       }
     },
-    "addtoInventorySlots": [
-      "ArmBand"
-    ],
-    "addtoModSlots": false,
-    "modSlot": [],
     "fleaPriceRoubles": 10900,
     "handbookPriceRoubles": 7250,
+    "addtoInventorySlots": ["ArmBand"],
     "addtoTraders": true,
-    "addtoBots": false,
-    "addtoStaticLootContainers": false,
-    "staticLootContainers": [
-      {
-        "containerName": "LOOTCONTAINER_WEAPON_BOX_4X4",
-        "probability": 250
-      },
-      {
-        "containerName": "LOOTCONTAINER_DEAD_SCAV",
-        "probability": 150
-      }
-    ],
-    "masteries": false,
-    "addWeaponPreset": false,
-    "weaponPresets": [],
     "traders": {
       "RAGMAN": {
         "681ce253b2fd4632d780ca88": {
@@ -184,448 +164,355 @@ Configuration: Create JSON files in  db/CustomItems/ in your mod folder (or use 
           ]
         }
       }
-    },
-    "masterySections": []
+    }
   }
+}
 ```
+</details>
 
-Key features:
-
+**Features**:
 - Clone existing items and modify properties
-
 - Add to trader inventories with custom barters
-
-- Add to bot loadouts (anywhere the item you're cloning exists, at the same chance. So if you clone bandages, have addtobots true, your item will be added anywhere bandages are at the same chance)
-
+- Add to bot loadouts (inherits spawn chances from cloned item)
 - Add to loot containers
-
-- Supports weapon presets
-
-- Supports weapon masteries
-
+- Weapon preset support
+- Weapon mastery integration
 - Hall of Fame integration
+- Generator fuel integration
+- Hideout poster/statuette integration
+- Custom inventory slot placement
+- Special slot support
+- Caliber-based weapon compatibility
+- Mod slot propagation (based on the cloned item's locations)
 
-- Generator Fuel integration
+---
 
-- Hideout Poster integration
+### CustomLocaleService
 
-- Hideout Statuette integration
+**Purpose**: Handles translations for all your custom content.
 
-- Supports pushing to player inventory slots (i.e. a shotgun in your pistol slot)
-
-- Supports pushing to player special slots
-
-- Supports adding new bullets to other similar caliber weapons/items
-
-- Supports pushing your item to other mod slots where the item you're cloning exists (i.e. clone an ak mag, add it to "mod_magazine" slots, it will go anywhere the ak mag exists)
-
-
-
-CustomLocaleService
-
-What it does: Handles translations for all your custom content.
-
-How to use:
-
-`
+**Usage**:
+```
 wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
-`
+```
 
-Configuration: Create locale files in  db/CustomLocales/:
-en.json - English
+**Configuration**: Create locale files in `db/CustomLocales/`:
+- `en.json` - English
+- `ru.json` - Russian
+- `de.json` - German
+- etc.
 
-ru.json - Russian
-
-de.json - German
-
-etc.
+<details>
+<summary> Example Locale File (Click to expand)</summary>
 
 ```
 {
-"my_custom_weapon_001 Name": "Custom Assault Rifle", 
-"my_custom_weapon_001 ShortName": "CAR",
-"my_custom_weapon_001 Description": "A powerful custom rifle", 
-"my_custom_quest_001 name": "Custom Quest Name", 
-"my_custom_quest_001 description": "Quest description here"
+  "my_custom_weapon_001 Name": "Custom Assault Rifle",
+  "my_custom_weapon_001 ShortName": "CAR",
+  "my_custom_weapon_001 Description": "A powerful custom rifle",
+  "my_custom_quest_001 name": "Custom Quest Name",
+  "my_custom_quest_001 description": "Quest description here"
 }
 ```
+</details>
 
-CustomQuestService
+---
 
-What it does: Adds custom quests to the database
+### CustomQuestService
 
-How to use:
+**Purpose**: Adds custom quests to the database with support for complex objectives and rewards.
 
-`
+**Usage**:
+```
 wttCommon.CustomQuestService.CreateCustomQuests(assembly);
-`
+```
 
-Configuration: Create quest files in  db/CustomQuests/:
+**Configuration**: Create quest files in `db/CustomQuests/`
 
+**Features**:
+- Time-limited quests (seasonal/date-based)
+- Faction restrictions (BEAR/USEC only)
+- Full locale support
 
+---
 
+### CustomQuestZoneService
 
-Key features:
+**Purpose**: Manages custom quest zones for Visit, PlaceItem, and other location-based objectives.
 
-Time-limited quests
-
-Faction restrictions (BEAR/USEC only quests)
-
-Locale support, Side Specific Quest support, and time/date locking!
-
-
-
-CustomQuestZoneService
-
-What it does: Manages custom quest zones for Visit, PlaceItem, and other location-based objectives.
-
-How to use:
-
-`
+**Usage**:
+```
 wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly);
-`
+```
 
-Configuration: Place zone files in  db/CustomQuestZones/. I recommend you use the in-game zone editor to create them:
+**Configuration**: Place zone files in `db/CustomQuestZones/`
+
+<details>
+<summary> Example Zone Configuration (Click to expand)</summary>
 
 ```
-  {
-    "ZoneId": "deadbody_1",
-    "ZoneName": "deadbody_1",
-    "ZoneLocation": "woods",
-    "ZoneType": "placeitem",
-    "FlareType": "",
-    "Position": {
-      "X": "91.6219",
-      "Y": "16.7",
-      "Z": "-845.9562",
-      "W": "0"
+{
+  "ZoneId": "deadbody_1",
+  "ZoneName": "deadbody_1",
+  "ZoneLocation": "woods",
+  "ZoneType": "placeitem",
+  "FlareType": "",
+  "Position": {
+    "X": "91.6219",
+    "Y": "16.7",
+    "Z": "-845.9562"
+  },
+  "Rotation": {
+    "X": "0",
+    "Y": "0",
+    "Z": "0",
+    "W": "1"
+  },
+  "Scale": {
+    "X": "1.5",
+    "Y": "3.25",
+    "Z": "1.75"
+  }
+}
+```
+</details>
+
+**In-Game Editor**: Press **F12** in-game → Navigate to **WTT-ClientCommonLib** settings → Create and position zones visually
+
+---
+
+### CustomVoiceService
+
+**Purpose**: Adds custom character voices for players and bots.
+
+**Usage**:
+```
+wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
+```
+
+**Configuration**: Create voice config files in `db/CustomVoices/`:
+
+<details>
+<summary> Example Voice Configuration (Click to expand)</summary>
+
+```
+{
+  "6747aa4495b4845a0f3d9f98": {
+    "locales": {
+      "en": "Duke"
     },
-    "Rotation": {
-      "X": "0",
-      "Y": "0",
-      "Z": "0",
-      "W": "1"
-    },
-    "Scale": {
-      "X": "1.5",
-      "Y": "3.25",
-      "Z": "1.75",
-      "W": "0"
+    "name": "Duke",
+    "bundlePath": "voices/Duke/Voices/duke_voice.bundle",
+    "addVoiceToPlayer": true
+  }
+}
+```
+</details>
+
+**Requirements**: Package voice audio into Unity AssetBundles → Place in `bundles/` folder → Add to `bundles.json`
+
+---
+
+### CustomHeadService
+
+**Purpose**: Adds custom character head models for player customization.
+
+**Usage**:
+```
+wttCommon.CustomHeadService.CreateCustomHeads(assembly);
+```
+
+**Configuration**: Create head config files in `db/CustomHeads/`:
+
+<details>
+<summary> Example Head Configuration (Click to expand)</summary>
+
+```
+{
+  "6747aa715be2c2e443264f32": {
+    "path": "heads/chrishead.bundle",
+    "addHeadToPlayer": true,
+    "side": ["Bear", "Usec"],
+    "locales": {
+      "en": "Chris Redfield"
     }
   }
-```
-
-In-game zone editor: Press F12 in-game, navigate to WTT -ClientCommonLib settings to create and position zones visually  .
-
-
-
-CustomVoiceService
-
-What it does: Adds custom character voices for players and bots.
-
-How to use:
-
-`
-wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
-`
-
-Configuration: Create voice config files in  config/voices/:
-
-```
-{
-    "6747aa4495b4845a0f3d9f98": {
-        "locales": {
-            "en": "Duke"
-        },
-        "name": "Duke",
-        "bundlePath": "voices/Duke/Voices/duke_voice.bundle",
-        "addVoiceToPlayer": true
-    },
 }
 ```
+</details>
 
-Asset requirements: Package voice audio into a Unity AssetBundle and place it in your mod's bundles/ folder and your bundles.json.
+**Requirements**: Package head models into Unity AssetBundles → Place in `bundles/` folder
 
+---
 
+### CustomClothingService
 
-CustomHeadService
+**Purpose**: Adds custom clothing sets (tops, bottoms) for players.
 
-What it does: Adds custom character head models for player customization.
-
-How to use:
-
-`
-wttCommon.CustomHeadService.CreateCustomHeads(assembly);
-`
-
-Configuration: Create head config files in  config/heads/:
+**Usage**:
 ```
-{
-    "6747aa715be2c2e443264f32":{
-        "path": "heads/chrishead.bundle",
-        "addHeadToPlayer": true,
-        "side": ["Bear", "Usec"],
-        "locales": {
-            "en": "Chris Redfield"
-        }
-    },
-}
-```
-Asset requirements: Package head models into Unity  AssetBundles and place them in your mod's bundles/ folder.
-
-CustomClothingService
-
-What it does: Adds custom clothing sets (outfits, tops, bottoms) for players.
-
-How to use:
-
-`
 wttCommon.CustomClothingService.CreateCustomClothing(assembly);
-`
+```
 
-Configuration: Create clothing config files in  db/CustomClothing/:
+**Configuration**: Create clothing config files in `db/CustomClothing/`:
+
+<details>
+<summary> Example Clothing Configuration (Click to expand)</summary>
 
 ```
 {
-	{
-		"type": "top",
-		"suiteId": "6748037e298128d377dfffd0",
-		"outfitId": "67480381bd1eb568c78598df",
-		"topId": "67480383b253d50226f3becd",
-		"handsId": "67480396eda19f232a648533",
-		"locales": {
-			"en": "Lara's Tattered Tank Top"
-		},
-		"topBundlePath": "clothing/lara_top.bundle",
-		"handsBundlePath": "clothing/lara_hands.bundle",
-		"traderId": "RAGMAN",
-		"loyaltyLevel": 1,
-		"profileLevel": 1,
-		"standing": 0,
-		"currencyId": "ROUBLES",
-		"price": 150
-	}
+  "type": "top",
+  "suiteId": "6748037e298128d377dfffd0",
+  "outfitId": "67480381bd1eb568c78598df",
+  "topId": "67480383b253d50226f3becd",
+  "handsId": "67480396eda19f232a648533",
+  "locales": {
+    "en": "Lara's Tattered Tank Top"
+  },
+  "topBundlePath": "clothing/lara_top.bundle",
+  "handsBundlePath": "clothing/lara_hands.bundle",
+  "traderId": "RAGMAN",
+  "loyaltyLevel": 1,
+  "profileLevel": 1,
+  "standing": 0,
+  "currencyId": "ROUBLES",
+  "price": 150
 }
 ```
+</details>
 
-CustomBotLoadoutService
+---
 
-What it does: Customizes  AI bot equipment, weapons, and appearance.
+### CustomBotLoadoutService
 
-How to use:
+**Purpose**: Customizes AI bot equipment, weapons, and appearance.
 
-`
+**Usage**:
+```
 wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly);
-`
+```
 
-Configuration: Create bot loadout files in config/bots/:
+**Configuration**: Create bot loadout files in `db/CustomBotLoadouts/`:
+
+<details>
+<summary> Example Bot Loadout (Click to expand)</summary>
 
 ```
 {
-	"chances": {
-		"equipment": {
-			"FirstPrimaryWeapon": 100
-		},
-		"weaponMods": {
-			"mod_stock": 100,
-			"mod_magazine": 100,
-			"mod_mount_000": 100,
-			"mod_charge": 70,
-			"mod_foregrip": 70,
-			"mod_tactical_002": 65,
-			"mod_pistol_grip": 100
-		}
-	},
-	"inventory": {
-		"equipment": {
-			"FirstPrimaryWeapon": {
-				"679a6a534f3d279c99b135b9": 500
-			}
-		},
-		"mods": {
-			"679a6a534f3d279c99b135b9": {
-				"mod_stock": [
-					"679a6e58085b54fdd56f5d0d"
-				],
-				"mod_magazine": [
-					"679a702c47bb7fa666fe618e"
-				],
-				"mod_mount_000": [
-					"57486e672459770abd687134"
-				],
-				"mod_charge": [
-					"5648ac824bdc2ded0b8b457d"
-				],
-				"mod_foregrip": [
-					"588226e62459776e3e094af7"
-				],
-				"mod_tactical_002": [
-					"5c5952732e2216398b5abda2"
-				],
-				"mod_pistol_grip": [
-					"679a766855f7e9fa7b1abfdf"
-				]
-			},
-			"679a6e58085b54fdd56f5d0d": {
-				"mod_stock": [
-					"5a0c59791526d8dba737bba7"
-				]
-			}
-		},
-		"Ammo": {
-			"Caliber545x39": {
-				"61962b617c6c7b169525f168": 1,
-				"56dff061d2720bb5668b4567": 1,
-				"56dfef82d2720bbd668b4567": 1
-			}
-		}
-	}
-}
-```
-
-
-CustomLootspawnService
-
-What it does: Controls where and how often your custom items spawn as loot, and forced loot for quest objectives
-
-How to use:
-
-`
-wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly);
-`
-
-
-CustomAssortSchemeService
-
-What it does: Adds complex items to trader inventory and barter schemes.
-
-How to use:
-
-`
-wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
-`
-
-Configuration: Usually reserved for complex items like weapons, you can create standalone assort files in db/CustomAssortSchemes/
-
-
-CustomHideoutRecipeService
-
-What it does: Creates crafting recipes for the hideout.
-
-How to use:
-
-`
-wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly);
-`
-
-Configuration: Create recipe files in  db/CustomHideoutRecipes/:
-
-
-CustomRigLayoutService
-
-What it does: Creates custom rig layouts and sends them to the client for your items to utilize.
-
-How to use:
-
-`
-wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly);
-`
-
-Asset requirements: Package rig layout GameObjects with  ContainedGridsView components into Unity AssetBundles and place them in   db/CustomRigLayouts/.
-
-CustomSlotImageService
-
-What it does: Provides custom inventory slot icons for unique items.
-
-How to use:
-
-`
-wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly);
-`
-
-Configuration: Place images in  db/CustomSlotImages/ in your mod folder. Name them according to the slot ID you want to customize. This will also be the key you use if you want to support multiple Locales.
-
-
-Typical Mod Workflow
-
-
-1. Custom Weapon Mod Example
-
-Mod structure:
-
-
-MyWeaponMod/ 
-├──  bundles/
-│	├──  MyCustomWeapon.bundle
-├──  db/
-│	├──  CustomItems/
-│	│	└──  weapons.json 
-│	└──  CustomAssortSchemes/
-|       └──  praporAssort.json
-|──  bundles.json
-└──  MyWeaponMod.dll
-
-
-Code:
-```
-using System.Reflection;
-using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Controllers;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Spt.Mod;
-using SPTarkov.Server.Core.Servers;
-using Path = System.IO.Path;
-using Range = SemanticVersioning.Range;
-
-namespace WTTArmory;
-
-public record ModMetadata : AbstractModMetadata
-{
-    public override string ModGuid { get; init; } = "com.GrooveypenguinX.MyWeaponMod";
-    public override string Name { get; init; } = "MyWeaponMod";
-    public override string Author { get; init; } = "GrooveypenguinX";
-    public override List<string>? Contributors { get; init; } = null;
-    public override SemanticVersioning.Version Version { get; init; } = new("1.0.0");
-    public override Range SptVersion { get; init; } = new("4.0.1");
-    public override List<string>? Incompatibilities { get; init; }
-    public override Dictionary<string, Range>? ModDependencies { get; init; }
-    public override string? Url { get; init; }
-    public override bool? IsBundleMod { get; init; } = true;
-    public override string License { get; init; } = "MIT";
-}
-
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 20)]
-public class MyWeaponMod(
-    WTTServerCommonLib.WTTServerCommonLib wttCommon,
-    WTTBot wttBot) : IOnLoad
-{
-
-    public Task OnLoad()
-    {
-        
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
-        wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
-        
-        return Task.CompletedTask;
+  "chances": {
+    "equipment": {
+      "FirstPrimaryWeapon": 100
+    },
+    "weaponMods": {
+      "mod_stock": 100,
+      "mod_magazine": 100,
+      "mod_tactical_002": 65
     }
+  },
+  "inventory": {
+    "equipment": {
+      "FirstPrimaryWeapon": {
+        "679a6a534f3d279c99b135b9": 500
+      }
+    },
+    "mods": {
+      "679a6a534f3d279c99b135b9": {
+        "mod_stock": ["679a6e58085b54fdd56f5d0d"],
+        "mod_magazine": ["679a702c47bb7fa666fe618e"]
+      }
+    },
+    "Ammo": {
+      "Caliber545x39": {
+        "61962b617c6c7b169525f168": 1
+      }
+    }
+  }
 }
 ```
+</details>
 
+---
 
+### CustomLootspawnService
 
-Debugging
+**Purpose**: Controls where and how often your custom items spawn as loot, plus forced loot for quest objectives.
 
-Check the SPT server console for errors during startup
+**Usage**:
+```
+wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly);
+```
 
-Review user/logs/ for detailed error messages
+**Configuration**: Create loot spawn files in `db/CustomLootspawns/`
 
-Enable BepInEx console in-game to see client-side loading
+---
 
+### CustomAssortSchemeService
 
+**Purpose**: Adds complex items to trader inventory with custom barter schemes.
 
+**Usage**:
+```
+wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
+```
 
-For issues, questions, or contributions:
+**Configuration**: Create assort files in `db/CustomAssortSchemes/`
 
-GitHub: https://github.com/WelcomeToTarkov/WTT-CommonLib
+> **Note**: Usually reserved for complex items like fully-modded weapons, or armor with plates
+
+---
+
+### CustomHideoutRecipeService
+
+**Purpose**: Creates crafting recipes for the hideout.
+
+**Usage**:
+```
+wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly);
+```
+
+**Configuration**: Create recipe files in `db/CustomHideoutRecipes/`
+
+---
+
+### CustomRigLayoutService
+
+**Purpose**: Creates custom rig layouts and sends them to the client for your items to utilize.
+
+**Usage**:
+```
+wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly);
+```
+
+**Requirements**: Package rig layout GameObjects with `ContainedGridsView` components into Unity AssetBundles → Place in `db/CustomRigLayouts/`
+
+---
+
+### CustomSlotImageService
+
+**Purpose**: Provides custom inventory slot icons for unique items.
+
+**Usage**:
+```
+wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly);
+```
+
+**Configuration**: Place PNG images in `db/CustomSlotImages/` → Name them by slot ID → Image name becomes the locale key
+
+---
+
+## Example Mod Structure
+
+### Custom Weapon Mod Structure
+
+```
+MyWeaponMod/
+├── bundles/
+│ └── MyCustomWeapon.bundle
+├── db/
+│ ├── CustomItems/
+│ │ └── weapons.json
+│ └── CustomAssortSchemes/
+│ 	└── praporAssort.json
+├── bundles.json
+└── MyWeaponMod.dll
+```
