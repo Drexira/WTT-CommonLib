@@ -69,7 +69,7 @@ public record ModMetadata : AbstractModMetadata
     public override string License { get; init; } = "MIT";
 }
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 20)]
+[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
 public class YourMod(
     WTTServerCommonLib.WTTServerCommonLib wttCommon
 ) : IOnLoad
@@ -89,7 +89,7 @@ public class YourMod(
 
 ### Key Points:
 - Inject `WTTServerCommonLib.WTTServerCommonLib` through the constructor
-- Set `TypePriority = OnLoadOrder.PostDBModLoader + 20` to load after the database
+- Set `TypePriority = OnLoadOrder.PostDBModLoader + 2` to load after the database
 - Get your assembly with `Assembly.GetExecutingAssembly()`
 - Pass your assembly to the services you want to use
 
