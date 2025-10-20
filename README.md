@@ -34,6 +34,17 @@ A comprehensive modding library for SPT that simplifies adding custom content to
 **Hideout Integration** - Add crafting recipes  
 **Multi-language Support** - Easy localization system  
 
+## Installation
+
+1. Download WTT-CommonLib from GitHub or SPT Forge
+2. Open the .7z file
+3. Drag the SPT and BepInEx folders into your main SPT directory (the one that contains EscapeFromTarkov.exe)
+
+**FOR MOD AUTHORS**
+
+4. Reference the user/mods/WTT-ServerCommonLib/WTTServerCommonLib.dll in your project
+5. Inject `WTTServerCommonLib` through the constructor
+
 
 ## Quick Start
 
@@ -194,6 +205,9 @@ wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly,
 **Usage**:
 ```
 wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
+// Or specify custom path
+wttCommon.CustomLocaleService.CreateCustomLocales(assembly, 
+    Path.Join("db", "MyCustomLocalesFolder"));
 ```
 
 **Configuration**: Create locale files in `db/CustomLocales/`:
@@ -220,19 +234,108 @@ wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
 
 ### CustomQuestService
 
-**Purpose**: Adds custom quests to the database with support for complex objectives and rewards.
+**Purpose**: Adds custom quests to the database with support for complex objectives, rewards, time windows, and faction restrictions.
 
 **Usage**:
 ```
 wttCommon.CustomQuestService.CreateCustomQuests(assembly);
+// Or specify custom path
+wttCommon.CustomQuestService.CreateCustomQuests(assembly, 
+    Path.Join("db", "MyCustomQuestsFolder"));
 ```
 
-**Configuration**: Create quest files in `db/CustomQuests/`
+**Default Folder Structure**: 
+
+The service expects quests organized by trader in the following structure:
+
+```
+db/CustomQuests/
+├── QuestTimeData.json          # Optional: Time-limited quest configuration
+├── QuestSideData.json          # Optional: Faction-exclusive quest configuration
+├── mechanic/                   # Trader folder (can use trader name or ID)
+│   ├── Quests/
+│   │   └── quest_definitions.json
+│   ├── QuestAssort/            # Optional: Quest-unlocked trader items
+│   │   └── assort.json
+│   ├── Locales/
+│   │   ├── en.json
+│   │   └── ru.json
+│   └── Images/                 # Quest icons
+│       └── quest_icon.png
+├── prapor/
+│   └── ...
+└── skier/
+    └── ...
+```
+
+**Configuration Files**:
+
+**QuestTimeData.json** (Optional - Time-Limited Quests):
+```
+{
+  "my_quest_id": {
+    "StartMonth": 12,
+    "StartDay": 1,
+    "EndMonth": 12,
+    "EndDay": 31
+  }
+}
+```
+Quests in this file will only be available during the specified date range. Useful for seasonal/holiday events.
+
+**QuestSideData.json** (Optional - Faction-Exclusive Quests):
+```
+{
+  "usecOnlyQuests": [
+    "quest_id_1",
+    "quest_id_2"
+  ],
+  "bearOnlyQuests": [
+    "quest_id_3",
+    "quest_id_4"
+  ]
+}
+```
+Quests listed here will only be available to the specified PMC faction.
+
+**Quest Assort** (`QuestAssort/*.json`) - Items unlocked after quest completion:
+```
+{
+  "success": {
+    "my_quest_id": "assort_item_id_to_unlock"
+  }
+}
+```
+
+**Locales** (`Locales/*.json`):
+```
+{
+  "my_quest_id name": "Custom Quest Name",
+  "my_quest_id description": "Quest description text",
+  "my_quest_id successMessageText": "Quest completion message",
+  "my_quest_id startedMessageText": "Quest started message"
+}
+```
+
+**Images** (`Images/*`): Quest icons referenced by filename (without extension) in the quest definition.
 
 **Features**:
-- Time-limited quests (seasonal/date-based)
-- Faction restrictions (BEAR/USEC only)
-- Full locale support
+- Time-limited quests (seasonal/date-based via QuestTimeData.json)
+- Faction restrictions (BEAR/USEC only via QuestSideData.json)
+- Full locale support with fallback to English
+- Quest-unlocked trader assortments
+- Custom quest icons
+
+**Trader Names**: You can use either trader names (case-insensitive) or trader IDs for folder names:
+- `mechanic`, `prapor`, `therapist`, `skier`, `peacekeeper`, `jaeger`, `ragman`, `fence`
+- Or their trader IDs: `54cb50c76803fa8b248b4571`, etc.
+
+**Important Notes**:
+- Quest .json files **MUST MATCH BSG QUEST MODELS** exactly. Invalid quest data will throw errors and prevent loading.
+- QuestTimeData.json and QuestSideData.json are optional and can be placed in the root `CustomQuests/` folder
+- If a quest is outside its time window, it will not be loaded into the database
+- Images must be in standard formats (.png, .jpg, etc)
+- Locales fall back to English if a translation is missing for a specific language
 
 ---
 
@@ -243,6 +346,9 @@ wttCommon.CustomQuestService.CreateCustomQuests(assembly);
 **Usage**:
 ```
 wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly);
+// Or specify custom path
+wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly, 
+    Path.Join("db", "MyCustomQuestZonesFolder"));
 ```
 
 **Configuration**: Place zone files in `db/CustomQuestZones/`
@@ -288,6 +394,9 @@ wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly);
 **Usage**:
 ```
 wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
+// Or specify custom path
+wttCommon.CustomVoiceService.CreateCustomVoices(assembly, 
+    Path.Join("db", "MyCustomVoicesFolder"));
 ```
 
 **Configuration**: Create voice config files in `db/CustomVoices/`:
@@ -320,6 +429,9 @@ wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
 **Usage**:
 ```
 wttCommon.CustomHeadService.CreateCustomHeads(assembly);
+// Or specify custom path
+wttCommon.CustomHeadService.CreateCustomHeads(assembly, 
+    Path.Join("db", "MyCustomHeadsFolder"));
 ```
 
 **Configuration**: Create head config files in `db/CustomHeads/`:
@@ -352,6 +464,9 @@ wttCommon.CustomHeadService.CreateCustomHeads(assembly);
 **Usage**:
 ```
 wttCommon.CustomClothingService.CreateCustomClothing(assembly);
+// Or specify custom path
+wttCommon.CustomClothingService.CreateCustomClothing(assembly, 
+    Path.Join("db", "MyCustomClothingFolder"));
 ```
 
 **Configuration**: Create clothing config files in `db/CustomClothing/`:
@@ -390,6 +505,9 @@ wttCommon.CustomClothingService.CreateCustomClothing(assembly);
 **Usage**:
 ```
 wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly);
+// Or specify custom path
+wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly, 
+    Path.Join("db", "MyCustomBotLoadoutsFolder"));
 ```
 
 **Configuration**: Create bot loadout files in `db/CustomBotLoadouts/`:
@@ -433,59 +551,374 @@ wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly);
 
 ---
 
+
 ### CustomLootspawnService
 
-**Purpose**: Controls where and how often your custom items spawn as loot, plus forced loot for quest objectives.
+**Purpose**: Controls where and how often your custom items spawn as loot on maps. Supports both random loot spawns and guaranteed forced spawns for quest objectives.
 
 **Usage**:
 ```
 wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly);
+// Or specify custom path
+wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly, 
+    Path.Join("db", "MyCustomLootspawnsFolder"));
 ```
 
-**Configuration**: Create loot spawn files in `db/CustomLootspawns/`
+**Default Folder Structure**:
+
+```
+db/CustomLootspawns/
+├── CustomSpawnpoints/           # Random loot spawns (probability-based)
+│   ├── woods_spawns.json
+│   ├── customs_spawns.json
+│   └── factory_spawns.json
+└── CustomSpawnpointsForced/     # Guaranteed spawns (for quest items)
+    ├── woods_forced.json
+    └── customs_forced.json
+```
+
+**Configuration Files**:
+
+**Random Loot Spawns** (`CustomSpawnpoints/*.json`):
+```
+{
+  "sandbox": [
+        {
+            "locationId": "(82.8276, 14.3806, 181.004)",
+            "probability": 0.30,
+            "template": {
+                "Id": "ag43_spawn",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": 82.8276,
+                    "y": 14.3806,
+                    "z": 181.004
+                },
+                "Rotation": {
+                    "x": 2.8415,
+                    "y": 212.2408,
+                    "z": 91.2423
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "68cf6c56cb996a3530052b52",
+                "Items": [
+                    {
+                        "_id": "68cf6c56cb996a3530052b53",
+                        "_tpl": "68cf56067ff6ceab0c2fd49e",
+                        "upd": {
+                            "SpawnedInSession": true,
+                            "Repairable": {
+                                "MaxDurability": 100,
+                                "Durability": 100
+                            },
+                            "Foldable": {
+                                "Folded": true
+                            },
+                            "FireMode": {
+                                "FireMode": "single"
+                            }
+                        }
+                    },
+                    {
+                        "_id": "68cf6c52cb996a3530052b4c",
+                        "_tpl": "564ca99c4bdc2d16268b4589",
+                        "slotId": "mod_magazine",
+                        "parentId": "68cf6c56cb996a3530052b53"
+                    },
+                    {
+                        "_id": "68cf6c52cb996a3530052b4d",
+                        "_tpl": "68c63ee6dcb5f65309eb4fcc",
+                        "slotId": "mod_muzzle",
+                        "upd": {
+                            "SpawnedInSession": true
+                        },
+                        "parentId": "68cf6c56cb996a3530052b53"
+                    },
+                    {
+                        "_id": "68cf6c52cb996a3530052b4e",
+                        "_tpl": "68c23b3d4a286357245eb641",
+                        "slotId": "mod_sight_rear",
+                        "upd": {
+                            "SpawnedInSession": true,
+                            "Sight": {
+                                "ScopesCurrentCalibPointIndexes": [
+                                    0
+                                ],
+                                "ScopesSelectedModes": [
+                                    0
+                                ],
+                                "SelectedScope": 0,
+                                "ScopeZoomValue": 0
+                            }
+                        },
+                        "parentId": "68cf6c56cb996a3530052b53"
+                    },
+                    {
+                        "_id": "68cf6c52cb996a3530052b4f",
+                        "_tpl": "68cf53ddb8f10c637706563c",
+                        "slotId": "mod_stock",
+                        "upd": {
+                            "SpawnedInSession": true
+                        },
+                        "parentId": "68cf6c56cb996a3530052b53"
+                    },
+                    {
+                        "_id": "68cf6c52cb996a3530052b50",
+                        "_tpl": "56dff216d2720bbd668b4568",
+                        "slotId": "cartridges",
+                        "location": 0,
+                        "upd": {
+                            "StackObjectsCount": 30
+                        },
+                        "parentId": "68cf6c52cb996a3530052b4c"
+                    }
+                ]
+            },
+            "itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "68cf6c56cb996a3530052b53"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+    ]
+}
+```
+
+**Forced Loot Spawns** (`CustomSpawnpointsForced/*.json`) - Always spawns, ideal for quest items:
+```
+{
+    "interchange": [     
+        {
+            "locationId": "(31.7642 38.7517 -22.9169)",
+            "probability": 0.25,
+            "template": {
+                "Id": "quest_item_immortal_poster (1) [8d2f6c4e-9b3a-4e1f-a7d5-2c8b0e9f3a6d]",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": 31.7642,
+                    "y": 38.7517,
+                    "z": -23.244
+                },
+                "Rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": true,
+                "Root": "68748750c2bc7bbc4797d713",
+                "Items": [
+                    {
+                        "_id": "68748762bdc2e875d3940b4f",
+                        "_tpl": "687464af51ed3be7e4f6f525",
+                        "upd": {
+                            "StackObjectsCount": 1
+                        }
+                    }
+                ]
+            },
+            "itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "687464af51ed3be7e4f6f525"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+    ]
+}
+```
+
+**Map Names**: Use the following map identifiers (case-sensitive):
+- `bigmap` - Customs
+- `woods` - Woods
+- `factory4_day` / `factory4_night` - Factory
+- `interchange` - Interchange
+- `lighthouse` - Lighthouse
+- `rezervbase` - Reserve
+- `shoreline` - Shoreline
+- `tarkovstreets` - Streets of Tarkov
+- `laboratory` - Labs
+- `sandbox` - Ground Zero
+
+**Use Cases**:
+
+- **Quest Items**: Use `CustomSpawnpointsForced/` for items players must find for quests
+- **Multiple Locations**: Use `GroupPositions` array to define several possible spawn positions for variety
 
 ---
 
 ### CustomAssortSchemeService
 
-**Purpose**: Adds complex items to trader inventory with custom barter schemes.
+**Purpose**: Adds complex, fully-assembled items (like pre-modded weapons or armor with plates) to trader inventories with custom barter schemes. This service gives you complete control over item configuration and pricing.
 
 **Usage**:
 ```
 wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
+// Or specify custom path
+wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly, 
+    Path.Join("db", "MyCustomAssortSchemesFolder"));
 ```
 
-**Configuration**: Create assort files in `db/CustomAssortSchemes/`
+**When to Use This**:
+- **Fully-modded weapons** with specific attachments pre-installed
+- **Armor with plates** already inserted
+- **Complex items** that require nested child items
 
-> **Note**: Usually reserved for complex items like fully-modded weapons, or armor with plates
+**Default Folder Structure**:
+
+```
+db/CustomAssortSchemes/
+├── peacekeeper_assort.json
+├── mechanic_assort.json
+└── ragman_assort.json
+```
+
+**Configuration Structure**:
+
+Each file defines trader assortments with three main sections:
+
+<details>
+<summary>Click to expand full configuration example</summary>
+
+```
+{
+  "PEACEKEEPER": {
+    "items": [
+      {
+        "_id": "my_custom_weapon_root",
+        "_tpl": "5447a9cd4bdc2dbd208b4567",
+        "upd": {
+          "Repairable": {
+            "MaxDurability": 100,
+            "Durability": 100
+          },
+          "FireMode": {
+            "FireMode": "fullauto"
+          },
+          "UnlimitedCount": true,
+          "StackObjectsCount": 999999,
+          "BuyRestrictionMax": 0
+        },
+        "parentId": "hideout",
+        "slotId": "hideout"
+      },
+      {
+        "_id": "weapon_mod_magazine",
+        "_tpl": "55d480c04bdc2d1d4e8b456a",
+        "slotId": "mod_magazine",
+        "parentId": "my_custom_weapon_root"
+      },
+      {
+        "_id": "weapon_mod_stock",
+        "_tpl": "5649be884bdc2d79388b4577",
+        "slotId": "mod_stock",
+        "parentId": "my_custom_weapon_root"
+      }
+    ],
+    "barter_scheme": {
+      "my_custom_weapon_root": [
+        [
+          {
+            "count": 50000,
+            "_tpl": "5449016a4bdc2d6f028b456f"
+          }
+        ]
+      ]
+    },
+    "loyal_level_items": {
+      "my_custom_weapon_root": 2
+    }
+  }
+}
+```
+
+</details>
 
 ---
 
 ### CustomHideoutRecipeService
 
-**Purpose**: Creates crafting recipes for the hideout.
+**Purpose**: Creates custom crafting recipes for hideout production modules (Workbench, Lavatory, Medstation, etc.).
 
 **Usage**:
 ```
 wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly);
+// Or specify custom path
+wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly, 
+    Path.Join("db", "MyCustomHideoutRecipesFolder"));
 ```
 
-**Configuration**: Create recipe files in `db/CustomHideoutRecipes/`
+**Configuration**: Place recipe JSON files in `db/CustomHideoutRecipes/`
+
+**Example Recipe**:
+```
+{
+  "_id": "my_custom_recipe_001",
+  "areaType": 10,
+  "requirements": [
+    {
+      "areaType": 10,
+      "requiredLevel": 2,
+      "type": "Area"
+    },
+    {
+      "templateId": "5c06779c86f77426e00dd782",
+      "count": 1,
+      "isFunctional": false,
+      "isEncoded": false,
+      "type": "Item"
+    }
+  ],
+  "productionTime": 3600,
+  "needFuelForAllProductionTime": true,
+  "locked": false,
+  "endProduct": "my_custom_item_001",
+  "continuous": false,
+  "count": 1,
+  "productionLimitCount": 0,
+  "isEncoded": false
+}
+```
+
+**Key Points**:
+- Recipe JSON **must match BSG's HideoutProduction model exactly**
+- `_id` must be a valid 24-character hex MongoDB ID
+- `areaType` determines which hideout module the recipe appears in (10 = Workbench, 2 = Lavatory, 7 = Medstation, etc.)
+- `productionTime` is in seconds
+- Invalid recipe structure will throw errors and prevent loading
 
 ---
 
+
 ### CustomRigLayoutService
 
-**Purpose**: Creates custom rig layouts and sends them to the client for your items to utilize.
+**Purpose**: Sends custom rig layouts to the client so it can register them in-game for your items to use.
 
 **Usage**:
 ```
 wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly);
+// Or specify custom path
+wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly, 
+    Path.Join("db", "MyCustomRigLayoutsFolder"));
 ```
 
-**Requirements**: Package rig layout GameObjects with `ContainedGridsView` components into Unity AssetBundles → Place in `db/CustomRigLayouts/`
+**Requirements**:
+- Build your rig layout prefabs into Unity AssetBundles
+- Place `.bundle` files in `db/CustomRigLayouts/` inside your mod folder
 
----
+***
 
 ### CustomSlotImageService
 
@@ -494,11 +927,17 @@ wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly);
 **Usage**:
 ```
 wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly);
+// Or specify custom path
+wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly, 
+    Path.Join("db", "MyCustomSlotImagesFolder"));
 ```
 
-**Configuration**: Place PNG images in `db/CustomSlotImages/` → Name them by slot ID → Image name becomes the locale key
+**Configuration**:
+- Place image files (`.png`, `.jpg`, `.jpeg`, `.bmp`) in `db/CustomSlotImages/` inside your mod folder
+- Name each file as the slot ID it replaces (filename without extension)
+- The slot ID/key will be used for locale entries if needed
 
----
+***
 
 ## Example Mod Structure
 
