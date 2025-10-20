@@ -1,0 +1,97 @@
+﻿using System.Reflection;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Spt.Server;
+using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Server.Core.Servers;
+using WTTServerCommonLib.Helpers;
+using WTTServerCommonLib.Models;
+using Path = System.IO.Path;
+
+namespace WTTServerCommonLib.Services;
+
+[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+public class WTTCustomAssortSchemeService(
+    DatabaseServer databaseServer,
+    ISptLogger<WTTCustomAssortSchemeService> logger,
+    ModHelper modHelper,
+    ConfigHelper configHelper
+    )
+{
+    private readonly List<Dictionary<string, TraderAssort>> _customAssortSchemes = new();
+
+    public void CreateCustomAssortSchemes(Assembly assembly, string? relativePath = null)
+    {
+        string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+        string defaultDir = Path.Combine("db", "CustomAssortSchemes");
+        string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
+        
+        if (!Directory.Exists(finalDir))
+        {
+            throw new DirectoryNotFoundException($"Config directory not found at {finalDir}");
+        }
+        
+        var jsonFiles = Directory.GetFiles(finalDir, "*.json")
+            .Concat(Directory.GetFiles(finalDir, "*.jsonc"))
+            .ToArray();
+        if (jsonFiles.Length == 0)
+        {
+            logger.Warning($"No assort scheme files found in {finalDir}");
+            return;
+        }
+
+        var assortList = configHelper.LoadAllJsonFiles<Dictionary<string, TraderAssort>>(finalDir);
+
+        if (assortList.Count > 0)
+            return;
+        foreach (var assortData in assortList)
+        {
+            _customAssortSchemes.Add(assortData);
+            logger.Info($"Loaded {assortData.Count} trader assort(s)");
+        }
+
+        ApplyAssorts();
+    }
+
+    private void ApplyAssorts()
+    {
+        DatabaseTables tables = databaseServer.GetTables();
+
+        foreach (var schemeDict in _customAssortSchemes)
+        {
+            foreach (var kvp in schemeDict)
+            {
+                var traderKey = kvp.Key;
+                var newAssort = kvp.Value;
+
+                if (!TraderIds.TraderMap.TryGetValue(traderKey.ToLower(), out var traderId))
+                {
+                    logger.Warning($"Unknown trader key '{traderKey}'");
+                    continue;
+                }
+
+                if (!tables.Traders.TryGetValue(traderId, out var trader))
+                {
+                    logger.Warning($"Trader not found in DB: ({traderId})");
+                    continue;
+                }
+
+                trader.Assort.Items.AddRange(newAssort.Items);
+
+                foreach (var scheme in newAssort.BarterScheme)
+                {
+                    trader.Assort.BarterScheme[scheme.Key] = scheme.Value;
+                }
+
+                foreach (var levelItem in newAssort.LoyalLevelItems)
+                {
+                    trader.Assort.LoyalLevelItems[levelItem.Key] = levelItem.Value;
+                }
+
+                logger.Info($"Merged {newAssort.Items.Count} items into trader");
+            }
+        }
+    }
+}

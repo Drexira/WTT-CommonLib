@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <Version>1.0.0</Version>
+    <!-- The two lines below will set the output path for the binaries -->
+    <OutputPath>bin\$(Configuration)\$(ProjectName)\$(AssemblyName)-$(Version)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <RootNamespace>WTTServerCommonLib</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.1-pre.202510120800" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="set MODNAME=$(TargetName)&#xA;set DLLPATH=$(TargetDir)$(TargetName).dll&#xA;set OUTDIR=..\..\..\SPT\user\mods\%MODNAME%&#xA;if not exist &quot;%OUTDIR%&quot; mkdir &quot;%OUTDIR%&quot;&#xA;copy /Y &quot;%DLLPATH%&quot; &quot;%OUTDIR%\&quot;&#xA;" />
+  </Target>
+</Project>

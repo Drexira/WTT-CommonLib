@@ -1,0 +1,206 @@
+﻿using System.Reflection;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Spt.Server;
+using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Utils;
+using WTTServerCommonLib.Helpers;
+using WTTServerCommonLib.Models;
+using Path = System.IO.Path;
+
+namespace WTTServerCommonLib.Services;
+
+[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+public class WTTCustomHeadService(
+    ISptLogger<WTTCustomHeadService> logger,
+    DatabaseService databaseService,
+    JsonUtil jsonUtil,
+    ModHelper modHelper,
+    ConfigHelper configHelper
+)
+{
+    private DatabaseTables? _database;
+
+    public void CreateCustomHeads(Assembly assembly, string? relativePath = null)
+    {
+        try
+        {
+            string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+            string defaultDir = Path.Combine("db", "CustomHeads");
+            string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
+
+            if (_database == null)
+            {
+                _database = databaseService.GetTables();
+            }
+
+            if (!Directory.Exists(finalDir))
+            {
+                logger.Warning($"Heads directory not found at {finalDir}");
+                return;
+            }
+
+            var headConfigDicts = configHelper.LoadAllJsonFiles<Dictionary<string, CustomHeadConfig>>(finalDir);
+
+            if (headConfigDicts.Count == 0)
+            {
+                logger.Warning($"No valid head configs found in {finalDir}");
+                return;
+            }
+
+            int totalHeadsCreated = 0;
+
+            foreach (var configDict in headConfigDicts)
+            {
+                if (configDict.Count == 0)
+                    continue;
+
+                foreach (var (headId, customHeadConfig) in configDict)
+                {
+                    if (ProcessCustomHeadConfig(headId, customHeadConfig))
+                        totalHeadsCreated++;
+                }
+            }
+
+            logger.Info($"Created {totalHeadsCreated} custom heads from {headConfigDicts.Count} files");
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Error loading head configs: {ex.Message}");
+        }
+    }
+    private bool ProcessCustomHeadConfig(string headId, CustomHeadConfig customHeadConfig)
+    {
+        try
+        {
+            if (_database == null)
+            {
+                logger.Error("Database not initialized");
+                return false;
+            }
+
+            var customizationItem = GenerateHeadCustomizationItem(headId, customHeadConfig);
+            
+            AddHeadToTemplates(headId, customizationItem, customHeadConfig.AddHeadToPlayer);
+            AddHeadToCustomizationStorage(headId);
+            AddHeadLocales(headId, customHeadConfig);
+
+            logger.Info($"Created custom head {headId}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Failed to create head {headId}: {ex.Message}");
+            return false;
+        }
+    }
+
+    private CustomizationItem GenerateHeadCustomizationItem(string headId, CustomHeadConfig customHeadConfig)
+    {
+        return new CustomizationItem
+        {
+            Id = headId,
+            Name = "",
+            Parent = "5cc085e214c02e000c6bea67",
+            Type = "Item",
+            Properties = new CustomizationProperties()
+            {
+                AvailableAsDefault = true,
+                Name = "",
+                ShortName = "",
+                Description = "",
+                Side = customHeadConfig.Side,
+                BodyPart = "Head",
+                IntegratedArmorVest = false,
+                ProfileVersions = [..Array.Empty<string>()],
+                Prefab = new Prefab
+                {
+                    Path = customHeadConfig.Path,
+                    Rcid = ""
+                },
+                WatchPrefab = new Prefab
+                {
+                    Path = "",
+                    Rcid = ""
+                },
+                WatchPosition = new XYZ
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0
+                },
+                WatchRotation = new XYZ
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0
+                },
+                Game = [..Array.Empty<string>()],
+                Body = "",
+                Hands = "",
+                Feet = ""
+            },
+            Prototype = "5cc2e4d014c02e000d0115f8"
+        };
+    }
+
+    private void AddHeadToCustomizationStorage(string headId)
+    {
+        if (_database == null) return;
+
+        var customizationStorage = _database.Templates.CustomisationStorage;
+        
+        var headStorage = new CustomisationStorage
+        {
+            Id = headId,
+            Source = CustomisationSource.DEFAULT,
+            Type = CustomisationType.HEAD
+        };
+
+        customizationStorage.Add(headStorage);
+    }
+
+    private void AddHeadToTemplates(string headId, CustomizationItem customizationItem, bool addHeadToPlayer)
+    {
+        if (_database == null) return;
+
+        var templates = _database.Templates;
+        templates.Customization[headId] = customizationItem;
+
+        if (addHeadToPlayer)
+        {
+            templates.Character.Add(headId);
+        }
+    }
+
+    private void AddHeadLocales(string headId, CustomHeadConfig customHeadConfig)
+    {
+        if (_database == null || customHeadConfig.Locales == null) return;
+
+        var globalLocales = _database.Locales.Global;
+        string headLocaleKey = $"{headId} Name";
+
+        foreach (var (localeCode, lazyLocale) in globalLocales)
+        {
+            lazyLocale.AddTransformer(localeData =>
+            {
+                if (localeData == null) return localeData;
+
+                if (customHeadConfig.Locales.TryGetValue(localeCode, out var localizedName))
+                {
+                    localeData[headLocaleKey] = localizedName;
+                }
+                else if (customHeadConfig.Locales.TryGetValue("en", out var fallbackName))
+                {
+                    localeData[headLocaleKey] = fallbackName;
+                }
+
+                return localeData;
+            });
+        }
+    }
+}

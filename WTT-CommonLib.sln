@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WTT-ServerCommonLib", "WTT-ServerCommonLib\WTT-ServerCommonLib.csproj", "{83C9B683-032E-4D58-8194-64E6601BCC36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WTT-ClientCommonLib", "WTT-ClientCommonLib\WTT-ClientCommonLib.csproj", "{612A2677-C48F-4A5F-9A7D-B3A803FF82B2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83C9B683-032E-4D58-8194-64E6601BCC36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83C9B683-032E-4D58-8194-64E6601BCC36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83C9B683-032E-4D58-8194-64E6601BCC36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83C9B683-032E-4D58-8194-64E6601BCC36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{612A2677-C48F-4A5F-9A7D-B3A803FF82B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{612A2677-C48F-4A5F-9A7D-B3A803FF82B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{612A2677-C48F-4A5F-9A7D-B3A803FF82B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{612A2677-C48F-4A5F-9A7D-B3A803FF82B2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
