@@ -580,6 +580,10 @@ db/CustomLootspawns/
 **Configuration Files**:
 
 **Random Loot Spawns** (`CustomSpawnpoints/*.json`):
+
+<details>
+<summary> Example CustomSpawnpoints config (Click to expand)</summary>
+  
 ```
 {
   "sandbox": [
@@ -690,8 +694,13 @@ db/CustomLootspawns/
     ]
 }
 ```
+</details>
 
-**Forced Loot Spawns** (`CustomSpawnpointsForced/*.json`) - Always spawns, ideal for quest items:
+**Forced Loot Spawns** (`CustomSpawnpointsForced/*.json`) - Always spawns when quest is active:
+
+<details>
+<summary> Example CustomSpawnpointsForced config (Click to expand)</summary>
+  
 ```
 {
     "interchange": [     
@@ -739,6 +748,7 @@ db/CustomLootspawns/
     ]
 }
 ```
+</details>
 
 **Map Names**: Use the following map identifiers (case-sensitive):
 - `bigmap` - Customs
