@@ -611,6 +611,7 @@ db/CustomLootspawns/
                 "Root": "68cf6c56cb996a3530052b52",
                 "Items": [
                     {
+                        "composedKey": "-69420",
                         "_id": "68cf6c56cb996a3530052b53",
                         "_tpl": "68cf56067ff6ceab0c2fd49e",
                         "upd": {
@@ -685,7 +686,7 @@ db/CustomLootspawns/
             "itemDistribution": [
                 {
                     "composedKey": {
-                        "key": "68cf6c56cb996a3530052b53"
+                        "key": "-69420"
                     },
                     "relativeProbability": 1
                 }
