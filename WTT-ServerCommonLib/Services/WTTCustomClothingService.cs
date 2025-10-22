@@ -13,7 +13,7 @@ using Path = System.IO.Path;
 
 namespace WTTServerCommonLib.Services;
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
 public class WTTCustomClothingService(
     ISptLogger<WTTCustomClothingService> logger,
     DatabaseService databaseService,

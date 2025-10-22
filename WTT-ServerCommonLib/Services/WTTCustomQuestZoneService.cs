@@ -8,7 +8,7 @@ using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable(TypePriority = OnLoadOrder.PostDBModLoader)]
+    [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
     public class WTTCustomQuestZoneService(
         ModHelper modHelper,
         SptLogger<WTTCustomQuestZoneService> logger,

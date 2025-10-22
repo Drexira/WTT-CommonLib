@@ -21,7 +21,7 @@ public record ModMetadata : AbstractModMetadata
     public override string License { get; init; } = "WTT";
 }
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
 public class WTTServerCommonLib(
     WTTCustomItemServiceExtended customItemServiceExtended, 
     WTTCustomAssortSchemeService customAssortSchemeService, 
@@ -60,7 +60,7 @@ public class WTTServerCommonLib(
         return Task.CompletedTask;
     }
 }
-[Injectable(TypePriority = OnLoadOrder.PostSptModLoader + 1)]
+[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostSptModLoader + 1)]
 public class WTTServerCommonLibPostSptLoad(WTTCustomItemServiceExtended customItemServiceExtended) : IOnLoad
 {
     public Task OnLoad()
