@@ -2,7 +2,6 @@
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Utils;
-using WTTServerCommonLib.Models;
 using WTTServerCommonLib.Services;
 
 namespace WTTServerCommonLib.Routes
@@ -13,77 +12,72 @@ namespace WTTServerCommonLib.Routes
         WTTCustomQuestZoneService zoneService,
         WTTCustomRigLayoutService rigService,
         WTTCustomSlotImageService slotService,
-        WTTCustomVoiceService voiceService,
+        WTTCustomStaticSpawnService staticSpawnService,
         WTTCustomVoiceBundleRequestService customVoiceBundleRequestService
     ) : DynamicRouter(jsonUtil, [
         // Zones
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/zones/get",
-            async (url, info, sessionId, output) => {
+            "/wttcommonlib/zones/get", (_, _, _, _) => {
                 var zones = zoneService.GetZones();
-                return jsonUtil.Serialize(zones ?? new List<CustomQuestZone>());
+                return ValueTask.FromResult(jsonUtil.Serialize(zones) ?? string.Empty);
             }
         ),
         
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/riglayouts/get",
-            async (url, info, sessionId, output) => {
+            "/wttcommonlib/riglayouts/get", (_, _, _, _) => {
                 var allBundles = rigService.GetLayoutManifest();
                 var payload = new Dictionary<string, string>();
                 foreach (var bundleName in allBundles)
                 {
                     var bundleData = rigService.GetBundleData(bundleName);
-                    if (bundleData != null && bundleData.Length > 0)
-                        payload[bundleName] = System.Convert.ToBase64String(bundleData);
+                    if (bundleData is { Length: > 0 })
+                        payload[bundleName] = Convert.ToBase64String(bundleData);
                 }
-                return jsonUtil.Serialize(payload);
+                return ValueTask.FromResult(jsonUtil.Serialize(payload) ?? string.Empty);
+            }
+        ),
+        // Bundles route
+        new RouteAction<EmptyRequestData>(
+            "/wttcommonlib/spawnsystem/bundles/get", (_, _, _, _) =>
+            {
+                var manifest = staticSpawnService.GetBundleManifest();
+                var payload = new Dictionary<string,string>();
+                foreach (var name in manifest)
+                {
+                    var data = staticSpawnService.GetBundleData(name);
+                    if (data?.Length > 0)
+                        payload[name] = Convert.ToBase64String(data);
+                }
+                return ValueTask.FromResult(jsonUtil.Serialize(payload) ?? string.Empty);
             }
         ),
 
-        // Slot Images - Manifest
+        // Configs route
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/slotimages/get",
-            async (url, info, sessionId, output) => {
-                var images = slotService.GetImageManifest();
-                return jsonUtil.Serialize(images ?? new List<string>());
+            "/wttcommonlib/spawnsystem/configs/get", (_, _, _, _) =>
+            {
+                var configs = staticSpawnService.GetAllSpawnConfigs();
+                return ValueTask.FromResult(jsonUtil.Serialize(configs) ?? string.Empty);
             }
         ),
-        
-        // Slot Images - Data 
+
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/slotimages/data",
-            async (url, info, sessionId, output) => {
-                // Extract query string from URL
-                string imageName = null;
-                var queryIndex = url.IndexOf('?');
-                if (queryIndex >= 0 && queryIndex + 1 < url.Length)
-                {
-                    var queryString = url.Substring(queryIndex + 1);
-                    var queryParams = System.Web.HttpUtility.ParseQueryString(queryString);
-                    imageName = queryParams["name"];
+            "/wttcommonlib/slotimages/get", (_, _, _, _) => {
+                var result = new Dictionary<string, string>();
+                foreach (var name in slotService.GetImageManifest()) {
+                    var data = slotService.GetImageData(name);
+                    if (data is { Length: > 0 }) {
+                        result[name] = Convert.ToBase64String(data);
+                    }
                 }
-                
-                if (string.IsNullOrEmpty(imageName))
-                {
-                    return jsonUtil.Serialize(new { error = "Missing image name" });
-                }
-                
-                var imageData = slotService.GetImageData(imageName);
-                if (imageData == null)
-                {
-                    return jsonUtil.Serialize(new { error = $"Image not found: {imageName}" });
-                }
-                
-                return jsonUtil.Serialize(new { data = System.Convert.ToBase64String(imageData) });
+                return ValueTask.FromResult(jsonUtil.Serialize(result) ?? string.Empty);
             }
         ),
-        
         // Voices
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/voices/get",
-            async (url, info, sessionId, output) => {
+            "/wttcommonlib/voices/get", (_, _, _, _) => {
                 var voiceMappings = customVoiceBundleRequestService.GetVoiceBundleMappings();
-                return jsonUtil.Serialize(voiceMappings ?? new Dictionary<string, string>());
+                return ValueTask.FromResult(jsonUtil.Serialize(voiceMappings) ?? string.Empty);
             }
         ),
     ])

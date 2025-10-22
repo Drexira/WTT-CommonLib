@@ -195,13 +195,6 @@ namespace WTTServerCommonLib.Constants
             { "Caliber23x75", "5f647f31b6238e5dd066e196" },
             { "Caliber40x46", "5ede474b0c226a66f5402622" }
         };
-        
-        public static readonly Dictionary<string, MongoId> CurrencyIDs = new()
-        {
-            { "ROUBLES", "5449016a4bdc2d6f028b456f" },
-            { "EUROS", "569668774bdc2da2298b4568" },
-            { "DOLLARS", "5696686a4bdc2da3298b456a" }
-        };
             public static readonly Dictionary<string, string> AllBotTypes = new()
         {
             { "ARENAFIGHTER", "arenafighter" },

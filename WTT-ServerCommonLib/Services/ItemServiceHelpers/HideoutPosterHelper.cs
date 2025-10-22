@@ -1,10 +1,9 @@
 ﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
@@ -38,7 +37,7 @@ public class HideoutPosterHelper(ISptLogger<HideoutPosterHelper> logger, Databas
 
     private void AddItemToPosterSlots(string itemId, TemplateItem posterItem, string? posterSlotId)
     {
-        foreach (var slot in posterItem.Properties?.Slots)
+        foreach (var slot in posterItem.Properties?.Slots!)
         {
             if (string.IsNullOrWhiteSpace(slot.Name) || slot.Properties?.Filters == null)
                 continue;
@@ -53,15 +52,15 @@ public class HideoutPosterHelper(ISptLogger<HideoutPosterHelper> logger, Databas
 
     private void AddItemToFilters(string itemId, Slot slot, string? slotName)
     {
-        foreach (var filter in slot.Properties?.Filters)
+        foreach (var filter in slot.Properties?.Filters!)
         {
             filter.Filter ??= new HashSet<MongoId>();
 
             if (filter.Filter.Add(itemId))
-                logger.Info($"[Poster] Added {itemId} to slot '{slot.Name}' in {slotName}");
+                LogHelper.Debug(logger,$"[Poster] Added {itemId} to slot '{slot.Name}' in {slotName}");
             else
                 if (logger.IsLogEnabled(LogLevel.Debug))
-                    logger.Debug($"[Poster] {itemId} already in slot '{slot.Name}'");
+                    LogHelper.Debug(logger,$"[Poster] {itemId} already in slot '{slot.Name}'");
         }
     }
 

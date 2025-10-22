@@ -61,7 +61,7 @@ public class StaticLootHelper(DatabaseService databaseService, ISptLogger<Static
                 }
                 if (!lazyloadedStaticLootData.TryGetValue(actualContainerId, out var containerDetails))
                 {
-                    logger.Warning($"[StaticLoot] Loot container '{containerId}' not found in {locationId}");
+                    LogHelper.Debug(logger,$"[StaticLoot] Loot container '{containerId}' not found in {locationId}");
                     return lazyloadedStaticLootData;
                 }
 
@@ -95,6 +95,6 @@ public class StaticLootHelper(DatabaseService databaseService, ISptLogger<Static
 
         containerDetails.ItemDistribution = newItemDistribution.ToArray();
         
-        logger.Info("[StaticLoot] Successfully added item to static loot container!");
+        LogHelper.Debug(logger,"[StaticLoot] Successfully added item to static loot container!");
     }
 }

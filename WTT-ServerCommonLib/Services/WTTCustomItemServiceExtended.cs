@@ -36,7 +36,8 @@ public class WTTCustomItemServiceExtended(
     GeneratorFuelHelper  generatorFuelHelper,
     CaliberHelper caliberHelper,
     BotLootHelper botLootHelper,
-    ConfigHelper configHelper
+    ConfigHelper configHelper,
+    StaticAmmoHelper staticAmmoHelper
     )
 {
     private readonly List<(string newItemId, CustomItemConfig config)> _deferredModSlotConfigs = new();
@@ -80,7 +81,7 @@ public class WTTCustomItemServiceExtended(
                 }
             }
 
-            logger.Info($"Created {totalItemsCreated} custom items from {itemConfigDicts.Count} files");
+            LogHelper.Debug(logger,$"Created {totalItemsCreated} custom items from {itemConfigDicts.Count} files");
         }
         catch (Exception ex)
         {
@@ -105,7 +106,7 @@ public class WTTCustomItemServiceExtended(
             };
 
             customItemService.CreateItemFromClone(itemDetails);
-            logger.Info( $"Created item {newItemId}");
+            LogHelper.Debug(logger, $"Created item {newItemId}");
 
             ProcessAdditionalProperties(newItemId, config);
 
@@ -165,6 +166,10 @@ public class WTTCustomItemServiceExtended(
 
         if (config.AddToStatuetteSlots == true)
             hideoutStatuetteHelper.AddToStatuetteSlot(newItemId);
+        
+        if (config.AddToStaticAmmo == true)
+            staticAmmoHelper.AddAmmoToLocationStaticAmmo(config, newItemId);
+
     }
     private void AddDeferredModSlot(string newItemId, CustomItemConfig config)
     {
@@ -179,11 +184,11 @@ public class WTTCustomItemServiceExtended(
     {
         if (_deferredModSlotConfigs.Count == 0)
         {
-            logger.Info( "No deferred modslots to process");
+            LogHelper.Debug(logger, "No deferred modslots to process");
             return;
         }
 
-        logger.Info( $"Processing {_deferredModSlotConfigs.Count} deferred modslots...");
+        LogHelper.Debug(logger, $"Processing {_deferredModSlotConfigs.Count} deferred modslots...");
 
         foreach (var (newItemId, config) in _deferredModSlotConfigs)
         {
@@ -197,7 +202,7 @@ public class WTTCustomItemServiceExtended(
 
                 if (logger.IsLogEnabled(LogLevel.Debug))
                 {
-                    logger.Debug($"Processed modslots for {newItemId}");
+                    LogHelper.Debug(logger,$"Processed modslots for {newItemId}");
                 }
             }
             catch (Exception ex)
@@ -208,6 +213,6 @@ public class WTTCustomItemServiceExtended(
 
         _deferredModSlotConfigs.Clear();
         
-        logger.Info( "Finished processing deferred modslots");
+        LogHelper.Debug(logger, "Finished processing deferred modslots");
     }
 }

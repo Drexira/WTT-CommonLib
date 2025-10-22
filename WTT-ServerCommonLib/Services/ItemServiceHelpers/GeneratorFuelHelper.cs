@@ -1,9 +1,8 @@
 ﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Enums;
-using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
@@ -43,7 +42,7 @@ public class GeneratorFuelHelper(ISptLogger<GeneratorFuelHelper> logger, Databas
                                 if (filter.Contains(itemId)) continue;
 
                                 filter.Add(itemId);
-                                logger.Info(
+                                LogHelper.Debug(logger,
                                     $"[GeneratorFuel] Added item {itemId} as fuel to generator at stage with bonus ID {bonus.Id}");
                             }
                     }

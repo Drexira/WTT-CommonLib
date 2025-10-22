@@ -35,7 +35,7 @@ public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
                 if (jsonData != null)
                 {
                     result.Add(jsonData);
-                    logger.Info($"Loaded file: {filePath}");
+                    LogHelper.Debug(logger,$"Loaded file: {filePath}");
                 }
             }
             catch (Exception ex)
@@ -67,7 +67,7 @@ public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
                 if (data != null)
                 {
                     locales[localeCode] = data;
-                    logger.Info($"Loaded locale file: {filePath}");
+                    LogHelper.Debug(logger,$"Loaded locale file: {filePath}");
                 }
             }
             catch (Exception ex)

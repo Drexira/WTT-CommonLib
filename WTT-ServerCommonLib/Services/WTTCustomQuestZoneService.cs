@@ -25,7 +25,7 @@ namespace WTTServerCommonLib.Services
             
             if (!Directory.Exists(finalDir))
             {
-                logger.Info($"No CustomQuestZones directory at {finalDir}");
+                LogHelper.Debug(logger,$"No CustomQuestZones directory at {finalDir}");
                 return;
             }
 
@@ -33,13 +33,13 @@ namespace WTTServerCommonLib.Services
             RegisterZones(zones);
         }
 
-        public void RegisterZones(IEnumerable<CustomQuestZone> zones)
+        private void RegisterZones(IEnumerable<CustomQuestZone> zones)
         {
             lock (_lock)
             {
                 List<CustomQuestZone> collection = zones.ToList();
                 _zones.AddRange(collection);
-                logger.Info($"Registered {collection.Count()} zones. Total zones: {_zones.Count}");
+                LogHelper.Debug(logger,$"Registered {collection.Count()} zones. Total zones: {_zones.Count}");
             }
         }
 
@@ -48,7 +48,7 @@ namespace WTTServerCommonLib.Services
             lock (_lock)
             {
                 _zones.Add(zone);
-                logger.Info($"Registered zone: {zone.ZoneName}. Total zones: {_zones.Count}");
+                LogHelper.Debug(logger,$"Registered zone: {zone.ZoneName}. Total zones: {_zones.Count}");
             }
         }
 
@@ -63,7 +63,7 @@ namespace WTTServerCommonLib.Services
                 if (fileZones.Count > 0)
                 {
                     loadedZones.AddRange(fileZones);
-                    logger.Info($"Loaded {fileZones.Count} zones from a file");
+                    LogHelper.Debug(logger,$"Loaded {fileZones.Count} zones from a file");
                 }
             }
 

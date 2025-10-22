@@ -1,10 +1,9 @@
 ﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
 
@@ -37,7 +36,7 @@ public class HideoutStatuetteHelper(ISptLogger<HideoutStatuetteHelper> logger, D
 
     private void AddItemToStatuetteSlots(string itemId, TemplateItem statuetteItem, string? statuetteSlotId)
     {
-        foreach (var slot in statuetteItem.Properties?.Slots)
+        foreach (var slot in statuetteItem.Properties?.Slots!)
         {
             if (string.IsNullOrWhiteSpace(slot.Name) || slot.Properties?.Filters == null)
                 continue;
@@ -52,14 +51,13 @@ public class HideoutStatuetteHelper(ISptLogger<HideoutStatuetteHelper> logger, D
 
     private void AddItemToFilters(string itemId, Slot slot, string? slotName)
     {
-        foreach (var filter in slot.Properties?.Filters)
+        foreach (var filter in slot.Properties?.Filters!)
         {
             filter.Filter ??= new HashSet<MongoId>();
 
-            if (filter.Filter.Add(itemId))
-                logger.Info($"[Statuette] Added {itemId} to slot '{slot.Name}' in {slotName}");
-            else
-                logger.Debug($"[Statuette] {itemId} already in slot '{slot.Name}'");
+            LogHelper.Debug(logger,filter.Filter.Add(itemId)
+                ? $"[Statuette] Added {itemId} to slot '{slot.Name}' in {slotName}"
+                : $"[Statuette] {itemId} already in slot '{slot.Name}'");
         }
     }
 

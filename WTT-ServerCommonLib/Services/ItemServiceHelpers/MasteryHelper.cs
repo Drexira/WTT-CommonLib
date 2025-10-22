@@ -2,6 +2,7 @@
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
 
@@ -44,12 +45,12 @@ public class MasteryHelper(ISptLogger<MasteryHelper> logger, DatabaseService dat
                     if (!templates.Contains(template))
                     {
                         templates.Add(template);
-                        logger.Warning($"Added template {template} to mastery '{mastery.Name}'");
+                        LogHelper.Debug(logger,$"Added template {template} to mastery '{mastery.Name}'");
                     }
                 }
 
                 existing.Templates = templates.ToArray();
-                //Log.Info($"[Mastery] Updated existing mastery '{mastery.Name}' for {itemId}");
+                LogHelper.Debug(logger,$"[Mastery] Updated existing mastery '{mastery.Name}' for {itemId}");
             }
             else
             {
@@ -65,7 +66,7 @@ public class MasteryHelper(ISptLogger<MasteryHelper> logger, DatabaseService dat
                 newMastering.Add(newMastery);
                 globals.Configuration.Mastering = newMastering.ToArray();
 
-                //Log.Info( $"[Mastery] Created new mastery '{mastery.Name}' for {itemId}");
+                LogHelper.Debug(logger, $"[Mastery] Created new mastery '{mastery.Name}' for {itemId}");
             }
         }
     }

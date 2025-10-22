@@ -7,7 +7,6 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Server.Core.Utils;
 using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 using Path = System.IO.Path;
@@ -18,7 +17,6 @@ namespace WTTServerCommonLib.Services;
 public class WTTCustomHeadService(
     ISptLogger<WTTCustomHeadService> logger,
     DatabaseService databaseService,
-    JsonUtil jsonUtil,
     ModHelper modHelper,
     ConfigHelper configHelper
 )
@@ -66,7 +64,7 @@ public class WTTCustomHeadService(
                 }
             }
 
-            logger.Info($"Created {totalHeadsCreated} custom heads from {headConfigDicts.Count} files");
+            LogHelper.Debug(logger,$"Created {totalHeadsCreated} custom heads from {headConfigDicts.Count} files");
         }
         catch (Exception ex)
         {
@@ -89,7 +87,7 @@ public class WTTCustomHeadService(
             AddHeadToCustomizationStorage(headId);
             AddHeadLocales(headId, customHeadConfig);
 
-            logger.Info($"Created custom head {headId}");
+            LogHelper.Debug(logger,$"Created custom head {headId}");
             return true;
         }
         catch (Exception ex)

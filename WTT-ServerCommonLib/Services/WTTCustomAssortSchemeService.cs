@@ -49,7 +49,7 @@ public class WTTCustomAssortSchemeService(
         foreach (var assortData in assortList)
         {
             _customAssortSchemes.Add(assortData);
-            logger.Info($"Loaded {assortData.Count} trader assort(s)");
+            LogHelper.Debug(logger,$"Loaded {assortData.Count} trader assort(s)");
         }
 
         ApplyAssorts();
@@ -90,7 +90,7 @@ public class WTTCustomAssortSchemeService(
                     trader.Assort.LoyalLevelItems[levelItem.Key] = levelItem.Value;
                 }
 
-                logger.Info($"Merged {newAssort.Items.Count} items into trader");
+                LogHelper.Debug(logger,$"Merged {newAssort.Items.Count} items into trader");
             }
         }
     }

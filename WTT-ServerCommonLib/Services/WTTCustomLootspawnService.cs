@@ -3,6 +3,7 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using WTTServerCommonLib.Helpers;
 using Path = System.IO.Path;
@@ -11,126 +12,328 @@ namespace WTTServerCommonLib.Services;
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
 public class WTTCustomLootspawnService(
+    ISptLogger<WTTCustomLootspawnService> logger,
     DatabaseService databaseService,
     ConfigHelper configHelper,
     ModHelper modHelper
-    )
+)
 {
     private const double Epsilon = 0.0001;
 
+    private readonly Dictionary<string, List<Spawnpoint>> _cachedGeneralSpawns = new();
+    private readonly Dictionary<string, List<Spawnpoint>> _cachedForcedSpawns = new();
+    private bool _transformersRegistered;
+
     public void CreateCustomLootSpawns(Assembly assembly, string? relativePath = null)
     {
-        string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
-        string baseDir = Path.Combine(assemblyLocation, relativePath ?? Path.Combine("db", "CustomLootspawns"));
+        try
+        {
+            string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+            string baseDir = Path.Combine(assemblyLocation, relativePath ?? Path.Combine("db", "CustomLootspawns"));
 
-        string spawnDir = Path.Combine(baseDir, "CustomSpawnpoints");
-        string forcedDir = Path.Combine(baseDir, "CustomSpawnpointsForced");
+            LogHelper.Debug(logger, $"Creating custom loot spawns from: {baseDir}");
 
-        var locations = databaseService.GetLocations().GetDictionary();
+            string spawnDir = Path.Combine(baseDir, "CustomSpawnpoints");
+            string forcedDir = Path.Combine(baseDir, "CustomSpawnpointsForced");
 
-        ProcessSpawnDirectory(spawnDir, locations, forced: false);
-        ProcessSpawnDirectory(forcedDir, locations, forced: true);
+            GatherSpawnsFromDirectory(spawnDir, _cachedGeneralSpawns, "general");
+            GatherSpawnsFromDirectory(forcedDir, _cachedForcedSpawns, "forced");
+
+            if (!_transformersRegistered)
+            {
+                RegisterTransformers();
+                _transformersRegistered = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Failed to create custom loot spawns: {ex.Message}");
+            LogHelper.Debug(logger, $"Stack trace: {ex.StackTrace}");
+        }
     }
 
-    private void ProcessSpawnDirectory(string directory, Dictionary<string, Location> locations, bool forced)
+    private void GatherSpawnsFromDirectory(string directory, Dictionary<string, List<Spawnpoint>> cache, string spawnType)
     {
         if (!Directory.Exists(directory))
-            return;
-
-        var spawnDicts = configHelper.LoadAllJsonFiles<Dictionary<string, List<Spawnpoint>>>(directory);
-
-        foreach (var spawns in spawnDicts)
         {
-            foreach (var (mapName, spawnList) in spawns)
+            LogHelper.Debug(logger, $"Directory does not exist, skipping: {directory}");
+            return;
+        }
+
+        try
+        {
+            LogHelper.Debug(logger, $"Gathering {spawnType} spawns from: {directory}");
+
+            var spawnDicts = configHelper.LoadAllJsonFiles<Dictionary<string, List<Spawnpoint>>>(directory);
+
+            if (spawnDicts.Count == 0)
             {
-                string locationId = databaseService.GetLocations().GetMappedKey(mapName);
-                if (!locations.TryGetValue(locationId, out var location)) continue;
-                if (location.LooseLoot == null) continue;
+                LogHelper.Debug(logger, $"No spawn configuration files found in: {directory}");
+                return;
+            }
+
+            LogHelper.Debug(logger, $"Loaded {spawnDicts.Count} spawn configuration file(s)");
+
+            foreach (var spawns in spawnDicts)
+            {
+                if (spawns.Count == 0)
+                {
+                    LogHelper.Debug(logger, "Empty spawn dictionary, skipping");
+                    continue;
+                }
+
+                foreach (var (mapName, spawnList) in spawns)
+                {
+                    if (string.IsNullOrEmpty(mapName))
+                    {
+                        logger.Warning("Spawn configuration has null or empty map name, skipping");
+                        continue;
+                    }
+
+                    if (spawnList.Count == 0)
+                    {
+                        LogHelper.Debug(logger, $"No spawn points for map '{mapName}', skipping");
+                        continue;
+                    }
+
+                    string locationId = databaseService.GetLocations().GetMappedKey(mapName);
+
+                    if (string.IsNullOrEmpty(locationId))
+                    {
+                        logger.Warning($"Could not map location name '{mapName}' to location ID");
+                        continue;
+                    }
+
+                    if (!cache.ContainsKey(locationId))
+                    {
+                        cache[locationId] = new List<Spawnpoint>();
+                    }
+
+                    cache[locationId].AddRange(spawnList);
+                    LogHelper.Debug(logger, $"Cached {spawnList.Count} {spawnType} spawn(s) for '{mapName}' (ID: {locationId})");
+                }
+            }
+
+            LogHelper.Debug(logger, $"Finished gathering {spawnType} spawns: {cache.Count} location(s) in cache");
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Error gathering spawns from directory '{directory}': {ex.Message}");
+            LogHelper.Debug(logger, $"Stack trace: {ex.StackTrace}");
+        }
+    }
+
+    private void RegisterTransformers()
+    {
+        try
+        {
+            var locations = databaseService.GetLocations().GetDictionary();
+
+            LogHelper.Debug(logger, $"Registering transformers for all locations");
+
+            foreach (var (locationId, location) in locations)
+            {
+                if (location.LooseLoot == null)
+                {
+                    continue;
+                }
 
                 location.LooseLoot.AddTransformer(looseLoot =>
                 {
-                    if (looseLoot == null) return looseLoot;
-                    if (forced)
-                        looseLoot.SpawnpointsForced = MergeForced(looseLoot.SpawnpointsForced, spawnList);
-                    else
-                        looseLoot.Spawnpoints = MergeGeneral(looseLoot.Spawnpoints, spawnList);
+                    if (looseLoot == null)
+                    {
+                        return looseLoot;
+                    }
+
+                    if (_cachedGeneralSpawns.TryGetValue(locationId, out var generalSpawns) && generalSpawns.Count > 0)
+                    {
+                        looseLoot.Spawnpoints = MergeGeneral(looseLoot.Spawnpoints, generalSpawns, locationId);
+                        LogHelper.Debug(logger, $"Applied {generalSpawns.Count} general spawn(s) to location '{locationId}'");
+                    }
+
+                    if (_cachedForcedSpawns.TryGetValue(locationId, out var forcedSpawns) && forcedSpawns.Count > 0)
+                    {
+                        looseLoot.SpawnpointsForced = MergeForced(looseLoot.SpawnpointsForced, forcedSpawns, locationId);
+                        LogHelper.Debug(logger, $"Applied {forcedSpawns.Count} forced spawn(s) to location '{locationId}'");
+                    }
+
                     return looseLoot;
                 });
             }
+
+            int totalGeneral = _cachedGeneralSpawns.Values.Sum(list => list.Count);
+            int totalForced = _cachedForcedSpawns.Values.Sum(list => list.Count);
+            LogHelper.Debug(logger, $"Registered transformers for all locations ({totalGeneral} general, {totalForced} forced spawns cached)");
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Error registering transformers: {ex.Message}");
+            LogHelper.Debug(logger, $"Stack trace: {ex.StackTrace}");
         }
     }
 
-    private static List<Spawnpoint> MergeForced(IEnumerable<Spawnpoint>? existingForced, List<Spawnpoint> newSpawns)
+    private List<Spawnpoint> MergeForced(IEnumerable<Spawnpoint>? existingForced, List<Spawnpoint> newSpawns, string locationId)
     {
         var existing = existingForced?.ToList() ?? new();
-        foreach (var newSpawn in newSpawns)
-        {
-            if (existing.All(sp => sp.LocationId != newSpawn.LocationId))
-                existing.Add(newSpawn);
-        }
-        return existing;
-    }
 
-    private static List<Spawnpoint> MergeGeneral(IEnumerable<Spawnpoint>? existingPoints, List<Spawnpoint> newSpawns)
-    {
-        var existing = existingPoints?.ToList() ?? new();
-        foreach (var custom in newSpawns)
+        try
         {
-            var match = existing.FirstOrDefault(sp => sp.LocationId == custom.LocationId);
-            if (match == null)
+            int addedCount = 0;
+
+            foreach (var newSpawn in newSpawns)
             {
-                existing.Add(custom);
-                continue;
+                if (string.IsNullOrEmpty(newSpawn.LocationId))
+                {
+                    logger.Warning($"Spawn point missing LocationId in location '{locationId}', skipping");
+                    continue;
+                }
+
+                if (existing.All(sp => sp.LocationId != newSpawn.LocationId))
+                {
+                    existing.Add(newSpawn);
+                    addedCount++;
+                }
             }
 
-            match.Probability = custom.Probability;
-            MergeSpawnpoint(match, custom);
+            if (addedCount > 0)
+            {
+                LogHelper.Debug(logger, $"Merged {addedCount} new forced spawn(s) into location '{locationId}'");
+            }
+
+            return existing;
         }
-        return existing;
+        catch (Exception ex)
+        {
+            logger.Error($"Error merging forced spawns for location '{locationId}': {ex.Message}");
+            return existing;
+        }
     }
 
-    private static void MergeSpawnpoint(Spawnpoint existing, Spawnpoint custom)
+    private List<Spawnpoint> MergeGeneral(IEnumerable<Spawnpoint>? existingPoints, List<Spawnpoint> newSpawns, string locationId)
     {
-        if (custom.Template != null)
+        var existing = existingPoints?.ToList() ?? new();
+
+        try
         {
+            int addedCount = 0;
+            int updatedCount = 0;
+
+            foreach (var custom in newSpawns)
+            {
+                if (string.IsNullOrEmpty(custom.LocationId))
+                {
+                    logger.Warning($"Spawn point missing LocationId in location '{locationId}', skipping");
+                    continue;
+                }
+
+                var match = existing.FirstOrDefault(sp => sp.LocationId == custom.LocationId);
+                if (match == null)
+                {
+                    existing.Add(custom);
+                    addedCount++;
+                    continue;
+                }
+
+                match.Probability = custom.Probability;
+                MergeSpawnpoint(match, custom, locationId);
+                updatedCount++;
+            }
+
+            if (addedCount > 0 || updatedCount > 0)
+            {
+                LogHelper.Debug(logger, $"Merged general spawns for location '{locationId}': {addedCount} added, {updatedCount} updated");
+            }
+
+            return existing;
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Error merging general spawns for location '{locationId}': {ex.Message}");
+            return existing;
+        }
+    }
+
+    private void MergeSpawnpoint(Spawnpoint existing, Spawnpoint custom, string locationId)
+    {
+        try
+        {
+            if (custom.Template == null)
+            {
+                return;
+            }
+
             existing.Template ??= new SpawnpointTemplate();
             existing.Template.IsContainer = custom.Template.IsContainer;
             existing.Template.UseGravity = custom.Template.UseGravity;
             existing.Template.RandomRotation = custom.Template.RandomRotation;
 
-            if (custom.Template.Items != null)
+            if (custom.Template.Items != null && custom.Template.Items.Any())
             {
                 var items = existing.Template.Items?.ToList() ?? new List<SptLootItem>();
+
                 foreach (var item in custom.Template.Items)
+                {
                     if (items.All(i => i.Id != item.Id))
+                    {
                         items.Add(item);
+                    }
+                }
+
                 existing.Template.Items = items;
             }
 
-            if (custom.Template.GroupPositions != null)
+            if (custom.Template.GroupPositions != null && custom.Template.GroupPositions.Any())
             {
                 var groups = existing.Template.GroupPositions?.ToList() ?? new List<GroupPosition>();
+
                 foreach (var group in custom.Template.GroupPositions)
                 {
+                    if (group.Position == null)
+                    {
+                        logger.Warning($"Group position with null Position in spawn '{custom.LocationId}' for location '{locationId}', skipping");
+                        continue;
+                    }
+
                     bool exists = groups.Any(g =>
                         AreEqual(g.Position?.X, group.Position?.X) &&
                         AreEqual(g.Position?.Y, group.Position?.Y) &&
                         AreEqual(g.Position?.Z, group.Position?.Z));
 
-                    if (!exists) groups.Add(group);
+                    if (!exists)
+                    {
+                        groups.Add(group);
+                    }
                 }
+
                 existing.Template.GroupPositions = groups;
             }
+
+            if (custom.ItemDistribution != null && custom.ItemDistribution.Any())
+            {
+                var dists = existing.ItemDistribution?.ToList() ?? new List<LooseLootItemDistribution>();
+
+                foreach (var dist in custom.ItemDistribution)
+                {
+                    if (dist.ComposedKey == null)
+                    {
+                        logger.Warning($"Item distribution with null ComposedKey in spawn '{custom.LocationId}' for location '{locationId}', skipping");
+                        continue;
+                    }
+
+                    if (dists.All(d => d.ComposedKey?.Key != dist.ComposedKey?.Key))
+                    {
+                        dists.Add(dist);
+                    }
+                }
+
+                existing.ItemDistribution = dists.AsEnumerable();
+            }
         }
-
-        if (custom.ItemDistribution == null) return;
-
-        var dists = existing.ItemDistribution?.ToList() ?? new List<LooseLootItemDistribution>();
-        foreach (var dist in custom.ItemDistribution)
-            if (dists.All(d => d.ComposedKey?.Key != dist.ComposedKey?.Key))
-                dists.Add(dist);
-
-        existing.ItemDistribution = dists;
+        catch (Exception ex)
+        {
+            logger.Error($"Error merging spawnpoint '{custom.LocationId}' in location '{locationId}': {ex.Message}");
+            LogHelper.Debug(logger, $"Stack trace: {ex.StackTrace}");
+        }
     }
 
     private static bool AreEqual(double? a, double? b)

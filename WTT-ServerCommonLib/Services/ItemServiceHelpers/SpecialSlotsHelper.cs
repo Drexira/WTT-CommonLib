@@ -1,7 +1,7 @@
 ﻿using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
@@ -48,7 +48,7 @@ public class SpecialSlotsHelper(ISptLogger<SpecialSlotsHelper> logger, DatabaseS
 
                 if (firstFilter.Filter.Add(itemId))
                 {
-                    //Log.Info($"[SpecialSlots] Added {itemId} to pockets slot in {pocketsId}");
+                    LogHelper.Debug(logger,$"[SpecialSlots] Added {itemId} to pockets slot in {pocketsId}");
                 }
             }
         }

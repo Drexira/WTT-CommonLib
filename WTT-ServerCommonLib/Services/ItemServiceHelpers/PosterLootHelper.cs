@@ -4,6 +4,7 @@ using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
@@ -27,11 +28,6 @@ public class PosterLootHelper(DatabaseService databaseService, ISptLogger<Poster
             {
                 foreach (var spawnpoint in lazyLoadedLooseLootData?.Spawnpoints ?? [])
                 {
-                    if (spawnpoint is null)
-                    {
-                        continue;
-                    }
-
                     var template = spawnpoint.Template;
 
                     if (template is null)
@@ -65,7 +61,7 @@ public class PosterLootHelper(DatabaseService databaseService, ISptLogger<Poster
 
                     if (logger.IsLogEnabled(LogLevel.Debug))
                     {
-                        logger.Debug($"[PosterLoot] {locationId} + {spawnpoint.LocationId ?? "?"} id={templateId} key={newId}");
+                        LogHelper.Debug(logger,$"[PosterLoot] {locationId} + {spawnpoint.LocationId ?? "?"} id={templateId} key={newId}");
                     }
 
                     template.Items = spawnPointItems;

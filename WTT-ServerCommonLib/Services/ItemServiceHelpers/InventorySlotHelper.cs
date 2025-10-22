@@ -1,7 +1,7 @@
 ﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
@@ -43,7 +43,7 @@ public class InventorySlotHelper(ISptLogger<InventorySlotHelper> logger, Databas
 
                 if (firstFilter.Filter.Add(itemId))
                 {
-                    logger.Info($"[InventorySlots] Added {itemId} to inventory slot '{slot.Name}'");
+                    LogHelper.Debug(logger,$"[InventorySlots] Added {itemId} to inventory slot '{slot.Name}'");
                 }
             }
         }

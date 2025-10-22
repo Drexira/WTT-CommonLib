@@ -122,7 +122,7 @@ namespace WTTClientCommonLib.CustomQuestZones.Services
         {
             if (Zones.Count < 1) return;
             
-            string outputDir = Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\..\..\"));
+            string outputDir = Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\..\..\..\"));
             string path = Path.Combine(outputDir, $"WTT-ClientCommonLib-CustomQuestZone-Output-{DateTime.Now:yyyyMMddHHmmssffff}.json");
 
             using (StreamWriter streamWriter = File.CreateText(path))

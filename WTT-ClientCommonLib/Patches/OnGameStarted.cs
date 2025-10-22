@@ -26,12 +26,24 @@ namespace WTTClientCommonLib.Patches
                 List<CustomQuestZone> questZones = QuestZones.GetZones();
                 if (questZones == null || questZones.Count == 0)
                 {
-                    Logger.LogWarning("No zones data loaded; skipping initialization.");
+                    Logger.LogDebug("No zones data loaded; skipping initialization.");
                     return;
                 }
                 List<CustomQuestZone> validZones = questZones.Where(zone => zone.ZoneLocation.ToLower() == currentMap.ToLower()).ToList();
                 ZoneConfigManager.ExistingQuestZones = validZones;
                 QuestZones.CreateZones(validZones);
+                
+                var player = __instance.MainPlayer;
+                string locationID = __instance.LocationId;
+                if (player?.Profile?.QuestsData == null) return;
+                if (locationID == null) return;
+
+                var loader  = WTTClientCommonLib.Instance.AssetLoader;
+                var configs = loader.SpawnConfigs;
+                foreach (var config in configs)
+                {
+                    loader.ProcessSpawnConfig(__instance.MainPlayer, config, __instance.LocationId);
+                }
             }
             catch (Exception e)
             {

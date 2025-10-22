@@ -2,6 +2,7 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Utils.Logger;
+using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services
 {
@@ -18,7 +19,7 @@ namespace WTTServerCommonLib.Services
             
             if (!Directory.Exists(finalDir))
             {
-                logger.Info($"No CustomSlotImages directory at {finalDir}");
+                LogHelper.Debug(logger,$"No CustomSlotImages directory at {finalDir}");
                 return;
             }
 
@@ -30,7 +31,7 @@ namespace WTTServerCommonLib.Services
                 {
                     string imageName = Path.GetFileNameWithoutExtension(imagePath);
                     _imagePaths[imageName] = imagePath;
-                    logger.Info($"Registered slot image: {imageName}");
+                    LogHelper.Debug(logger,$"Registered slot image: {imageName}");
                 }
             }
         }

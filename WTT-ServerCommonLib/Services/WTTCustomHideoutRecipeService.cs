@@ -53,7 +53,7 @@ public class WTTCustomHideoutRecipeService(
 
                 if (!MongoId.IsValidMongoId(recipe.Id))
                 {
-                    logger.Error($"Missing or invalid Id in recipe for end product {recipe?.EndProduct}");
+                    logger.Error($"Missing or invalid Id in recipe for end product {recipe.EndProduct}");
                     continue;
                 }
 
@@ -62,13 +62,13 @@ public class WTTCustomHideoutRecipeService(
                 {
                     if (logger.IsLogEnabled(LogLevel.Debug))
                     {
-                        logger.Debug($"Recipe {recipe.Id} already exists, skipping");
+                        LogHelper.Debug(logger,$"Recipe {recipe.Id} already exists, skipping");
                     }
                     continue;
                 }
 
                 _database.Hideout.Production.Recipes?.Add(recipe);
-                logger.Info($"Added hideout recipe {recipe.Id} for item {recipe.EndProduct}");
+                LogHelper.Debug(logger,$"Added hideout recipe {recipe.Id} for item {recipe.EndProduct}");
             }
         }
         catch (Exception ex)

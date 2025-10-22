@@ -36,6 +36,7 @@ public class WTTServerCommonLib(
     WTTCustomQuestZoneService customQuestZoneService,
     WTTCustomRigLayoutService customRigLayoutService,
     WTTCustomSlotImageService customSlotImageService,
+    WTTCustomStaticSpawnService customStaticSpawnService,
     ISptLogger<WTTServerCommonLib> logger
     ) : IOnLoad
 {
@@ -52,6 +53,7 @@ public class WTTServerCommonLib(
     public WTTCustomQuestZoneService CustomQuestZoneService { get; } = customQuestZoneService;
     public WTTCustomRigLayoutService CustomRigLayoutService { get; } = customRigLayoutService;
     public WTTCustomSlotImageService CustomSlotImageService { get; } = customSlotImageService;
+    public WTTCustomStaticSpawnService CustomStaticSpawnService { get; } = customStaticSpawnService;
     
     public Task OnLoad()
     {

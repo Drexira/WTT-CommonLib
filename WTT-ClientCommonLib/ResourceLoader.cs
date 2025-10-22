@@ -4,27 +4,24 @@ using BepInEx.Logging;
 using EFT.UI.DragAndDrop;
 using UnityEngine;
 using WTTClientCommonLib.Common.Helpers;
+using WTTClientCommonLib.CustomStaticSpawnSystem;
 
 namespace WTTClientCommonLib
 {
-    public class ResourceLoader
+    public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
     {
-        private readonly ManualLogSource logger;
-
-        public ResourceLoader(ManualLogSource logger)
-        {
-            this.logger = logger;
-        }
-
         public void LoadAllResourcesFromServer()
         {
             try
             {
-                logger.LogInfo("Loading resources from server...");
+                logger.LogDebug("Loading resources from server...");
                 LoadVoicesFromServer();
                 LoadSlotImagesFromServer();
                 LoadRigLayoutsFromServer();
-                logger.LogInfo("All resources loaded successfully from server");
+                assetLoader.InitializeBundles("/wttcommonlib/spawnsystem/bundles/get");
+                assetLoader.SpawnConfigs = assetLoader.FetchSpawnConfigs("/wttcommonlib/spawnsystem/configs/get");
+                logger.LogDebug($"Loaded {assetLoader.SpawnConfigs.Count} spawn configurations");
+                logger.LogDebug("All resources loaded successfully from server");
             }
             catch (Exception ex)
             {
@@ -47,10 +44,10 @@ namespace WTTClientCommonLib
                     if (!ResourceKeyManagerAbstractClass.Dictionary_0.ContainsKey(kvp.Key))
                     {
                         ResourceKeyManagerAbstractClass.Dictionary_0[kvp.Key] = kvp.Value;
-                        logger.LogInfo($"Added voice key: {kvp.Key}");
+                        logger.LogDebug($"Added voice key: {kvp.Key}");
                     }
                 }
-                logger.LogInfo($"Loaded {voiceResponse.Count} voice mappings from server");
+                logger.LogDebug($"Loaded {voiceResponse.Count} voice mappings from server");
             }
             catch (Exception ex)
             {
@@ -62,52 +59,14 @@ namespace WTTClientCommonLib
         {
             try
             {
-                var imageManifest = Utils.Get<List<string>>("/wttcommonlib/slotimages/get");
-                if (imageManifest == null)
-                {
-                    logger.LogWarning("No slot images manifest received from server");
-                    return;
+                var images = Utils.Get<Dictionary<string,string>>("/wttcommonlib/slotimages/get");
+                if (images == null) { logger.LogWarning("No slot images"); return; }
+                foreach (var kvp in images) {
+                    byte[] imageData;
+                    try { imageData = Convert.FromBase64String(kvp.Value); }
+                    catch { logger.LogWarning($"Invalid data for {kvp.Key}"); continue; }
+                    CreateAndRegisterSlotImage(imageData, kvp.Key);
                 }
-
-                logger.LogInfo($"Received slot image manifest with {imageManifest.Count} images");
-
-                foreach (var imageName in imageManifest)
-                {
-                    try
-                    {
-                        var imageResponse = Utils.Get<Dictionary<string, string>>(
-                            $"/wttcommonlib/slotimages/data?name={Uri.EscapeDataString(imageName)}");
-                        if (imageResponse != null && imageResponse.TryGetValue("data", out var base64Data))
-                        {
-                            if (string.IsNullOrEmpty(base64Data))
-                            {
-                                logger.LogWarning($"Base64 data is empty for slot image: {imageName}");
-                                continue;
-                            }
-                            byte[] imageData = null;
-                            try { imageData = Convert.FromBase64String(base64Data); }
-                            catch (Exception ex)
-                            {
-                                logger.LogError($"Base64 decode failed for image {imageName}: {ex}");
-                                continue;
-                            }
-                            CreateAndRegisterSlotImage(imageData, imageName);
-                        }
-                        else if (imageResponse != null && imageResponse.TryGetValue("error", out var error))
-                        {
-                            logger.LogWarning($"Failed to load slot image {imageName}: {error}");
-                        }
-                        else
-                        {
-                            logger.LogWarning($"Unexpected response format for slot image {imageName}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError($"Error loading slot image {imageName}: {ex}");
-                    }
-                }
-                logger.LogInfo($"Loaded {imageManifest.Count} slot images from server");
             }
             catch (Exception ex)
             {
@@ -126,7 +85,7 @@ namespace WTTClientCommonLib
                     return;
                 }
 
-                logger.LogInfo($"Received {bundleMap.Count} rig layouts from server");
+                logger.LogDebug($"Received {bundleMap.Count} rig layouts from server");
 
                 foreach (var kvp in bundleMap)
                 {
@@ -152,7 +111,7 @@ namespace WTTClientCommonLib
                     LoadBundleFromMemory(bundleData, bundleName);
                 }
 
-                logger.LogInfo($"Loaded {bundleMap.Count} rig layouts from server");
+                logger.LogDebug($"Loaded {bundleMap.Count} rig layouts from server");
             }
             catch (Exception ex)
             {
@@ -184,7 +143,7 @@ namespace WTTClientCommonLib
                 );
 
                 ResourceHelper.AddEntry($"Slots/{slotID}", sprite);
-                logger.LogInfo($"Added slot sprite: {slotID}");
+                logger.LogDebug($"Added slot sprite: {slotID}");
             }
             catch (Exception ex)
             {
@@ -232,11 +191,11 @@ namespace WTTClientCommonLib
 
                     ResourceHelper.AddEntry($"UI/Rig Layouts/{prefab.name}", gridView);
                     loadedCount++;
-                    logger.LogInfo($"Added rig layout: {prefab.name}");
+                    logger.LogDebug($"Added rig layout: {prefab.name}");
                 }
 
                 bundle.Unload(false);
-                logger.LogInfo($"Loaded {loadedCount} prefabs from bundle: {bundleName}");
+                logger.LogDebug($"Loaded {loadedCount} prefabs from bundle: {bundleName}");
             }
             catch (Exception ex)
             {

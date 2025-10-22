@@ -59,12 +59,12 @@ public class WTTCustomQuestService(
             if (TraderIds.TraderMap.TryGetValue(traderKey.ToLower(), out var mappedTraderId))
             {
                 traderId = mappedTraderId;
-                logger.Debug($"Mapped trader key '{traderKey}' to ID '{traderId}'");
+                LogHelper.Debug(logger,$"Mapped trader key '{traderKey}' to ID '{traderId}'");
             }
             else if (traderKey.IsValidMongoId())
             {
                 traderId = traderKey;
-                logger.Debug($"Using trader key '{traderKey}' as direct ID");
+                LogHelper.Debug(logger,$"Using trader key '{traderKey}' as direct ID");
             }
             else
             {
@@ -78,7 +78,7 @@ public class WTTCustomQuestService(
 
     private void LoadQuestsFromDirectory(string traderId, string traderDir)
     {
-        logger.Info($"Loading quests for trader {traderId} from {traderDir}");
+        LogHelper.Debug(logger,$"Loading quests for trader {traderId} from {traderDir}");
 
         var questFiles = LoadQuestFiles(Path.Combine(traderDir, "Quests"));
         var assortFiles = LoadAssortFiles(Path.Combine(traderDir, "QuestAssort"));
@@ -103,7 +103,7 @@ public class WTTCustomQuestService(
                 if (questData.Any())
                 {
                     result.Add(questData);
-                    logger.Info($"Loaded quest data with {questData.Count} quests");
+                    LogHelper.Debug(logger,$"Loaded quest data with {questData.Count} quests");
                 }
             }
         }
@@ -129,7 +129,7 @@ public class WTTCustomQuestService(
                 if (assortData.Any())
                 {
                     result.Add(assortData);
-                    logger.Info($"Loaded assort data with {assortData.Count} entries");
+                    LogHelper.Debug(logger,$"Loaded assort data with {assortData.Count} entries");
                 }
             }
         }
@@ -157,7 +157,7 @@ public class WTTCustomQuestService(
                 .Where(f => _validImageExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
                 .ToList();
             
-            logger.Info($"Found {images.Count} image files in {directoryPath}");
+            LogHelper.Debug(logger,$"Found {images.Count} image files in {directoryPath}");
             return images;
         }
         catch (Exception ex)
@@ -190,12 +190,12 @@ public class WTTCustomQuestService(
                     && !IsWithin(window)) continue;
                 _database.Templates.Quests[key] = quest;
                 questCount++;
-                logger.Debug($"{traderId}: Added quest {key}");
+                LogHelper.Debug(logger,$"{traderId}: Added quest {key}");
 
             }
         }
 
-        logger.Info($"{traderId}: Successfully loaded {questCount} quests");
+        LogHelper.Debug(logger,$"{traderId}: Successfully loaded {questCount} quests");
     }
     private bool IsWithin(CustomQuestTimeWindow w)
     {
@@ -206,7 +206,7 @@ public class WTTCustomQuestService(
 
         if (end < start)
         {
-            // spans year end
+            // spans year-end
             if (now.Month < w.StartMonth) start = start.AddYears(-1);
             else                             end   = end.AddYears(1);
         }
@@ -243,12 +243,12 @@ public class WTTCustomQuestService(
                 {
                     trader.QuestAssort[stage][questId] = assortId;
                     assortCount++;
-                    logger.Debug($"{traderId}: Added assort for quest {questId} in stage {stage}");
+                    LogHelper.Debug(logger,$"{traderId}: Added assort for quest {questId} in stage {stage}");
                 }
             }
         }
 
-        logger.Info($"{traderId}: Loaded {assortCount} quest assort items");
+        LogHelper.Debug(logger,$"{traderId}: Loaded {assortCount} quest assort items");
     }
     private void ImportLocaleData(string traderId, string traderDir)
     {
@@ -288,7 +288,7 @@ public class WTTCustomQuestService(
                 });
             }
 
-            logger.Info($"{traderId}: Registered transformers for {locales.Count} quest locale files");
+            LogHelper.Debug(logger,$"{traderId}: Registered transformers for {locales.Count} quest locale files");
         }
         catch (Exception ex)
         {
@@ -300,7 +300,7 @@ public class WTTCustomQuestService(
     {
         if (!imageFiles.Any())
         {
-            logger.Warning($"{traderId}: No images found");
+            LogHelper.Debug(logger,$"{traderId}: No images found");
             return;
         }
 
@@ -310,7 +310,7 @@ public class WTTCustomQuestService(
             {
                 string imageName = Path.GetFileNameWithoutExtension(imagePath);
                 imageRouter.AddRoute($"/files/quest/icon/{imageName}", imagePath);
-                logger.Debug($"{traderId}: Registered image route for {imageName}");
+                LogHelper.Debug(logger,$"{traderId}: Registered image route for {imageName}");
             }
             catch (Exception ex)
             {
@@ -318,19 +318,19 @@ public class WTTCustomQuestService(
             }
         }
         
-        logger.Info($"{traderId}: Loaded {imageFiles.Count} images");
+        LogHelper.Debug(logger,$"{traderId}: Loaded {imageFiles.Count} images");
     }
     private void ImportQuestTimeConfig(string basePath)
     {
         // Try both .json and .jsonc
-        string[] filenames = { "QuestTimeData.json", "QuestTimeData.jsonc" };
+        string[] filenames = ["QuestTimeData.json", "QuestTimeData.jsonc"];
         string? configPath = filenames
             .Select(name => Path.Combine(basePath, name))
-            .FirstOrDefault(path => File.Exists(path));
+            .FirstOrDefault(File.Exists);
 
         if (configPath == null)
         {
-            logger.Info("No QuestTimeData.json/.jsonc found, skipping date locks");
+            LogHelper.Debug(logger,"No QuestTimeData.json/.jsonc found, skipping date locks");
             return;
         }
 
@@ -340,7 +340,7 @@ public class WTTCustomQuestService(
                                .DeserializeFromFile<Dictionary<string, CustomQuestTimeWindow>>(configPath)
                            ?? new Dictionary<string, CustomQuestTimeWindow>();
 
-            logger.Info($"Loaded QuestTimeData from {Path.GetFileName(configPath)} for {_timeWindows.Count} quests");
+            LogHelper.Debug(logger,$"Loaded QuestTimeData from {Path.GetFileName(configPath)} for {_timeWindows.Count} quests");
         }
         catch (Exception ex)
         {
@@ -350,14 +350,14 @@ public class WTTCustomQuestService(
 
     private void ImportQuestSideConfig(string basePath)
     {
-        string[] filenames = { "QuestSideData.json", "QuestSideData.jsonc" };
+        string[] filenames = ["QuestSideData.json", "QuestSideData.jsonc"];
         string? configPath = filenames
             .Select(name => Path.Combine(basePath, name))
-            .FirstOrDefault(path => File.Exists(path));
+            .FirstOrDefault(File.Exists);
 
         if (configPath == null)
         {
-            logger.Info("No QuestSideData.json/.jsonc found, skipping side-exclusive setup");
+            LogHelper.Debug(logger,"No QuestSideData.json/.jsonc found, skipping side-exclusive setup");
             return;
         }
 
@@ -408,7 +408,7 @@ public class WTTCustomQuestService(
                 }
             }
 
-            logger.Info($"Loaded QuestSideData.json: {usecAdded} USEC quests, {bearAdded} BEAR quests");
+            LogHelper.Debug(logger,$"Loaded QuestSideData.json: {usecAdded} USEC quests, {bearAdded} BEAR quests");
         }
         catch (Exception ex)
         {

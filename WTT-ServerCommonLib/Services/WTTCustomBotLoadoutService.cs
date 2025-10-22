@@ -10,6 +10,7 @@ using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
+using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 using Path = System.IO.Path;
 
@@ -53,7 +54,7 @@ public class WTTCustomBotLoadoutService(
             {
                 var customLoadout = jsonUtil.DeserializeFromFile<CustomBotLoadoutConfig>(file);
                 if (customLoadout != null) ApplyCustomBotLoadout(botTypeName, customLoadout);
-                logger.Info($"Successfully applied custom loadout for bot type: {botTypeName}");
+                LogHelper.Debug(logger,$"Successfully applied custom loadout for bot type: {botTypeName}");
             }
             catch (Exception ex)
             {

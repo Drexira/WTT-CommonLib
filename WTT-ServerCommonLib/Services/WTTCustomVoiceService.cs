@@ -69,7 +69,7 @@ public class WTTCustomVoiceService(
                 }
             }
 
-            logger.Info($"Created {totalVoicesCreated} custom voices from {voiceConfigDicts.Count} files");
+            LogHelper.Debug(logger,$"Created {totalVoicesCreated} custom voices from {voiceConfigDicts.Count} files");
         }
         catch (Exception ex)
         {
@@ -92,7 +92,7 @@ public class WTTCustomVoiceService(
             HandleLocale(voiceId, voiceConfig);
             ProcessBotVoices(voiceId, voiceConfig);
 
-            logger.Info($"Created custom voice {voiceId}");
+            LogHelper.Debug(logger,$"Created custom voice {voiceId}");
             return true;
         }
         catch (Exception ex)
@@ -123,12 +123,12 @@ public class WTTCustomVoiceService(
         };
 
         _database.Templates.Customization[voiceId] = voice;
-        logger.Info($"Added voice customization: {voiceId}");
+        LogHelper.Debug(logger,$"Added voice customization: {voiceId}");
 
         if (voiceConfig.AddVoiceToPlayer)
         {
             _database.Templates.Character.Add(voiceId);
-            logger.Info($"Added voice {voiceId} to player character");
+            LogHelper.Debug(logger,$"Added voice {voiceId} to player character");
         }
     }
 
@@ -193,7 +193,7 @@ public class WTTCustomVoiceService(
 
                 if (botDb != null) botDb.BotAppearance.Voice[voiceId] = weight;
 
-                logger.Info($"Added voice {voiceId} to bot type '{botTypeKey}' with weight {weight}");
+                LogHelper.Debug(logger,$"Added voice {voiceId} to bot type '{botTypeKey}' with weight {weight}");
             }
             catch (Exception ex)
             {

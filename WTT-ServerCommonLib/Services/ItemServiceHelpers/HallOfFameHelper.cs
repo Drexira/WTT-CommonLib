@@ -1,10 +1,9 @@
 ﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
@@ -13,7 +12,7 @@ namespace WTTServerCommonLib.Services.ItemServiceHelpers;
 [Injectable]
 public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseService databaseService)
 {
-    private static readonly string[] ValidTypes = ["dogtag", "smallTrophies", "bigTrophies"];
+    private static readonly string?[] ValidTypes = ["dogtag", "smallTrophies", "bigTrophies"];
     private static readonly string[] HallItemIds =
     [
         "63dbd45917fff4dee40fe16e", // Level 1
@@ -40,9 +39,9 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
         }
     }
 
-    private HashSet<string> GetValidFilterTypes(CustomItemConfig config)
+    private HashSet<string?> GetValidFilterTypes(CustomItemConfig config)
     {
-        var types = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var types = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
 
         if (config.HallOfFameSlots == null) 
             return types;
@@ -67,14 +66,14 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
         return types;
     }
 
-    private void AddItemToHallSlots(string itemId, TemplateItem hallItem, HashSet<string> filterTypes)
+    private void AddItemToHallSlots(string itemId, TemplateItem hallItem, HashSet<string?> filterTypes)
     {
-        foreach (var slot in hallItem.Properties.Slots)
+        foreach (var slot in hallItem.Properties?.Slots!)
         {
             if (string.IsNullOrWhiteSpace(slot.Name) || slot.Properties?.Filters == null)
                 continue;
 
-            string slotType = GetMatchingSlotType(slot.Name);
+            string? slotType = GetMatchingSlotType(slot.Name);
             if (!filterTypes.Contains(slotType))
                 continue;
 
@@ -82,11 +81,11 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
         }
     }
 
-    private string GetMatchingSlotType(string slotName)
+    private string? GetMatchingSlotType(string slotName)
     {
         foreach (var type in ValidTypes)
         {
-            if (slotName.StartsWith(type, StringComparison.OrdinalIgnoreCase))
+            if (type != null && slotName.StartsWith(type, StringComparison.OrdinalIgnoreCase))
                 return type;
         }
         return null;
@@ -94,15 +93,15 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
 
     private void AddItemToFilters(string itemId, Slot slot, string? hallName)
     {
-        foreach (var filter in slot.Properties.Filters)
+        foreach (var filter in slot.Properties?.Filters!)
         {
             filter.Filter ??= new HashSet<MongoId>();
 
             if (filter.Filter.Add(itemId))
-                logger.Info($"[HallOfFame] Added {itemId} to slot '{slot.Name}' in {hallName}");
+                LogHelper.Debug(logger,$"[HallOfFame] Added {itemId} to slot '{slot.Name}' in {hallName}");
             else
                 if (logger.IsLogEnabled(LogLevel.Debug))
-                    logger.Debug($"[HallOfFame] {itemId} already in slot '{slot.Name}'");
+                    LogHelper.Debug(logger,$"[HallOfFame] {itemId} already in slot '{slot.Name}'");
         }
     }
 }

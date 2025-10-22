@@ -62,7 +62,7 @@ public class WTTCustomClothingService(
                 }
             }
 
-            logger.Info($"Created {totalClothingCreated} custom clothing items from {clothingConfigsList.Count} files");
+            LogHelper.Debug(logger,$"Created {totalClothingCreated} custom clothing items from {clothingConfigsList.Count} files");
         }
         catch (Exception ex)
         {
@@ -128,7 +128,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.TopId!] = topItem;
-            logger.Info($"Added top customization: {config.TopId}");
+            LogHelper.Debug(logger,$"Added top customization: {config.TopId}");
 
             // Create hands customization item
             var handsItem = new CustomizationItem
@@ -158,7 +158,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.HandsId!] = handsItem;
-            logger.Info($"Added hands customization: {config.HandsId}");
+            LogHelper.Debug(logger,$"Added hands customization: {config.HandsId}");
 
             // Create suite
             var suite = new CustomizationItem
@@ -182,7 +182,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.SuiteId!] = suite;
-            logger.Info($"Added suite customization: {config.SuiteId}");
+            LogHelper.Debug(logger,$"Added suite customization: {config.SuiteId}");
 
             HandleLocale(config, config.SuiteId!);
             AddSuiteToTrader(config);
@@ -230,7 +230,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.BottomId!] = bottomItem;
-            logger.Info($"Added bottom customization: {config.BottomId}");
+            LogHelper.Debug(logger,$"Added bottom customization: {config.BottomId}");
 
             // Create suite
             var suite = new CustomizationItem
@@ -253,7 +253,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.SuiteId!] = suite;
-            logger.Info($"Added suite customization: {config.SuiteId}");
+            LogHelper.Debug(logger,$"Added suite customization: {config.SuiteId}");
 
             HandleLocale(config, config.SuiteId!);
             AddSuiteToTrader(config);
@@ -316,7 +316,7 @@ public class WTTCustomClothingService(
         };
 
         _database.Traders[traderId].Suits?.Add(traderSuit);
-        logger.Info($"Added suite {config.SuiteId} to trader {config.TraderId}");
+        LogHelper.Debug(logger,$"Added suite {config.SuiteId} to trader {config.TraderId}");
     }
 
     private void HandleLocale(CustomClothingConfig config, string clothingId)

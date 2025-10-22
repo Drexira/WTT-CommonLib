@@ -117,6 +117,15 @@ namespace WTTServerCommonLib.Models
         [JsonPropertyName("addCaliberToAllCloneLocations")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? AddCaliberToAllCloneLocations { get; set; }
+        
+        [JsonPropertyName("addtoStaticAmmo")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? AddToStaticAmmo { get; set; }
+
+        [JsonPropertyName("staticAmmoProbability")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? StaticAmmoProbability { get; set; }
+
 
         public void Validate()
         {
@@ -271,6 +280,13 @@ namespace WTTServerCommonLib.Models
                         throw new InvalidDataException($"masterySections[{i}].level3 is required");
                 }
             }
+            
+            if (AddToStaticAmmo == true && StaticAmmoProbability == null)
+                throw new InvalidDataException("locationStaticAmmoProbability is required when addToLocationStaticAmmo is true");
+
+            if (StaticAmmoProbability is < 0)
+                throw new InvalidDataException("locationStaticAmmoProbability must be >= 0");
+
 
             if (AddWeaponPreset == true && WeaponPresets != null)
             {

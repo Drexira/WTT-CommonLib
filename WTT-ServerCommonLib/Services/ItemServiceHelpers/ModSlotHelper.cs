@@ -1,8 +1,6 @@
 ﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
-using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
@@ -43,7 +41,7 @@ public class ModSlotHelper(ISptLogger<ModSlotHelper> logger, DatabaseService dat
                 if (slotFilter.Filter.Contains(finalTplToClone) && 
                     slotFilter.Filter.Add(newItemId))
                 {
-                    //Log.Info($"[ModSlots] Added {newItemId} to slot '{slot.Name}' for parent template {parentTemplateId}");
+                    LogHelper.Debug(logger,$"[ModSlots] Added {newItemId} to slot '{slot.Name}' for parent template {parentTemplate}");
                 }
             }
         }

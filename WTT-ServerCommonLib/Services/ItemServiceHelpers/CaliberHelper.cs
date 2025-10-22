@@ -2,6 +2,7 @@
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
+using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
@@ -64,7 +65,7 @@ public class CaliberHelper(ISptLogger<CaliberHelper> logger, DatabaseService dat
         {
             if (filter.Filter != null && filter.Filter.Contains(cloneId) && filter.Filter.Add(newId))
             {
-                logger.Info($"Added {newId} to filter in {itemId}");
+                LogHelper.Debug(logger,$"Added {newId} to filter in {itemId}");
             }
         }
     }

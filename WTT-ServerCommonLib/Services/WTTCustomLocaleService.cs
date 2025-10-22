@@ -69,6 +69,6 @@ public class WTTCustomLocaleService(
             });
         }
 
-        logger.Info($"WTTCustomLocaleService: Registered transformers for {customLocales.Count} locale files");
+        LogHelper.Debug(logger,$"WTTCustomLocaleService: Registered transformers for {customLocales.Count} locale files");
     }
 }
