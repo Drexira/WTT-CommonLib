@@ -17,7 +17,7 @@ namespace WTTServerCommonLib.Services
         private readonly List<CustomQuestZone> _zones = new();
         private readonly Lock _lock = new Lock();
 
-        public void CreateCustomQuestZones(Assembly assembly, string? relativePath = null)
+        public async Task CreateCustomQuestZones(Assembly assembly, string? relativePath = null)
         {
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
             string defaultDir = Path.Combine("db", "CustomQuestZones");
@@ -29,7 +29,7 @@ namespace WTTServerCommonLib.Services
                 return;
             }
 
-            var zones = LoadZoneFiles(finalDir);
+            var zones = await LoadZoneFiles(finalDir);
             RegisterZones(zones);
         }
 
@@ -52,11 +52,11 @@ namespace WTTServerCommonLib.Services
             }
         }
 
-        private List<CustomQuestZone> LoadZoneFiles(string directory)
+        private async Task<List<CustomQuestZone>> LoadZoneFiles(string directory)
         {
             var loadedZones = new List<CustomQuestZone>();
 
-            var zoneLists = configHelper.LoadAllJsonFiles<List<CustomQuestZone>>(directory); 
+            var zoneLists = await configHelper.LoadAllJsonFiles<List<CustomQuestZone>>(directory); 
 
             foreach (var fileZones in zoneLists)
             {
@@ -72,10 +72,7 @@ namespace WTTServerCommonLib.Services
 
         internal IReadOnlyList<CustomQuestZone> GetZones()
         {
-            lock (_lock)
-            {
-                return _zones.AsReadOnly();
-            }
+            return _zones;
         }
     }
 }

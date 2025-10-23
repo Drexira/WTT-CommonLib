@@ -8,8 +8,8 @@ namespace WTTServerCommonLib.Services
     public class WTTCustomVoiceBundleRequestService(
         SptLogger<WTTCustomVoiceBundleRequestService> logger)
     {
-        private readonly Dictionary<string, string> _voiceBundleMappings = new();
-        private readonly object _lock = new();
+        private readonly Dictionary<string, string> _voiceBundleMappings = [];
+        private readonly Lock _lock = new();
 
         public void RegisterVoiceBundle(string voiceId, string bundlePath)
         {
@@ -28,10 +28,7 @@ namespace WTTServerCommonLib.Services
 
         public Dictionary<string, string> GetVoiceBundleMappings()
         {
-            lock (_lock)
-            {
-                return new Dictionary<string, string>(_voiceBundleMappings);
-            }
+            return _voiceBundleMappings;
         }
     }
 }

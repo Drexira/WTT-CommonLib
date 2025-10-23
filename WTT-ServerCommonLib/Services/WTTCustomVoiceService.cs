@@ -23,18 +23,18 @@ public class WTTCustomVoiceService(
 {
     private DatabaseTables? _database;
 
-    public void CreateCustomVoices(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomVoices(Assembly assembly, string? relativePath = null)
     {
+        if (_database == null)
+        {
+            _database = databaseServer.GetTables();
+        }
+
         try
         {
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
             string defaultDir = Path.Combine("db", "CustomVoices");
             string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
-
-            if (_database == null)
-            {
-                _database = databaseServer.GetTables();
-            }
 
             if (!Directory.Exists(finalDir))
             {
@@ -42,7 +42,7 @@ public class WTTCustomVoiceService(
                 return;
             }
 
-            var voiceConfigDicts = configHelper.LoadAllJsonFiles<Dictionary<string, CustomVoiceConfig>>(finalDir);
+            var voiceConfigDicts = await configHelper.LoadAllJsonFiles<Dictionary<string, CustomVoiceConfig>>(finalDir);
 
             if (voiceConfigDicts.Count == 0)
             {

@@ -2,6 +2,7 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Server;
@@ -23,18 +24,18 @@ public class WTTCustomClothingService(
 {
     private DatabaseTables? _database;
 
-    public void CreateCustomClothing(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomClothing(Assembly assembly, string? relativePath = null)
     {
+        if (_database == null)
+        {
+            _database = databaseService.GetTables();
+        }
+
         try
         {
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
             string defaultDir = Path.Combine("db", "CustomClothing");
             string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
-
-            if (_database == null)
-            {
-                _database = databaseService.GetTables();
-            }
 
             if (!Directory.Exists(finalDir))
             {
@@ -42,7 +43,7 @@ public class WTTCustomClothingService(
                 return;
             }
 
-            var clothingConfigsList = configHelper.LoadAllJsonFiles<List<CustomClothingConfig>>(finalDir);
+            var clothingConfigsList = await configHelper.LoadAllJsonFiles<List<CustomClothingConfig>>(finalDir);
 
             if (clothingConfigsList.Count == 0)
             {

@@ -19,36 +19,36 @@ namespace WTTServerCommonLib.Routes
         new RouteAction<EmptyRequestData>(
             "/wttcommonlib/zones/get", (_, _, _, _) => {
                 var zones = zoneService.GetZones();
-                return ValueTask.FromResult(jsonUtil.Serialize(zones) ?? string.Empty);
+                return ValueTask.FromResult(jsonUtil.Serialize(zones) ?? throw new NullReferenceException("Could not serialize voice mappings!"));
             }
         ),
         
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/riglayouts/get", (_, _, _, _) => {
+            "/wttcommonlib/riglayouts/get", async (_, _, _, _) => {
                 var allBundles = rigService.GetLayoutManifest();
                 var payload = new Dictionary<string, string>();
                 foreach (var bundleName in allBundles)
                 {
-                    var bundleData = rigService.GetBundleData(bundleName);
-                    if (bundleData is { Length: > 0 })
-                        payload[bundleName] = Convert.ToBase64String(bundleData);
+                    var bundleData = await rigService.GetBundleData(bundleName);
+                    if (bundleData?.Length > 0)
+                        payload.Add(bundleName, Convert.ToBase64String(bundleData));
                 }
-                return ValueTask.FromResult(jsonUtil.Serialize(payload) ?? string.Empty);
+                return jsonUtil.Serialize(payload) ?? throw new NullReferenceException("Could not serialize payload!");
             }
         ),
         // Bundles route
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/spawnsystem/bundles/get", (_, _, _, _) =>
+            "/wttcommonlib/spawnsystem/bundles/get", async (_, _, _, _) =>
             {
                 var manifest = staticSpawnService.GetBundleManifest();
                 var payload = new Dictionary<string,string>();
                 foreach (var name in manifest)
                 {
-                    var data = staticSpawnService.GetBundleData(name);
+                    var data = await staticSpawnService.GetBundleData(name);
                     if (data?.Length > 0)
-                        payload[name] = Convert.ToBase64String(data);
+                        payload.Add(name, Convert.ToBase64String(data));
                 }
-                return ValueTask.FromResult(jsonUtil.Serialize(payload) ?? string.Empty);
+                return jsonUtil.Serialize(payload) ?? throw new NullReferenceException("Could not serialize payload!");
             }
         ),
 
@@ -62,22 +62,24 @@ namespace WTTServerCommonLib.Routes
         ),
 
         new RouteAction<EmptyRequestData>(
-            "/wttcommonlib/slotimages/get", (_, _, _, _) => {
+            "/wttcommonlib/slotimages/get", async (_, _, _, _) => {
                 var result = new Dictionary<string, string>();
+
                 foreach (var name in slotService.GetImageManifest()) {
-                    var data = slotService.GetImageData(name);
-                    if (data is { Length: > 0 }) {
-                        result[name] = Convert.ToBase64String(data);
+                    var data = await slotService.GetImageData(name);
+                    if (data?.Length > 0) {
+                        result.Add(name, Convert.ToBase64String(data));
                     }
                 }
-                return ValueTask.FromResult(jsonUtil.Serialize(result) ?? string.Empty);
+
+                return jsonUtil.Serialize(result) ?? throw new NullReferenceException("Could not serialize payload!");
             }
         ),
         // Voices
         new RouteAction<EmptyRequestData>(
             "/wttcommonlib/voices/get", (_, _, _, _) => {
                 var voiceMappings = customVoiceBundleRequestService.GetVoiceBundleMappings();
-                return ValueTask.FromResult(jsonUtil.Serialize(voiceMappings) ?? string.Empty);
+                return ValueTask.FromResult(jsonUtil.Serialize(voiceMappings) ?? throw new NullReferenceException("Could not serialize voice mappings!"));
             }
         ),
     ])

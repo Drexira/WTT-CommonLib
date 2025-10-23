@@ -22,7 +22,7 @@ public class WTTCustomAssortSchemeService(
 {
     private readonly List<Dictionary<string, TraderAssort>> _customAssortSchemes = new();
 
-    public void CreateCustomAssortSchemes(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomAssortSchemes(Assembly assembly, string? relativePath = null)
     {
         string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         string defaultDir = Path.Combine("db", "CustomAssortSchemes");
@@ -42,7 +42,7 @@ public class WTTCustomAssortSchemeService(
             return;
         }
 
-        var assortList = configHelper.LoadAllJsonFiles<Dictionary<string, TraderAssort>>(finalDir);
+        var assortList = await configHelper.LoadAllJsonFiles<Dictionary<string, TraderAssort>>(finalDir);
 
         if (assortList.Count > 0)
             return;

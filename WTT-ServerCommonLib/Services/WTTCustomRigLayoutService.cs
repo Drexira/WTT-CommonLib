@@ -6,10 +6,10 @@ using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable]
+    [Injectable(injectionType: InjectionType.Singleton)]
     public class WTTCustomRigLayoutService(ModHelper modHelper, ISptLogger<WTTCustomRigLayoutService> logger)
     {
-        private readonly Dictionary<string, Dictionary<string, string>> _modBundles = new();
+        private readonly Dictionary<string, Dictionary<string, string>> _modBundles = [];
 
         public void CreateRigLayouts(Assembly assembly, string? relativePath = null)
         {
@@ -45,16 +45,20 @@ namespace WTTServerCommonLib.Services
             return allBundles;
         }
 
-        public byte[]? GetBundleData(string bundleName)
+        public async Task<byte[]?> GetBundleData(string bundleName)
         {
-            foreach (var modBundles in _modBundles.Values)
+            foreach (var bundles in _modBundles.Values)
             {
-                if (modBundles.TryGetValue(bundleName, out var path) && File.Exists(path))
-                {
-                    LogHelper.Debug(logger,$"Serving bundle {bundleName} from {path}");
-                    return File.ReadAllBytes(path);
-                }
+                if (!bundles.TryGetValue(bundleName, out var path))
+                    continue;
+
+                if (!File.Exists(path))
+                    continue;
+
+                LogHelper.Debug(logger, $"Serving bundle {bundleName} from {path}");
+                return await File.ReadAllBytesAsync(path);
             }
+
             logger.Warning($"Bundle {bundleName} not found in any registered mod");
             return null;
         }

@@ -19,8 +19,7 @@ public class WTTCustomLocaleService(
 {
     private DatabaseTables? _database;
     
-
-    public void CreateCustomLocales(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomLocales(Assembly assembly, string? relativePath = null)
     {
         _database = databaseServer.GetTables();
         string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
@@ -33,9 +32,9 @@ public class WTTCustomLocaleService(
             return;
         }
 
-        var customLocales = configHelper.LoadLocalesFromDirectory(finalDir);
+        var customLocales = await configHelper.LoadLocalesFromDirectory(finalDir);
         
-        if (!customLocales.Any())
+        if (customLocales.Count == 0)
         {
             logger.Warning("No custom locale files found or loaded");
             return;

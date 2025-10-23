@@ -43,25 +43,26 @@ public class WTTCustomItemServiceExtended(
     private readonly List<(string newItemId, CustomItemConfig config)> _deferredModSlotConfigs = new();
     private DatabaseTables? _database;
 
-    public void CreateCustomItems(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomItems(Assembly assembly, string? relativePath = null)
     {
+        if (_database == null)
+        {
+            _database = databaseServer.GetTables();
+        }
+
         try
         {
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
             string defaultDir = Path.Combine("db", "CustomItems");
             string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
 
-            if (_database == null)
-            {
-                _database = databaseServer.GetTables();
-            }
             if (!Directory.Exists(finalDir))
             {
                 logger.Error($"Directory not found at {finalDir}");
                 return;
             }
 
-            var itemConfigDicts = configHelper.LoadAllJsonFiles<Dictionary<string, CustomItemConfig>>(finalDir);
+            var itemConfigDicts = await configHelper.LoadAllJsonFiles<Dictionary<string, CustomItemConfig>>(finalDir);
 
             if (itemConfigDicts.Count == 0)
             {
