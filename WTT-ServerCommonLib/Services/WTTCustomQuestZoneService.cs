@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Utils.Logger;
 using WTTServerCommonLib.Helpers;
@@ -8,7 +7,7 @@ using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+    [Injectable(InjectionType.Singleton)]
     public class WTTCustomQuestZoneService(
         ModHelper modHelper,
         SptLogger<WTTCustomQuestZoneService> logger,
@@ -17,7 +16,7 @@ namespace WTTServerCommonLib.Services
         private readonly List<CustomQuestZone> _zones = new();
         private readonly Lock _lock = new Lock();
 
-        public void CreateCustomQuestZones(Assembly assembly, string? relativePath = null)
+        public async Task CreateCustomQuestZones(Assembly assembly, string? relativePath = null)
         {
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
             string defaultDir = Path.Combine("db", "CustomQuestZones");
@@ -29,7 +28,7 @@ namespace WTTServerCommonLib.Services
                 return;
             }
 
-            var zones = LoadZoneFiles(finalDir);
+            var zones = await LoadZoneFiles(finalDir);
             RegisterZones(zones);
         }
 
@@ -39,7 +38,7 @@ namespace WTTServerCommonLib.Services
             {
                 List<CustomQuestZone> collection = zones.ToList();
                 _zones.AddRange(collection);
-                LogHelper.Debug(logger,$"Registered {collection.Count()} zones. Total zones: {_zones.Count}");
+                LogHelper.Debug(logger,$"Registered {collection.Count} zones. Total zones: {_zones.Count}");
             }
         }
 
@@ -52,11 +51,11 @@ namespace WTTServerCommonLib.Services
             }
         }
 
-        private List<CustomQuestZone> LoadZoneFiles(string directory)
+        private async Task<List<CustomQuestZone>> LoadZoneFiles(string directory)
         {
             var loadedZones = new List<CustomQuestZone>();
 
-            var zoneLists = configHelper.LoadAllJsonFiles<List<CustomQuestZone>>(directory); 
+            var zoneLists = await configHelper.LoadAllJsonFiles<List<CustomQuestZone>>(directory); 
 
             foreach (var fileZones in zoneLists)
             {
@@ -72,10 +71,7 @@ namespace WTTServerCommonLib.Services
 
         internal IReadOnlyList<CustomQuestZone> GetZones()
         {
-            lock (_lock)
-            {
-                return _zones.AsReadOnly();
-            }
+            return _zones;
         }
     }
 }

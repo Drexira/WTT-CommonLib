@@ -13,7 +13,7 @@ using Path = System.IO.Path;
 
 namespace WTTServerCommonLib.Services;
 
-[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton)]
 public class WTTCustomHeadService(
     ISptLogger<WTTCustomHeadService> logger,
     DatabaseService databaseService,
@@ -23,7 +23,7 @@ public class WTTCustomHeadService(
 {
     private DatabaseTables? _database;
 
-    public void CreateCustomHeads(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomHeads(Assembly assembly, string? relativePath = null)
     {
         try
         {
@@ -42,7 +42,7 @@ public class WTTCustomHeadService(
                 return;
             }
 
-            var headConfigDicts = configHelper.LoadAllJsonFiles<Dictionary<string, CustomHeadConfig>>(finalDir);
+            var headConfigDicts = await configHelper.LoadAllJsonFiles<Dictionary<string, CustomHeadConfig>>(finalDir);
 
             if (headConfigDicts.Count == 0)
             {

@@ -8,7 +8,7 @@ using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable]
+    [Injectable(InjectionType.Singleton)]
     public class WTTCustomStaticSpawnService(
         ModHelper modHelper,
         SptLogger<WTTCustomStaticSpawnService> logger,
@@ -18,7 +18,7 @@ namespace WTTServerCommonLib.Services
 
         private readonly Dictionary<string, List<CustomSpawnConfig>> _modConfigs = new();
 
-        public void CreateCustomStaticSpawns(Assembly assembly, string? relativePath = null)
+        public async Task CreateCustomStaticSpawns(Assembly assembly, string? relativePath = null)
         {
             string modKey = assembly.GetName().Name!;
             string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
@@ -56,7 +56,7 @@ namespace WTTServerCommonLib.Services
                 {
                     try
                     {
-                        var json = File.ReadAllText(file);
+                        var json = await File.ReadAllTextAsync(file);
                         var info = jsonUtil.Deserialize<List<CustomSpawnConfig>>(json) ?? new List<CustomSpawnConfig>();
                         _modConfigs[modKey].AddRange(info);
                         LogHelper.Debug(logger,$"[SpawnService] Loaded {info.Count} configs from '{file}'");
@@ -81,7 +81,7 @@ namespace WTTServerCommonLib.Services
                 .ToList();
         }
 
-        public byte[]? GetBundleData(string bundleName)
+        public async Task<byte[]?> GetBundleData(string bundleName)
         {
             foreach (var modBundles in _modBundles.Values)
             {
@@ -89,7 +89,7 @@ namespace WTTServerCommonLib.Services
                     && File.Exists(path))
                 {
                     LogHelper.Debug(logger,$"[SpawnService] Serving bundle '{bundleName}' from '{path}'");
-                    return File.ReadAllBytes(path);
+                    return await File.ReadAllBytesAsync(path);
                 }
             }
             logger.Warning($"[SpawnService] Bundle '{bundleName}' not found");

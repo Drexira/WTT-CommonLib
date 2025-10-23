@@ -51,7 +51,7 @@ A comprehensive modding library for SPT that simplifies adding custom content to
 
 Here's a minimal example showing how to use WTT-CommonLib:
 
-```
+```csharp
 using System.Reflection;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
@@ -76,13 +76,13 @@ public class YourMod(
     WTTServerCommonLib.WTTServerCommonLib wttCommon
 ) : IOnLoad
 {
-    public Task OnLoad()
+    public async Task OnLoad()
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
         
         // Use WTT-CommonLib services
-        wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
-        wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
+        await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
+        await wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
         
         return Task.CompletedTask;
     }
@@ -104,12 +104,12 @@ public class YourMod(
 **Purpose**: Creates custom items (weapons, armor, consumables, etc.) and integrates them into traders, loot tables, and bot loadouts.
 
 **Usage**:
-```
+```csharp
 // Use default path (db/CustomItems/)
-wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
+await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
 
 // Or specify custom path
-wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly, 
+await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly, 
     Path.Join("db", "MyCustomItemFolder"));
 ```
 
@@ -118,7 +118,7 @@ wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly,
 <details>
 <summary> Example Item Configuration (Click to expand)</summary>
 
-```
+```json
 {
   "6761b213607f9a6f79017aef": {
     "itemTplToClone": "572b7adb24597762ae139821",
@@ -205,10 +205,10 @@ wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly,
 **Purpose**: Handles translations for all your custom content.
 
 **Usage**:
-```
-wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
+```csharp
+await wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
 // Or specify custom path
-wttCommon.CustomLocaleService.CreateCustomLocales(assembly, 
+await wttCommon.CustomLocaleService.CreateCustomLocales(assembly, 
     Path.Join("db", "MyCustomLocalesFolder"));
 ```
 
@@ -221,7 +221,7 @@ wttCommon.CustomLocaleService.CreateCustomLocales(assembly,
 <details>
 <summary> Example Locale File (Click to expand)</summary>
 
-```
+```json
 {
   "my_custom_weapon_001 Name": "Custom Assault Rifle",
   "my_custom_weapon_001 ShortName": "CAR",
@@ -239,10 +239,10 @@ wttCommon.CustomLocaleService.CreateCustomLocales(assembly,
 **Purpose**: Adds custom quests to the database with support for complex objectives, rewards, time windows, and faction restrictions.
 
 **Usage**:
-```
-wttCommon.CustomQuestService.CreateCustomQuests(assembly);
+```csharp
+await wttCommon.CustomQuestService.CreateCustomQuests(assembly);
 // Or specify custom path
-wttCommon.CustomQuestService.CreateCustomQuests(assembly, 
+await wttCommon.CustomQuestService.CreateCustomQuests(assembly, 
     Path.Join("db", "MyCustomQuestsFolder"));
 ```
 
@@ -273,7 +273,7 @@ db/CustomQuests/
 **Configuration Files**:
 
 **QuestTimeData.json** (Optional - Time-Limited Quests):
-```
+```json
 {
   "my_quest_id": {
     "StartMonth": 12,
@@ -286,7 +286,7 @@ db/CustomQuests/
 Quests in this file will only be available during the specified date range. Useful for seasonal/holiday events.
 
 **QuestSideData.json** (Optional - Faction-Exclusive Quests):
-```
+```json
 {
   "usecOnlyQuests": [
     "quest_id_1",
@@ -301,7 +301,7 @@ Quests in this file will only be available during the specified date range. Usef
 Quests listed here will only be available to the specified PMC faction.
 
 **Quest Assort** (`QuestAssort/*.json`) - Items unlocked after quest completion:
-```
+```json
 {
   "success": {
     "my_quest_id": "assort_item_id_to_unlock"
@@ -310,7 +310,7 @@ Quests listed here will only be available to the specified PMC faction.
 ```
 
 **Locales** (`Locales/*.json`):
-```
+```json
 {
   "my_quest_id name": "Custom Quest Name",
   "my_quest_id description": "Quest description text",
@@ -346,10 +346,10 @@ Quests listed here will only be available to the specified PMC faction.
 **Purpose**: Manages custom quest zones for Visit, PlaceItem, and other location-based objectives.
 
 **Usage**:
-```
-wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly);
+```csharp
+await wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly);
 // Or specify custom path
-wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly, 
+await wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly, 
     Path.Join("db", "MyCustomQuestZonesFolder"));
 ```
 
@@ -358,7 +358,7 @@ wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly,
 <details>
 <summary> Example Zone Configuration (Click to expand)</summary>
 
-```
+```json
 {
   "ZoneId": "deadbody_1",
   "ZoneName": "deadbody_1",
@@ -394,10 +394,10 @@ wttCommon.CustomQuestZoneService.CreateCustomQuestZones(assembly,
 **Purpose**: Adds custom character voices for players and bots.
 
 **Usage**:
-```
-wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
+```csharp
+await wttCommon.CustomVoiceService.CreateCustomVoices(assembly);
 // Or specify custom path
-wttCommon.CustomVoiceService.CreateCustomVoices(assembly, 
+await wttCommon.CustomVoiceService.CreateCustomVoices(assembly, 
     Path.Join("db", "MyCustomVoicesFolder"));
 ```
 
@@ -406,7 +406,7 @@ wttCommon.CustomVoiceService.CreateCustomVoices(assembly,
 <details>
 <summary> Example Voice Configuration (Click to expand)</summary>
 
-```
+```json
 {
   "6747aa4495b4845a0f3d9f98": {
     "locales": {
@@ -429,10 +429,10 @@ wttCommon.CustomVoiceService.CreateCustomVoices(assembly,
 **Purpose**: Adds custom character head models for player customization.
 
 **Usage**:
-```
-wttCommon.CustomHeadService.CreateCustomHeads(assembly);
+```csharp
+await wttCommon.CustomHeadService.CreateCustomHeads(assembly);
 // Or specify custom path
-wttCommon.CustomHeadService.CreateCustomHeads(assembly, 
+await wttCommon.CustomHeadService.CreateCustomHeads(assembly, 
     Path.Join("db", "MyCustomHeadsFolder"));
 ```
 
@@ -441,7 +441,7 @@ wttCommon.CustomHeadService.CreateCustomHeads(assembly,
 <details>
 <summary> Example Head Configuration (Click to expand)</summary>
 
-```
+```json
 {
   "6747aa715be2c2e443264f32": {
     "path": "heads/chrishead.bundle",
@@ -464,10 +464,10 @@ wttCommon.CustomHeadService.CreateCustomHeads(assembly,
 **Purpose**: Adds custom clothing sets (tops, bottoms) for players.
 
 **Usage**:
-```
-wttCommon.CustomClothingService.CreateCustomClothing(assembly);
+```csharp
+await wttCommon.CustomClothingService.CreateCustomClothing(assembly);
 // Or specify custom path
-wttCommon.CustomClothingService.CreateCustomClothing(assembly, 
+await wttCommon.CustomClothingService.CreateCustomClothing(assembly, 
     Path.Join("db", "MyCustomClothingFolder"));
 ```
 
@@ -476,7 +476,7 @@ wttCommon.CustomClothingService.CreateCustomClothing(assembly,
 <details>
 <summary> Example Clothing Configuration (Click to expand)</summary>
 
-```
+```json
 {
   "type": "top",
   "suiteId": "6748037e298128d377dfffd0",
@@ -505,10 +505,10 @@ wttCommon.CustomClothingService.CreateCustomClothing(assembly,
 **Purpose**: Customizes AI bot equipment, weapons, and appearance.
 
 **Usage**:
-```
-wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly);
+```csharp
+await wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly);
 // Or specify custom path
-wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly, 
+await wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly, 
     Path.Join("db", "MyCustomBotLoadoutsFolder"));
 ```
 
@@ -517,7 +517,7 @@ wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly,
 <details>
 <summary> Example Bot Loadout (Click to expand)</summary>
 
-```
+```json
 {
   "chances": {
     "equipment": {
@@ -559,10 +559,10 @@ wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly,
 **Purpose**: Controls where and how often your custom items spawn as loot on maps. Supports both random loot spawns and guaranteed forced spawns for quest objectives.
 
 **Usage**:
-```
-wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly);
+```csharp
+await wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly);
 // Or specify custom path
-wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly, 
+await wttCommon.CustomLootspawnService.CreateCustomLootspawns(assembly, 
     Path.Join("db", "MyCustomLootspawnsFolder"));
 ```
 
@@ -586,7 +586,7 @@ db/CustomLootspawns/
 <details>
 <summary> Example CustomSpawnpoints config (Click to expand)</summary>
   
-```
+```json
 {
   "sandbox": [
         {
@@ -704,7 +704,7 @@ db/CustomLootspawns/
 <details>
 <summary> Example CustomSpawnpointsForced config (Click to expand)</summary>
   
-```
+```json
 {
     "interchange": [     
         {
@@ -777,10 +777,10 @@ db/CustomLootspawns/
 **Purpose**: Adds complex, fully-assembled items (like pre-modded weapons or armor with plates) to trader inventories with custom barter schemes. This service gives you complete control over item configuration and pricing.
 
 **Usage**:
-```
-wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
+```csharp
+await wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
 // Or specify custom path
-wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly, 
+await wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly, 
     Path.Join("db", "MyCustomAssortSchemesFolder"));
 ```
 
@@ -805,7 +805,7 @@ Each file defines trader assortments with three main sections:
 <details>
 <summary>Click to expand full configuration example</summary>
 
-```
+```json
 {
   "PEACEKEEPER": {
     "items": [
@@ -867,9 +867,9 @@ Each file defines trader assortments with three main sections:
 
 **Usage**:
 ```csharp
-wttCommon.CustomStaticSpawnService.CreateCustomStaticSpawns(assembly);
+await wttCommon.CustomStaticSpawnService.CreateCustomStaticSpawns(assembly);
 // Or specify custom path
-wttCommon.CustomStaticSpawnService.CreateCustomStaticSpawns(assembly, 
+await wttCommon.CustomStaticSpawnService.CreateCustomStaticSpawns(assembly, 
     Path.Join("db", "MyCustomStaticSpawnsFolder"));
 ```
 
@@ -1012,9 +1012,9 @@ Press **~** in-game to access the debug console:
 
 **Usage**:
 ```csharp
-wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
+await wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
 // Or specify custom path
-wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly, 
+await wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly, 
     Path.Join("db", "MyCustomAssortSchemesFolder"));
 ```
 
@@ -1099,17 +1099,17 @@ Each file defines trader assortments with three main sections:
 **Purpose**: Creates custom crafting recipes for hideout production modules (Workbench, Lavatory, Medstation, etc.).
 
 **Usage**:
-```
-wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly);
+```csharp
+await wttCommon.CustomHideoutRecipeService.CreateHideoutRecipes(assembly);
 // Or specify custom path
-wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly, 
+await wttCommon.CustomHideoutRecipeService.CreateHideoutRecipes(assembly, 
     Path.Join("db", "MyCustomHideoutRecipesFolder"));
 ```
 
 **Configuration**: Place recipe JSON files in `db/CustomHideoutRecipes/`
 
 **Example Recipe**:
-```
+```json
 {
   "_id": "my_custom_recipe_001",
   "areaType": 10,
@@ -1153,10 +1153,10 @@ wttCommon.CustomHideoutRecipeService.CreateCustomHideoutRecipes(assembly,
 **Purpose**: Sends custom rig layouts to the client so it can register them in-game for your items to use.
 
 **Usage**:
-```
-wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly);
+```csharp
+await wttCommon.CustomRigLayoutService.CreateRigLayouts(assembly);
 // Or specify custom path
-wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly, 
+await wttCommon.CustomRigLayoutService.CreateRigLayouts(assembly, 
     Path.Join("db", "MyCustomRigLayoutsFolder"));
 ```
 
@@ -1171,10 +1171,10 @@ wttCommon.CustomRigLayoutService.CreateCustomRigLayouts(assembly,
 **Purpose**: Provides custom inventory slot icons for unique items.
 
 **Usage**:
-```
-wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly);
+```csharp
+wttCommon.CustomSlotImageService.CreateSlotImages(assembly);
 // Or specify custom path
-wttCommon.CustomSlotImageService.CreateCustomSlotImages(assembly, 
+wttCommon.CustomSlotImageService.CreateSlotImages(assembly, 
     Path.Join("db", "MyCustomSlotImagesFolder"));
 ```
 

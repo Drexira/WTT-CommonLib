@@ -18,7 +18,7 @@ using Path = System.IO.Path;
 
 namespace WTTServerCommonLib.Services;
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton)]
 public class WTTCustomQuestService(
     ISptLogger<WTTCustomQuestService> logger,
     DatabaseServer databaseServer,
@@ -28,21 +28,22 @@ public class WTTCustomQuestService(
     ConfigHelper configHelper,
     JsonUtil jsonUtil)
 {
-    private DatabaseTables _database = null!;
+    private DatabaseTables? _database;
     private Dictionary<string, CustomQuestTimeWindow> _timeWindows = new();
-    public void CreateCustomQuests(Assembly assembly, string? relativePath = null)
+
+    public async Task CreateCustomQuests(Assembly assembly, string? relativePath = null)
     {
+        _database = databaseServer.GetTables();
         string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         string defaultDir = Path.Combine("db", "CustomQuests");
         string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
-        _database = databaseServer.GetTables();
         
-        ImportQuestTimeConfig(finalDir);
-        ImportQuestSideConfig(finalDir);
-        LoadAllTraderQuests(finalDir);
+        await ImportQuestTimeConfig(finalDir);
+        await ImportQuestSideConfig(finalDir);
+        await LoadAllTraderQuests(finalDir);
     }
 
-    private void LoadAllTraderQuests(string basePath)
+    private async Task LoadAllTraderQuests(string basePath)
     {
         if (!Directory.Exists(basePath))
         {
@@ -72,35 +73,35 @@ public class WTTCustomQuestService(
                 continue;
             }
 
-            LoadQuestsFromDirectory(traderId, traderDir);
+            await LoadQuestsFromDirectory(traderId, traderDir);
         }
     }
 
-    private void LoadQuestsFromDirectory(string traderId, string traderDir)
+    private async Task LoadQuestsFromDirectory(string traderId, string traderDir)
     {
         LogHelper.Debug(logger,$"Loading quests for trader {traderId} from {traderDir}");
 
-        var questFiles = LoadQuestFiles(Path.Combine(traderDir, "Quests"));
-        var assortFiles = LoadAssortFiles(Path.Combine(traderDir, "QuestAssort"));
+        var questFiles = await LoadQuestFiles(Path.Combine(traderDir, "Quests"));
+        var assortFiles = await LoadAssortFiles(Path.Combine(traderDir, "QuestAssort"));
         var imageFiles = LoadImageFiles(Path.Combine(traderDir, "Images"));
 
         ImportQuestData(questFiles, traderId);
         ImportQuestAssortData(assortFiles, traderId);
-        ImportLocaleData(traderId, traderDir);
+        await ImportLocaleData(traderId, traderDir);
         ImportImageData(imageFiles, traderId);
     }
 
-    private List<Dictionary<MongoId, Quest>> LoadQuestFiles(string questsDir)
+    private async Task<List<Dictionary<MongoId, Quest>>> LoadQuestFiles(string questsDir)
     {
         var result = new List<Dictionary<MongoId, Quest>>();
 
         try
         {
-            var questDicts = configHelper.LoadAllJsonFiles<Dictionary<MongoId, Quest>>(questsDir);
+            var questDicts = await configHelper.LoadAllJsonFiles<Dictionary<MongoId, Quest>>(questsDir);
 
             foreach (var questData in questDicts)
             {
-                if (questData.Any())
+                if (questData.Count != 0)
                 {
                     result.Add(questData);
                     LogHelper.Debug(logger,$"Loaded quest data with {questData.Count} quests");
@@ -114,7 +115,7 @@ public class WTTCustomQuestService(
 
         return result;
     }
-    private List<Dictionary<string, Dictionary<MongoId, MongoId>>> LoadAssortFiles(string assortDir)
+    private async Task<List<Dictionary<string, Dictionary<MongoId, MongoId>>>> LoadAssortFiles(string assortDir)
     {
         var result = new List<Dictionary<string, Dictionary<MongoId, MongoId>>>();
         if (!Directory.Exists(assortDir))
@@ -122,11 +123,11 @@ public class WTTCustomQuestService(
 
         try
         {
-            var assortDicts = configHelper.LoadAllJsonFiles<Dictionary<string, Dictionary<MongoId, MongoId>>>(assortDir);
+            var assortDicts = await configHelper.LoadAllJsonFiles<Dictionary<string, Dictionary<MongoId, MongoId>>>(assortDir);
 
             foreach (var assortData in assortDicts)
             {
-                if (assortData.Any())
+                if (assortData.Count != 0)
                 {
                     result.Add(assortData);
                     LogHelper.Debug(logger,$"Loaded assort data with {assortData.Count} entries");
@@ -169,7 +170,7 @@ public class WTTCustomQuestService(
 
     private void ImportQuestData(List<Dictionary<MongoId, Quest>> questFiles, string traderId)
     {
-        if (!questFiles.Any())
+        if (questFiles.Count == 0)
         {
             logger.Warning($"{traderId}: No quest files found or loaded");
             return;
@@ -197,6 +198,7 @@ public class WTTCustomQuestService(
 
         LogHelper.Debug(logger,$"{traderId}: Successfully loaded {questCount} quests");
     }
+
     private bool IsWithin(CustomQuestTimeWindow w)
     {
         var now = DateTime.Now;
@@ -216,7 +218,7 @@ public class WTTCustomQuestService(
 
     private void ImportQuestAssortData(List<Dictionary<string, Dictionary<MongoId, MongoId>>> assortFiles, string traderId)
     {
-        if (!assortFiles.Any())
+        if (assortFiles.Count == 0)
         {
             logger.Warning($"{traderId}: No quest assort files found");
             return;
@@ -234,14 +236,15 @@ public class WTTCustomQuestService(
         {
             foreach (var (stage, questAssortDict) in questAssort)
             {
-                if (!trader.QuestAssort.ContainsKey(stage))
+                if (!trader.QuestAssort.TryGetValue(stage, out Dictionary<MongoId, MongoId>? value))
                 {
-                    trader.QuestAssort[stage] = new Dictionary<MongoId, MongoId>();
+                    value = new Dictionary<MongoId, MongoId>();
+                    trader.QuestAssort[stage] = value;
                 }
 
                 foreach (var (questId, assortId) in questAssortDict)
                 {
-                    trader.QuestAssort[stage][questId] = assortId;
+                    value[questId] = assortId;
                     assortCount++;
                     LogHelper.Debug(logger,$"{traderId}: Added assort for quest {questId} in stage {stage}");
                 }
@@ -250,15 +253,16 @@ public class WTTCustomQuestService(
 
         LogHelper.Debug(logger,$"{traderId}: Loaded {assortCount} quest assort items");
     }
-    private void ImportLocaleData(string traderId, string traderDir)
+
+    private async Task ImportLocaleData(string traderId, string traderDir)
     {
         string localesPath = Path.Combine(traderDir, "Locales");
     
         try
         {
-            var locales = configHelper.LoadLocalesFromDirectory(localesPath);
+            var locales = await configHelper.LoadLocalesFromDirectory(localesPath);
     
-            if (!locales.Any())
+            if (locales.Count == 0)
             {
                 logger.Warning($"{traderId}: No locale files found or loaded from {localesPath}");
                 return;
@@ -298,7 +302,7 @@ public class WTTCustomQuestService(
 
     private void ImportImageData(List<string> imageFiles, string traderId)
     {
-        if (!imageFiles.Any())
+        if (imageFiles.Count == 0)
         {
             LogHelper.Debug(logger,$"{traderId}: No images found");
             return;
@@ -320,7 +324,7 @@ public class WTTCustomQuestService(
         
         LogHelper.Debug(logger,$"{traderId}: Loaded {imageFiles.Count} images");
     }
-    private void ImportQuestTimeConfig(string basePath)
+    private async Task ImportQuestTimeConfig(string basePath)
     {
         // Try both .json and .jsonc
         string[] filenames = ["QuestTimeData.json", "QuestTimeData.jsonc"];
@@ -336,9 +340,9 @@ public class WTTCustomQuestService(
 
         try
         {
-            _timeWindows = jsonUtil
-                               .DeserializeFromFile<Dictionary<string, CustomQuestTimeWindow>>(configPath)
-                           ?? new Dictionary<string, CustomQuestTimeWindow>();
+            _timeWindows = await jsonUtil
+                               .DeserializeFromFileAsync<Dictionary<string, CustomQuestTimeWindow>>(configPath)
+                           ?? [];
 
             LogHelper.Debug(logger,$"Loaded QuestTimeData from {Path.GetFileName(configPath)} for {_timeWindows.Count} quests");
         }
@@ -348,7 +352,7 @@ public class WTTCustomQuestService(
         }
     }
 
-    private void ImportQuestSideConfig(string basePath)
+    private async Task ImportQuestSideConfig(string basePath)
     {
         string[] filenames = ["QuestSideData.json", "QuestSideData.jsonc"];
         string? configPath = filenames
@@ -363,7 +367,7 @@ public class WTTCustomQuestService(
 
         try
         {
-            string content = File.ReadAllText(configPath);
+            string content = await File.ReadAllTextAsync(configPath);
             var config = JsonSerializer.Deserialize<CustomQuestSideConfig>(content);
 
             var questConfig = cfgServer.GetConfig<QuestConfig>();

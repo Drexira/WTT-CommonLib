@@ -10,7 +10,7 @@ using Path = System.IO.Path;
 
 namespace WTTServerCommonLib.Services;
 
-[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton)]
 public class WTTCustomLootspawnService(
     ISptLogger<WTTCustomLootspawnService> logger,
     DatabaseService databaseService,
@@ -24,7 +24,7 @@ public class WTTCustomLootspawnService(
     private readonly Dictionary<string, List<Spawnpoint>> _cachedForcedSpawns = new();
     private bool _transformersRegistered;
 
-    public void CreateCustomLootSpawns(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomLootSpawns(Assembly assembly, string? relativePath = null)
     {
         try
         {
@@ -36,8 +36,8 @@ public class WTTCustomLootspawnService(
             string spawnDir = Path.Combine(baseDir, "CustomSpawnpoints");
             string forcedDir = Path.Combine(baseDir, "CustomSpawnpointsForced");
 
-            GatherSpawnsFromDirectory(spawnDir, _cachedGeneralSpawns, "general");
-            GatherSpawnsFromDirectory(forcedDir, _cachedForcedSpawns, "forced");
+            await GatherSpawnsFromDirectory(spawnDir, _cachedGeneralSpawns, "general");
+            await GatherSpawnsFromDirectory(forcedDir, _cachedForcedSpawns, "forced");
 
             if (!_transformersRegistered)
             {
@@ -52,7 +52,7 @@ public class WTTCustomLootspawnService(
         }
     }
 
-    private void GatherSpawnsFromDirectory(string directory, Dictionary<string, List<Spawnpoint>> cache, string spawnType)
+    private async Task GatherSpawnsFromDirectory(string directory, Dictionary<string, List<Spawnpoint>> cache, string spawnType)
     {
         if (!Directory.Exists(directory))
         {
@@ -64,7 +64,7 @@ public class WTTCustomLootspawnService(
         {
             LogHelper.Debug(logger, $"Gathering {spawnType} spawns from: {directory}");
 
-            var spawnDicts = configHelper.LoadAllJsonFiles<Dictionary<string, List<Spawnpoint>>>(directory);
+            var spawnDicts = await configHelper.LoadAllJsonFiles<Dictionary<string, List<Spawnpoint>>>(directory);
 
             if (spawnDicts.Count == 0)
             {

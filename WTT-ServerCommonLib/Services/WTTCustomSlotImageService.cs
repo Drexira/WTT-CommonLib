@@ -6,7 +6,7 @@ using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable]
+    [Injectable(InjectionType.Singleton)]
     public class WTTCustomSlotImageService(ModHelper modHelper, SptLogger<WTTCustomSlotImageService> logger)
     {
         private readonly Dictionary<string, string> _imagePaths = new();
@@ -41,11 +41,11 @@ namespace WTTServerCommonLib.Services
             return _imagePaths.Keys.ToList();
         }
 
-        public byte[]? GetImageData(string imageName)
+        public async Task<byte[]?> GetImageData(string imageName)
         {
             if (_imagePaths.TryGetValue(imageName, out var path) && File.Exists(path))
             {
-                return File.ReadAllBytes(path);
+                return await File.ReadAllBytesAsync(path);
             }
             return null;
         }

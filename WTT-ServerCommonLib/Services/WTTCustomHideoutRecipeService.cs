@@ -12,7 +12,7 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace WTTServerCommonLib.Services;
 
-[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton)]
 public class WTTCustomHideoutRecipeService(
     ISptLogger<WTTCustomHideoutRecipeService> logger,
     DatabaseServer databaseServer,
@@ -22,7 +22,7 @@ public class WTTCustomHideoutRecipeService(
 {
     private DatabaseTables? _database;
     
-    public void CreateHideoutRecipes(Assembly assembly, string? relativePath = null)
+    public async Task CreateHideoutRecipes(Assembly assembly, string? relativePath = null)
     {
         try
         {
@@ -40,7 +40,7 @@ public class WTTCustomHideoutRecipeService(
                 return;
             }
 
-            var recipes = configHelper.LoadAllJsonFiles<HideoutProduction>(finalDir);
+            var recipes = await configHelper.LoadAllJsonFiles<HideoutProduction>(finalDir);
 
             if (recipes.Count == 0)
             {

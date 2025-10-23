@@ -7,17 +7,7 @@ namespace WTTServerCommonLib.Helpers;
 [Injectable]
 public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
 {
-    // ReSharper disable once MemberCanBeMadeStatic.Global
-    public string LoadJsonFile(string fileName, string directory)
-    {
-        var baseName = Path.GetFileNameWithoutExtension(fileName);
-        var jsoncPath = Path.Combine(directory, $"{baseName}.jsonc");
-        var jsonPath = Path.Combine(directory, $"{baseName}.json");
-    
-        return File.Exists(jsoncPath) ? jsoncPath : jsonPath;
-    }
-
-    public List<T> LoadAllJsonFiles<T>(string directoryPath)
+    public async Task<List<T>> LoadAllJsonFiles<T>(string directoryPath)
     {
         var result = new List<T>();
 
@@ -31,7 +21,7 @@ public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
         {
             try
             {
-                var jsonData = jsonUtil.DeserializeFromFile<T>(filePath);
+                var jsonData = await jsonUtil.DeserializeFromFileAsync<T>(filePath);
                 if (jsonData != null)
                 {
                     result.Add(jsonData);
@@ -48,7 +38,7 @@ public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
     }
 
     
-    public Dictionary<string, Dictionary<string, string>> LoadLocalesFromDirectory(string directoryPath)
+    public async Task<Dictionary<string, Dictionary<string, string>>> LoadLocalesFromDirectory(string directoryPath)
     {
         var locales = new Dictionary<string, Dictionary<string, string>>();
 
@@ -62,7 +52,7 @@ public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
 
             try
             {
-                var data = jsonUtil.DeserializeFromFile<Dictionary<string, string>>(filePath);
+                var data = await jsonUtil.DeserializeFromFileAsync<Dictionary<string, string>>(filePath);
 
                 if (data != null)
                 {
