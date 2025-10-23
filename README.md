@@ -17,6 +17,7 @@ A comprehensive modding library for SPT that simplifies adding custom content to
   - [CustomBotLoadoutService](#custombotloadoutservice)
   - [CustomLootspawnService](#customlootspawnservice)
   - [CustomAssortSchemeService](#customassortschemeservice)
+  - [CustomStaticSpawnService](#customstaticspawnservice)
   - [CustomHideoutRecipeService](#customhideoutrecipeservice)
   - [CustomRigLayoutService](#customriglayoutservice)
   - [CustomSlotImageService](#customslotimageservice)
@@ -42,7 +43,7 @@ A comprehensive modding library for SPT that simplifies adding custom content to
 
 **FOR MOD AUTHORS**
 
-4. Reference the user/mods/WTT-ServerCommonLib/WTTServerCommonLib.dll in your project
+4. Reference the SPT/user/mods/WTT-ServerCommonLib/WTTServerCommonLib.dll in your project
 5. Inject `WTTServerCommonLib` through the constructor
 
 
@@ -67,6 +68,7 @@ public record ModMetadata : AbstractModMetadata
     public override SemanticVersioning.Version Version { get; init; } = new("1.0.0");
     public override Range SptVersion { get; init; } = new("4.0.1");
     public override string License { get; init; } = "MIT";
+    public override bool? IsBundleMod { get; init; } = true;
 }
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
@@ -859,6 +861,239 @@ Each file defines trader assortments with three main sections:
 
 ---
 
+### CustomStaticSpawnService
+
+**Purpose**: Places persistent 3D objects on maps with advanced quest-based conditions. Supports complex spawn logic including quest status checks, item requirements, boss detection, and linked quest conditions.
+
+**Usage**:
+```csharp
+wttCommon.CustomStaticSpawnService.CreateCustomStaticSpawns(assembly);
+// Or specify custom path
+wttCommon.CustomStaticSpawnService.CreateCustomStaticSpawns(assembly, 
+    Path.Join("db", "MyCustomStaticSpawnsFolder"));
+```
+
+**Default Folder Structure**:
+
+```
+db/CustomStaticSpawns/
+├── StaticBundles/               # Unity AssetBundles containing prefabs
+│   ├── my_objects.bundle
+│   └── quest_decorations.bundle
+└── CustomSpawnConfigs/          # Configuration files
+    ├── interchange_spawns.json
+    ├── woods_spawns.json
+    └── customs_spawns.json
+```
+
+**Configuration Structure**:
+
+<details>
+<summary>Example CustomStaticSpawn config (Click to expand)</summary>
+
+```json
+[
+  {
+    "questId": "my_custom_quest_001",
+    "locationID": "interchange",
+    "bundleName": "my_objects",
+    "prefabName": "QuestMarker_001",
+    "position": {
+      "x": 123.45,
+      "y": 15.67,
+      "z": -89.01
+    },
+    "rotation": {
+      "x": 0,
+      "y": 45,
+      "z": 0
+    },
+    "requiredQuestStatuses": ["Started"],
+    "excludedQuestStatuses": ["AvailableForStart"],
+    "questMustExist": true,
+    "linkedQuestId": null,
+    "linkedRequiredStatuses": [],
+    "linkedExcludedStatuses": [],
+    "linkedQuestMustExist": null,
+    "requiredItemInInventory": null,
+    "requiredLevel": 10,
+    "requiredFaction": "USEC",
+    "requiredBossSpawned": null
+  },
+  {
+    "questId": "my_custom_quest_002",
+    "locationID": "woods",
+    "bundleName": "quest_decorations",
+    "prefabName": "TreeMarker_001",
+    "position": {
+      "x": 200.5,
+      "y": 20.0,
+      "z": -150.3
+    },
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "requiredQuestStatuses": ["AvailableForStart", "Started"],
+    "excludedQuestStatuses": ["Completed"],
+    "questMustExist": false,
+    "linkedQuestId": "linked_quest_001",
+    "linkedRequiredStatuses": ["Completed"],
+    "linkedExcludedStatuses": [],
+    "linkedQuestMustExist": true,
+    "requiredItemInInventory": "some_item_template_id",
+    "requiredLevel": null,
+    "requiredFaction": null,
+    "requiredBossSpawned": "BosBully"
+  }
+]
+```
+</details>
+
+**Condition Properties**:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `questId` | string | Quest ID that must exist/not exist based on conditions |
+| `locationID` | string | Map ID where the object spawns (lowercase, case-sensitive) |
+| `bundleName` | string | Name of the AssetBundle containing the prefab |
+| `prefabName` | string | Name of the GameObject inside the bundle to spawn |
+| `position` | XYZ | World position where object spawns |
+| `rotation` | XYZ | Euler angles for object rotation |
+| `requiredQuestStatuses` | List[string] | Quest must be in one of these statuses to spawn (e.g., "Started", "Completed") |
+| `excludedQuestStatuses` | List[string] | Quest must NOT be in these statuses to spawn |
+| `questMustExist` | bool | If true, quest must exist in player profile; if false, must not exist |
+| `linkedQuestId` | string | Secondary quest ID for linked quest conditions |
+| `linkedRequiredStatuses` | List[string] | Linked quest must be in one of these statuses |
+| `linkedExcludedStatuses` | List[string] | Linked quest must NOT be in these statuses |
+| `linkedQuestMustExist` | bool | If true, linked quest must exist; if false, must not exist |
+| `requiredItemInInventory` | string | Player must have this item template in inventory to spawn object |
+| `requiredLevel` | int | Player must be at least this level to see the object |
+| `requiredFaction` | string | Player must be this faction: "USEC" or "BEAR" |
+| `requiredBossSpawned` | string | Boss with this role must be alive in raid (e.g., "BosBully", "BosKnight") |
+
+**In-Game Object Placement Tool**:
+
+Press **~** in-game to access the debug console:
+
+1. **Spawn Object**: `SpawnObject <bundleName> <prefabName>`
+   - Spawns object in front of you
+   
+2. **Enter Edit Mode**: `EnterEditMode`
+   - WASD - Move object
+   - Numpad 1-9 - Rotate
+   - Shift - 2x speed multiplier
+   - Shift+Alt - 4x speed multiplier
+   - Enter - Backslash
+   - Delete key - Remove selected object
+   - Period - Cycle through spawned objects
+   - Comma - Cycle through spawned objects
+
+3. **Export Spawns**: `ExportSpawnedObjectInfo`
+   - Saves all placed objects to JSON file
+   - Outputs to: `WTT-ClientCommonLib-CustomStaticSpawnConfig-Output-{timestamp}.json`
+
+**Example Workflow**:
+
+1. Build Unity prefabs and package as AssetBundles (my_objects.bundle)
+2. Place bundle in `db/CustomStaticSpawns/StaticBundles/`
+3. Run in-game: `SpawnObject my_objects QuestMarker_001`
+4. Position object with edit mode controls
+5. Run: `ExportSpawnedObjectInfo` to generate config JSON
+6. Move JSON to `db/CustomStaticSpawns/CustomSpawnConfigs/`
+7. Call `CreateCustomStaticSpawns()` to load configurations
+
+---
+
+### CustomAssortSchemeService
+
+**Purpose**: Adds complex, fully-assembled items (like pre-modded weapons or armor with plates) to trader inventories with custom barter schemes. This service gives you complete control over item configuration and pricing.
+
+**Usage**:
+```csharp
+wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
+// Or specify custom path
+wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly, 
+    Path.Join("db", "MyCustomAssortSchemesFolder"));
+```
+
+**When to Use This**:
+- **Fully-modded weapons** with specific attachments pre-installed
+- **Armor with plates** already inserted
+- **Complex items** that require nested child items
+
+**Default Folder Structure**:
+
+```
+db/CustomAssortSchemes/
+├── peacekeeper_assort.json
+├── mechanic_assort.json
+└── ragman_assort.json
+```
+
+**Configuration Structure**:
+
+Each file defines trader assortments with three main sections:
+
+<details>
+<summary>Click to expand full configuration example</summary>
+
+```json
+{
+  "PEACEKEEPER": {
+    "items": [
+      {
+        "_id": "my_custom_weapon_root",
+        "_tpl": "5447a9cd4bdc2dbd208b4567",
+        "upd": {
+          "Repairable": {
+            "MaxDurability": 100,
+            "Durability": 100
+          },
+          "FireMode": {
+            "FireMode": "fullauto"
+          },
+          "UnlimitedCount": true,
+          "StackObjectsCount": 999999,
+          "BuyRestrictionMax": 0
+        },
+        "parentId": "hideout",
+        "slotId": "hideout"
+      },
+      {
+        "_id": "weapon_mod_magazine",
+        "_tpl": "55d480c04bdc2d1d4e8b456a",
+        "slotId": "mod_magazine",
+        "parentId": "my_custom_weapon_root"
+      },
+      {
+        "_id": "weapon_mod_stock",
+        "_tpl": "5649be884bdc2d79388b4577",
+        "slotId": "mod_stock",
+        "parentId": "my_custom_weapon_root"
+      }
+    ],
+    "barter_scheme": {
+      "my_custom_weapon_root": [
+        [
+          {
+            "count": 50000,
+            "_tpl": "5449016a4bdc2d6f028b456f"
+          }
+        ]
+      ]
+    },
+    "loyal_level_items": {
+      "my_custom_weapon_root": 2
+    }
+  }
+}
+```
+
+</details>
+
+---
 ### CustomHideoutRecipeService
 
 **Purpose**: Creates custom crafting recipes for hideout production modules (Workbench, Lavatory, Medstation, etc.).
