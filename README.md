@@ -43,7 +43,7 @@ A comprehensive modding library for SPT that simplifies adding custom content to
 
 **FOR MOD AUTHORS**
 
-4. Reference the user/mods/WTT-ServerCommonLib/WTTServerCommonLib.dll in your project
+4. Reference the SPT/user/mods/WTT-ServerCommonLib/WTTServerCommonLib.dll in your project
 5. Inject `WTTServerCommonLib` through the constructor
 
 
