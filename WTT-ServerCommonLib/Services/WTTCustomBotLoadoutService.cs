@@ -25,7 +25,7 @@ public class WTTCustomBotLoadoutService(
 {
     private DatabaseTables? _database;
 
-    public void CreateCustomBotLoadouts(Assembly assembly, string? relativePath = null)
+    public async Task CreateCustomBotLoadouts(Assembly assembly, string? relativePath = null)
     {
         string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         string defaultDir = Path.Combine("db", "CustomBotLoadouts");
@@ -52,7 +52,7 @@ public class WTTCustomBotLoadoutService(
 
             try
             {
-                var customLoadout = jsonUtil.DeserializeFromFile<CustomBotLoadoutConfig>(file);
+                var customLoadout = await jsonUtil.DeserializeFromFileAsync<CustomBotLoadoutConfig>(file);
                 if (customLoadout != null) ApplyCustomBotLoadout(botTypeName, customLoadout);
                 LogHelper.Debug(logger,$"Successfully applied custom loadout for bot type: {botTypeName}");
             }
