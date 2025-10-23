@@ -101,7 +101,7 @@ public class WTTCustomQuestService(
 
             foreach (var questData in questDicts)
             {
-                if (questData.Any())
+                if (questData.Count != 0)
                 {
                     result.Add(questData);
                     LogHelper.Debug(logger,$"Loaded quest data with {questData.Count} quests");
@@ -127,7 +127,7 @@ public class WTTCustomQuestService(
 
             foreach (var assortData in assortDicts)
             {
-                if (assortData.Any())
+                if (assortData.Count != 0)
                 {
                     result.Add(assortData);
                     LogHelper.Debug(logger,$"Loaded assort data with {assortData.Count} entries");
@@ -170,7 +170,7 @@ public class WTTCustomQuestService(
 
     private void ImportQuestData(List<Dictionary<MongoId, Quest>> questFiles, string traderId)
     {
-        if (!questFiles.Any())
+        if (questFiles.Count == 0)
         {
             logger.Warning($"{traderId}: No quest files found or loaded");
             return;
@@ -198,6 +198,7 @@ public class WTTCustomQuestService(
 
         LogHelper.Debug(logger,$"{traderId}: Successfully loaded {questCount} quests");
     }
+
     private bool IsWithin(CustomQuestTimeWindow w)
     {
         var now = DateTime.Now;
