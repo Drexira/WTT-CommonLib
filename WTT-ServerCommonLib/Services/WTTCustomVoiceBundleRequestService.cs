@@ -4,7 +4,7 @@ using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable]
+    [Injectable(InjectionType.Singleton)]
     public class WTTCustomVoiceBundleRequestService(
         SptLogger<WTTCustomVoiceBundleRequestService> logger)
     {

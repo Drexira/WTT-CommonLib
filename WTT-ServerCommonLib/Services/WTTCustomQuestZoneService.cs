@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Utils.Logger;
 using WTTServerCommonLib.Helpers;
@@ -8,7 +7,7 @@ using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+    [Injectable(InjectionType.Singleton)]
     public class WTTCustomQuestZoneService(
         ModHelper modHelper,
         SptLogger<WTTCustomQuestZoneService> logger,
@@ -39,7 +38,7 @@ namespace WTTServerCommonLib.Services
             {
                 List<CustomQuestZone> collection = zones.ToList();
                 _zones.AddRange(collection);
-                LogHelper.Debug(logger,$"Registered {collection.Count()} zones. Total zones: {_zones.Count}");
+                LogHelper.Debug(logger,$"Registered {collection.Count} zones. Total zones: {_zones.Count}");
             }
         }
 

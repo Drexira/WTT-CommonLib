@@ -10,7 +10,7 @@ using Path = System.IO.Path;
 
 namespace WTTServerCommonLib.Services;
 
-[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton)]
 public class WTTCustomLootspawnService(
     ISptLogger<WTTCustomLootspawnService> logger,
     DatabaseService databaseService,

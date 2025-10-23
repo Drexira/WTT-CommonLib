@@ -6,7 +6,7 @@ using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable(injectionType: InjectionType.Singleton)]
+    [Injectable(InjectionType.Singleton)]
     public class WTTCustomRigLayoutService(ModHelper modHelper, ISptLogger<WTTCustomRigLayoutService> logger)
     {
         private readonly Dictionary<string, Dictionary<string, string>> _modBundles = [];

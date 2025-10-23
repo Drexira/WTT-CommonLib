@@ -8,7 +8,7 @@ using WTTServerCommonLib.Models;
 
 namespace WTTServerCommonLib.Services
 {
-    [Injectable]
+    [Injectable(InjectionType.Singleton)]
     public class WTTCustomStaticSpawnService(
         ModHelper modHelper,
         SptLogger<WTTCustomStaticSpawnService> logger,

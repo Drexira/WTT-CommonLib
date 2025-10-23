@@ -9,7 +9,7 @@ using WTTServerCommonLib.Helpers;
 
 namespace WTTServerCommonLib.Services;
 
-[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
+[Injectable(InjectionType.Singleton)]
 public class WTTCustomLocaleService(
     ISptLogger<WTTCustomLocaleService> logger, 
     DatabaseServer databaseServer, 
