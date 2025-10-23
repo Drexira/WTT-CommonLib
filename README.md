@@ -84,7 +84,7 @@ public class YourMod(
         await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
         await wttCommon.CustomLocaleService.CreateCustomLocales(assembly);
         
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
 }
 ```
