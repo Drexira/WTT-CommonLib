@@ -68,8 +68,6 @@ public class StaticAmmoHelper(ISptLogger<StaticAmmoHelper> logger, DatabaseServi
                 }
                 
             }
-            logger.Info($"Added ammo {newItemId} to {locationsUpdated} locations");
-            
         }
         catch (Exception ex)
         {

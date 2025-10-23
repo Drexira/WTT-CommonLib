@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Spt.Mod;
 
 namespace WTTServerCommonLib.Models;
 
@@ -28,7 +29,7 @@ public class CustomClothingConfig
     public List<string>? Side { get; set; }
 
     [JsonPropertyName("locales")]
-    public Dictionary<string, string>? Locales { get; set; }
+    public Dictionary<string, LocaleDetails>? Locales { get; set; }
 
     [JsonPropertyName("topBundlePath")]
     public string? TopBundlePath { get; set; }

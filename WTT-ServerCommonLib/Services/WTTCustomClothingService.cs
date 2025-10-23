@@ -278,7 +278,6 @@ public class WTTCustomClothingService(
         
         string currencyId = ItemTplResolver.ResolveId(config.CurrencyId); 
             
-        // Ensure trader is a customization seller
         _database.Traders[traderId].Base.CustomizationSeller = true;
 
         _database.Traders[traderId].Suits ??= [];
@@ -291,7 +290,7 @@ public class WTTCustomClothingService(
             IsActive = true,
             IsHiddenInPVE = false,
             ExternalObtain = false,
-            InternalObtain = false,
+            InternalObtain = true,
             Requirements = new SuitRequirements()
             {
                 LoyaltyLevel = config.LoyaltyLevel,
@@ -324,7 +323,6 @@ public class WTTCustomClothingService(
         if (_database == null || config.Locales == null) return;
 
         var globalLocales = _database.Locales.Global;
-        string itemNameKey = $"{clothingId} Name";
 
         foreach (var (localeCode, lazyLocale) in globalLocales)
         {
@@ -332,13 +330,21 @@ public class WTTCustomClothingService(
             {
                 if (localeData == null) return localeData;
 
-                if (config.Locales.TryGetValue(localeCode, out var localizedName))
+                var localeInfo = config.Locales.GetValueOrDefault(localeCode) ?? 
+                               config.Locales.GetValueOrDefault("en");
+
+                if (localeInfo != null)
                 {
-                    localeData[itemNameKey] = localizedName;
-                }
-                else if (config.Locales.TryGetValue("en", out var fallbackName))
-                {
-                    localeData[itemNameKey] = fallbackName;
+                    string itemKey = clothingId;
+                    string nameKey = $"{clothingId} name";
+                    string descriptionKey = $"{clothingId} description";
+
+                    string nameValue = localeInfo.Name ?? "";
+                    string descriptionValue = localeInfo.Description ?? "";
+
+                    localeData[itemKey] = nameValue;
+                    localeData[nameKey] = nameValue;
+                    localeData[descriptionKey] = descriptionValue;
                 }
 
                 return localeData;
