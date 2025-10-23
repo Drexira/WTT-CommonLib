@@ -12,7 +12,7 @@ public class MasteryHelper(ISptLogger<MasteryHelper> logger, DatabaseService dat
     public void AddOrUpdateMasteries(IEnumerable<Mastering> masterySections, string itemId)
     {
         var masteries = masterySections.ToList();
-        if (!masteries.Any())
+        if (masteries.Count == 0)
         {
             logger.Warning( $"No mastery sections defined for item {itemId}");
             return;
