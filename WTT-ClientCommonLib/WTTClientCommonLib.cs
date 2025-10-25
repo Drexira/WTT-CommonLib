@@ -34,7 +34,8 @@ namespace WTTClientCommonLib
 
                 ZoneConfigManager.Initialize(Config);
                 StaticSpawnSystemConfigManager.Initialize(Config);
-                new OnGameStarted().Enable();
+                new OnGameStarted().Enable(); 
+                new ClothingBundleRendererPatch().Enable();
 
                 var resourceLoader = new ResourceLoader(Logger, AssetLoader);
                 resourceLoader.LoadAllResourcesFromServer();

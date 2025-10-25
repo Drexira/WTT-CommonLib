@@ -1,8 +1,10 @@
-﻿namespace WTTServerCommonLib.Models;
+﻿using SPTarkov.Server.Core.Models.Common;
+
+namespace WTTServerCommonLib.Models;
 
 public static class TraderIds
 {
-    public static readonly Dictionary<string, string> TraderMap = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly Dictionary<string, MongoId> TraderMap = new(StringComparer.OrdinalIgnoreCase)
     {
         { "mechanic",    "5a7c2eca46aef81a7ca2145d" },
         { "skier",       "58330581ace78e27b8b10cee" },
@@ -15,7 +17,7 @@ public static class TraderIds
         { "badger",      "bd3a8b28356d9c6509966546" }
     };
 
-    public static void Add(string traderName, string traderId)
+    public static void Add(string traderName, MongoId traderId)
     {
         TraderMap[traderName] = traderId;
     }
