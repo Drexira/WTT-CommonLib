@@ -18,26 +18,24 @@ public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
             .ToArray();
 
         foreach (var filePath in jsonFiles)
-        {
             try
             {
                 var jsonData = await jsonUtil.DeserializeFromFileAsync<T>(filePath);
                 if (jsonData != null)
                 {
                     result.Add(jsonData);
-                    LogHelper.Debug(logger,$"Loaded file: {filePath}");
+                    LogHelper.Debug(logger, $"Loaded file: {filePath}");
                 }
             }
             catch (Exception ex)
             {
                 logger.Error($"Error loading file {filePath}: {ex.Message}");
             }
-        }
 
         return result;
     }
 
-    
+
     public async Task<Dictionary<string, Dictionary<string, string>>> LoadLocalesFromDirectory(string directoryPath)
     {
         var locales = new Dictionary<string, Dictionary<string, string>>();
@@ -57,7 +55,7 @@ public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
                 if (data != null)
                 {
                     locales[localeCode] = data;
-                    LogHelper.Debug(logger,$"Loaded locale file: {filePath}");
+                    LogHelper.Debug(logger, $"Loaded locale file: {filePath}");
                 }
             }
             catch (Exception ex)

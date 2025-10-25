@@ -5,7 +5,6 @@ using SPTarkov.Server.Core.Services;
 using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 
-
 namespace WTTServerCommonLib.Services.ItemServiceHelpers;
 
 [Injectable]
@@ -80,10 +79,7 @@ public class TraderItemHelper(ISptLogger<TraderItemHelper> logger, DatabaseServi
                         barterSchemeItems.Add(barter);
                     }
 
-                    if (barterSchemeItems.Count > 0)
-                    {
-                        barterOptions.Add(barterSchemeItems);
-                    }
+                    if (barterSchemeItems.Count > 0) barterOptions.Add(barterSchemeItems);
 
                     trader.Assort.LoyalLevelItems[schemeKey] = scheme.ConfigBarterSettings.LoyalLevel;
                 }

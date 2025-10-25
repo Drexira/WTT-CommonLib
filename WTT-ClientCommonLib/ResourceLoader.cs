@@ -6,201 +6,220 @@ using UnityEngine;
 using WTTClientCommonLib.Common.Helpers;
 using WTTClientCommonLib.CustomStaticSpawnSystem;
 
-namespace WTTClientCommonLib
+namespace WTTClientCommonLib;
+
+public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
 {
-    public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
+    public void LoadAllResourcesFromServer()
     {
-        public void LoadAllResourcesFromServer()
+        try
         {
-            try
+            logger.LogDebug("Loading resources from server...");
+            LoadVoicesFromServer();
+            LoadSlotImagesFromServer();
+            LoadRigLayoutsFromServer();
+            assetLoader.InitializeBundles("/wttcommonlib/spawnsystem/bundles/get");
+            assetLoader.SpawnConfigs = assetLoader.FetchSpawnConfigs("/wttcommonlib/spawnsystem/configs/get");
+            logger.LogDebug($"Loaded {assetLoader.SpawnConfigs.Count} spawn configurations");
+            logger.LogDebug("All resources loaded successfully from server");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Error loading resources from server: {ex}");
+        }
+    }
+
+    private void LoadVoicesFromServer()
+    {
+        try
+        {
+            var voiceResponse = Utils.Get<Dictionary<string, string>>("/wttcommonlib/voices/get");
+            if (voiceResponse == null)
             {
-                logger.LogDebug("Loading resources from server...");
-                LoadVoicesFromServer();
-                LoadSlotImagesFromServer();
-                LoadRigLayoutsFromServer();
-                assetLoader.InitializeBundles("/wttcommonlib/spawnsystem/bundles/get");
-                assetLoader.SpawnConfigs = assetLoader.FetchSpawnConfigs("/wttcommonlib/spawnsystem/configs/get");
-                logger.LogDebug($"Loaded {assetLoader.SpawnConfigs.Count} spawn configurations");
-                logger.LogDebug("All resources loaded successfully from server");
+                logger.LogWarning("No voice data received from server");
+                return;
             }
-            catch (Exception ex)
+
+            foreach (var kvp in voiceResponse)
+                if (!ResourceKeyManagerAbstractClass.Dictionary_0.ContainsKey(kvp.Key))
+                {
+                    ResourceKeyManagerAbstractClass.Dictionary_0[kvp.Key] = kvp.Value;
+                    logger.LogDebug($"Added voice key: {kvp.Key}");
+                }
+
+            logger.LogDebug($"Loaded {voiceResponse.Count} voice mappings from server");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Error loading voices: {ex}");
+        }
+    }
+
+    private void LoadSlotImagesFromServer()
+    {
+        try
+        {
+            var images = Utils.Get<Dictionary<string, string>>("/wttcommonlib/slotimages/get");
+            if (images == null)
             {
-                logger.LogError($"Error loading resources from server: {ex}");
+                logger.LogWarning("No slot images");
+                return;
+            }
+
+            foreach (var kvp in images)
+            {
+                byte[] imageData;
+                try
+                {
+                    imageData = Convert.FromBase64String(kvp.Value);
+                }
+                catch
+                {
+                    logger.LogWarning($"Invalid data for {kvp.Key}");
+                    continue;
+                }
+
+                CreateAndRegisterSlotImage(imageData, kvp.Key);
             }
         }
-
-        private void LoadVoicesFromServer()
+        catch (Exception ex)
         {
-            try
-            {
-                var voiceResponse = Utils.Get<Dictionary<string, string>>("/wttcommonlib/voices/get");
-                if (voiceResponse == null)
-                {
-                    logger.LogWarning("No voice data received from server");
-                    return;
-                }
-                foreach (var kvp in voiceResponse)
-                {
-                    if (!ResourceKeyManagerAbstractClass.Dictionary_0.ContainsKey(kvp.Key))
-                    {
-                        ResourceKeyManagerAbstractClass.Dictionary_0[kvp.Key] = kvp.Value;
-                        logger.LogDebug($"Added voice key: {kvp.Key}");
-                    }
-                }
-                logger.LogDebug($"Loaded {voiceResponse.Count} voice mappings from server");
-            }
-            catch (Exception ex)
-            {
-                logger.LogError($"Error loading voices: {ex}");
-            }
+            logger.LogError($"Error loading slot images: {ex}");
         }
+    }
 
-        private void LoadSlotImagesFromServer()
+    private void LoadRigLayoutsFromServer()
+    {
+        try
         {
-            try
+            var bundleMap = Utils.Get<Dictionary<string, string>>("/wttcommonlib/riglayouts/get");
+            if (bundleMap == null)
             {
-                var images = Utils.Get<Dictionary<string,string>>("/wttcommonlib/slotimages/get");
-                if (images == null) { logger.LogWarning("No slot images"); return; }
-                foreach (var kvp in images) {
-                    byte[] imageData;
-                    try { imageData = Convert.FromBase64String(kvp.Value); }
-                    catch { logger.LogWarning($"Invalid data for {kvp.Key}"); continue; }
-                    CreateAndRegisterSlotImage(imageData, kvp.Key);
+                logger.LogWarning("No rig layouts received from server");
+                return;
+            }
+
+            logger.LogDebug($"Received {bundleMap.Count} rig layouts from server");
+
+            foreach (var kvp in bundleMap)
+            {
+                var bundleName = kvp.Key;
+                var base64Data = kvp.Value;
+                if (string.IsNullOrEmpty(base64Data))
+                {
+                    logger.LogWarning($"No data for rig layout: {bundleName}");
+                    continue;
                 }
+
+                byte[] bundleData = null;
+                try
+                {
+                    bundleData = Convert.FromBase64String(base64Data);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError($"Base64 decode failed for rig layout {bundleName}: {ex}");
+                    continue;
+                }
+
+                if (bundleData == null || bundleData.Length == 0)
+                {
+                    logger.LogWarning($"Bundle data is empty for rig layout: {bundleName}");
+                    continue;
+                }
+
+                LoadBundleFromMemory(bundleData, bundleName);
             }
-            catch (Exception ex)
-            {
-                logger.LogError($"Error loading slot images: {ex}");
-            }
+
+            logger.LogDebug($"Loaded {bundleMap.Count} rig layouts from server");
         }
-
-        private void LoadRigLayoutsFromServer()
+        catch (Exception ex)
         {
-            try
-            {
-                var bundleMap = Utils.Get<Dictionary<string, string>>("/wttcommonlib/riglayouts/get");
-                if (bundleMap == null)
-                {
-                    logger.LogWarning("No rig layouts received from server");
-                    return;
-                }
-
-                logger.LogDebug($"Received {bundleMap.Count} rig layouts from server");
-
-                foreach (var kvp in bundleMap)
-                {
-                    var bundleName = kvp.Key;
-                    var base64Data = kvp.Value;
-                    if (string.IsNullOrEmpty(base64Data))
-                    {
-                        logger.LogWarning($"No data for rig layout: {bundleName}");
-                        continue;
-                    }
-                    byte[] bundleData = null;
-                    try { bundleData = Convert.FromBase64String(base64Data); }
-                    catch (Exception ex)
-                    {
-                        logger.LogError($"Base64 decode failed for rig layout {bundleName}: {ex}");
-                        continue;
-                    }
-                    if (bundleData == null || bundleData.Length == 0)
-                    {
-                        logger.LogWarning($"Bundle data is empty for rig layout: {bundleName}");
-                        continue;
-                    }
-                    LoadBundleFromMemory(bundleData, bundleName);
-                }
-
-                logger.LogDebug($"Loaded {bundleMap.Count} rig layouts from server");
-            }
-            catch (Exception ex)
-            {
-                logger.LogError($"Error loading rig layouts: {ex}");
-            }
+            logger.LogError($"Error loading rig layouts: {ex}");
         }
+    }
 
-        private void CreateAndRegisterSlotImage(byte[] data, string slotID)
+    private void CreateAndRegisterSlotImage(byte[] data, string slotID)
+    {
+        try
         {
-            try
+            if (data == null || data.Length == 0)
             {
-                if (data == null || data.Length == 0)
-                {
-                    logger.LogWarning($"Empty data for slot image: {slotID}");
-                    return;
-                }
-                Texture2D texture = new Texture2D(2, 2);
-                if (!texture.LoadImage(data))
-                {
-                    logger.LogWarning($"Failed to create texture for {slotID}");
-                    return;
-                }
-
-                Sprite sprite = Sprite.Create(
-                    texture,
-                    new Rect(0, 0, texture.width, texture.height),
-                    new Vector2(0.5f, 0.5f),
-                    100f
-                );
-
-                ResourceHelper.AddEntry($"Slots/{slotID}", sprite);
-                logger.LogDebug($"Added slot sprite: {slotID}");
+                logger.LogWarning($"Empty data for slot image: {slotID}");
+                return;
             }
-            catch (Exception ex)
+
+            var texture = new Texture2D(2, 2);
+            if (!texture.LoadImage(data))
             {
-                logger.LogError($"Error creating slot sprite {slotID}: {ex}");
+                logger.LogWarning($"Failed to create texture for {slotID}");
+                return;
             }
+
+            var sprite = Sprite.Create(
+                texture,
+                new Rect(0, 0, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f),
+                100f
+            );
+
+            ResourceHelper.AddEntry($"Slots/{slotID}", sprite);
+            logger.LogDebug($"Added slot sprite: {slotID}");
         }
-
-        private void LoadBundleFromMemory(byte[] data, string bundleName)
+        catch (Exception ex)
         {
-            try
+            logger.LogError($"Error creating slot sprite {slotID}: {ex}");
+        }
+    }
+
+    private void LoadBundleFromMemory(byte[] data, string bundleName)
+    {
+        try
+        {
+            if (data == null || data.Length == 0)
             {
-                if (data == null || data.Length == 0)
-                {
-                    logger.LogWarning($"Bundle data is null or empty for: {bundleName}");
-                    return;
-                }
-
-                AssetBundle bundle = AssetBundle.LoadFromMemory(data);
-                if (bundle == null)
-                {
-                    logger.LogWarning($"Failed to load rig layout bundle: {bundleName}");
-                    return;
-                }
-
-                int loadedCount = 0;
-                var gameObjects = bundle.LoadAllAssets<GameObject>();
-                if (gameObjects == null || gameObjects.Length == 0)
-                {
-                    logger.LogWarning($"No GameObjects loaded from bundle: {bundleName}");
-                }
-
-                foreach (var prefab in gameObjects)
-                {
-                    if (prefab == null)
-                    {
-                        logger.LogWarning("Encountered null prefab in bundle.");
-                        continue;
-                    }
-                    var gridView = prefab.GetComponent<ContainedGridsView>();
-                    if (gridView == null)
-                    {
-                        logger.LogWarning($"Prefab {prefab.name} missing ContainedGridsView.");
-                        continue;
-                    }
-
-                    ResourceHelper.AddEntry($"UI/Rig Layouts/{prefab.name}", gridView);
-                    loadedCount++;
-                    logger.LogDebug($"Added rig layout: {prefab.name}");
-                }
-
-                bundle.Unload(false);
-                logger.LogDebug($"Loaded {loadedCount} prefabs from bundle: {bundleName}");
+                logger.LogWarning($"Bundle data is null or empty for: {bundleName}");
+                return;
             }
-            catch (Exception ex)
+
+            var bundle = AssetBundle.LoadFromMemory(data);
+            if (bundle == null)
             {
-                logger.LogError($"Error loading bundle {bundleName}: {ex}");
+                logger.LogWarning($"Failed to load rig layout bundle: {bundleName}");
+                return;
             }
+
+            var loadedCount = 0;
+            var gameObjects = bundle.LoadAllAssets<GameObject>();
+            if (gameObjects == null || gameObjects.Length == 0)
+                logger.LogWarning($"No GameObjects loaded from bundle: {bundleName}");
+
+            foreach (var prefab in gameObjects)
+            {
+                if (prefab == null)
+                {
+                    logger.LogWarning("Encountered null prefab in bundle.");
+                    continue;
+                }
+
+                var gridView = prefab.GetComponent<ContainedGridsView>();
+                if (gridView == null)
+                {
+                    logger.LogWarning($"Prefab {prefab.name} missing ContainedGridsView.");
+                    continue;
+                }
+
+                ResourceHelper.AddEntry($"UI/Rig Layouts/{prefab.name}", gridView);
+                loadedCount++;
+                logger.LogDebug($"Added rig layout: {prefab.name}");
+            }
+
+            bundle.Unload(false);
+            logger.LogDebug($"Loaded {loadedCount} prefabs from bundle: {bundleName}");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Error loading bundle {bundleName}: {ex}");
         }
     }
 }

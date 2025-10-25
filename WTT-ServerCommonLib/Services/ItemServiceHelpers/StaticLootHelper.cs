@@ -16,13 +16,11 @@ public class StaticLootHelper(DatabaseService databaseService, ISptLogger<Static
         string itemId)
     {
         if (config.StaticLootContainers != null)
-        {
             foreach (var container in config.StaticLootContainers)
             {
                 if (string.IsNullOrWhiteSpace(container.ContainerName)) continue;
                 AddToStaticLoot(container.ContainerName, itemId, container.Probability);
             }
-        }
     }
 
     private void AddToStaticLoot(
@@ -40,17 +38,11 @@ public class StaticLootHelper(DatabaseService databaseService, ISptLogger<Static
 
         foreach (var (locationId, location) in locations)
         {
-            if (location.StaticLoot is null)
-            {
-                continue;
-            }
+            if (location.StaticLoot is null) continue;
 
             location.StaticLoot.AddTransformer(lazyloadedStaticLootData =>
             {
-                if (lazyloadedStaticLootData is null)
-                {
-                    return lazyloadedStaticLootData;
-                }
+                if (lazyloadedStaticLootData is null) return lazyloadedStaticLootData;
 
                 var actualContainerId = ItemTplResolver.ResolveId(containerId);
 
@@ -59,9 +51,10 @@ public class StaticLootHelper(DatabaseService databaseService, ISptLogger<Static
                     logger.Error("[StaticLoot] Could not resolve container ID");
                     return lazyloadedStaticLootData;
                 }
+
                 if (!lazyloadedStaticLootData.TryGetValue(actualContainerId, out var containerDetails))
                 {
-                    LogHelper.Debug(logger,$"[StaticLoot] Loot container '{containerId}' not found in {locationId}");
+                    LogHelper.Debug(logger, $"[StaticLoot] Loot container '{containerId}' not found in {locationId}");
                     return lazyloadedStaticLootData;
                 }
 
@@ -73,11 +66,11 @@ public class StaticLootHelper(DatabaseService databaseService, ISptLogger<Static
     }
 
     private void AddDistributionToContainer(
-     StaticLootDetails? containerDetails,
-     string itemId,
-     int probability,
-     string locationId,
-     string containerId)
+        StaticLootDetails? containerDetails,
+        string itemId,
+        int probability,
+        string locationId,
+        string containerId)
     {
         if (containerDetails is null)
         {
@@ -94,7 +87,7 @@ public class StaticLootHelper(DatabaseService databaseService, ISptLogger<Static
         });
 
         containerDetails.ItemDistribution = newItemDistribution.ToArray();
-        
-        LogHelper.Debug(logger,"[StaticLoot] Successfully added item to static loot container!");
+
+        LogHelper.Debug(logger, "[StaticLoot] Successfully added item to static loot container!");
     }
 }

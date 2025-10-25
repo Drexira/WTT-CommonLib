@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
-using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Server;
@@ -26,16 +24,13 @@ public class WTTCustomClothingService(
 
     public async Task CreateCustomClothing(Assembly assembly, string? relativePath = null)
     {
-        if (_database == null)
-        {
-            _database = databaseService.GetTables();
-        }
+        if (_database == null) _database = databaseService.GetTables();
 
         try
         {
-            string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
-            string defaultDir = Path.Combine("db", "CustomClothing");
-            string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
+            var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+            var defaultDir = Path.Combine("db", "CustomClothing");
+            var finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
 
             if (!Directory.Exists(finalDir))
             {
@@ -51,19 +46,14 @@ public class WTTCustomClothingService(
                 return;
             }
 
-            int totalClothingCreated = 0;
+            var totalClothingCreated = 0;
             foreach (var configList in clothingConfigsList)
-            {
-                foreach (var config in configList)
-                {
-                    if (ProcessClothingConfig(config))
-                    {
-                        totalClothingCreated++;
-                    }
-                }
-            }
+            foreach (var config in configList)
+                if (ProcessClothingConfig(config))
+                    totalClothingCreated++;
 
-            LogHelper.Debug(logger,$"Created {totalClothingCreated} custom clothing items from {clothingConfigsList.Count} files");
+            LogHelper.Debug(logger,
+                $"Created {totalClothingCreated} custom clothing items from {clothingConfigsList.Count} files");
         }
         catch (Exception ex)
         {
@@ -129,7 +119,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.TopId!] = topItem;
-            LogHelper.Debug(logger,$"Added top customization: {config.TopId}");
+            LogHelper.Debug(logger, $"Added top customization: {config.TopId}");
 
             // Create hands customization item
             var handsItem = new CustomizationItem
@@ -159,7 +149,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.HandsId!] = handsItem;
-            LogHelper.Debug(logger,$"Added hands customization: {config.HandsId}");
+            LogHelper.Debug(logger, $"Added hands customization: {config.HandsId}");
 
             // Create suite
             var suite = new CustomizationItem
@@ -183,7 +173,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.SuiteId!] = suite;
-            LogHelper.Debug(logger,$"Added suite customization: {config.SuiteId}");
+            LogHelper.Debug(logger, $"Added suite customization: {config.SuiteId}");
 
             HandleLocale(config, config.SuiteId!);
             AddSuiteToTrader(config);
@@ -231,7 +221,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.BottomId!] = bottomItem;
-            LogHelper.Debug(logger,$"Added bottom customization: {config.BottomId}");
+            LogHelper.Debug(logger, $"Added bottom customization: {config.BottomId}");
 
             // Create suite
             var suite = new CustomizationItem
@@ -254,7 +244,7 @@ public class WTTCustomClothingService(
             };
 
             _database.Templates.Customization[config.SuiteId!] = suite;
-            LogHelper.Debug(logger,$"Added suite customization: {config.SuiteId}");
+            LogHelper.Debug(logger, $"Added suite customization: {config.SuiteId}");
 
             HandleLocale(config, config.SuiteId!);
             AddSuiteToTrader(config);
@@ -276,14 +266,14 @@ public class WTTCustomClothingService(
             logger.Warning($"Unknown trader key '{config.TraderId}'");
             return;
         }
-        
-        string currencyId = ItemTplResolver.ResolveId(config.CurrencyId); 
-            
+
+        string currencyId = ItemTplResolver.ResolveId(config.CurrencyId);
+
         _database.Traders[traderId].Base.CustomizationSeller = true;
 
         _database.Traders[traderId].Suits ??= [];
 
-        var traderSuit = new Suit()
+        var traderSuit = new Suit
         {
             Id = config.OutfitId!,
             Tid = traderId,
@@ -292,7 +282,7 @@ public class WTTCustomClothingService(
             IsHiddenInPVE = false,
             ExternalObtain = false,
             InternalObtain = true,
-            Requirements = new SuitRequirements()
+            Requirements = new SuitRequirements
             {
                 LoyaltyLevel = config.LoyaltyLevel,
                 ProfileLevel = config.ProfileLevel,
@@ -316,7 +306,7 @@ public class WTTCustomClothingService(
         };
 
         _database.Traders[traderId].Suits?.Add(traderSuit);
-        LogHelper.Debug(logger,$"Added suite {config.SuiteId} to trader {config.TraderId}");
+        LogHelper.Debug(logger, $"Added suite {config.SuiteId} to trader {config.TraderId}");
     }
 
     private void HandleLocale(CustomClothingConfig config, string clothingId)
@@ -326,22 +316,21 @@ public class WTTCustomClothingService(
         var globalLocales = _database.Locales.Global;
 
         foreach (var (localeCode, lazyLocale) in globalLocales)
-        {
             lazyLocale.AddTransformer(localeData =>
             {
                 if (localeData == null) return localeData;
 
-                var localeInfo = config.Locales.GetValueOrDefault(localeCode) ?? 
-                               config.Locales.GetValueOrDefault("en");
+                var localeInfo = config.Locales.GetValueOrDefault(localeCode) ??
+                                 config.Locales.GetValueOrDefault("en");
 
                 if (localeInfo != null)
                 {
-                    string itemKey = clothingId;
-                    string nameKey = $"{clothingId} name";
-                    string descriptionKey = $"{clothingId} description";
+                    var itemKey = clothingId;
+                    var nameKey = $"{clothingId} name";
+                    var descriptionKey = $"{clothingId} description";
 
-                    string nameValue = localeInfo.Name ?? "";
-                    string descriptionValue = localeInfo.Description ?? "";
+                    var nameValue = localeInfo.Name ?? "";
+                    var descriptionValue = localeInfo.Description ?? "";
 
                     localeData[itemKey] = nameValue;
                     localeData[nameKey] = nameValue;
@@ -350,6 +339,5 @@ public class WTTCustomClothingService(
 
                 return localeData;
             });
-        }
     }
 }

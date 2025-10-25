@@ -13,11 +13,12 @@ namespace WTTServerCommonLib.Services.ItemServiceHelpers;
 public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseService databaseService)
 {
     private static readonly string?[] ValidTypes = ["dogtag", "smallTrophies", "bigTrophies"];
+
     private static readonly string[] HallItemIds =
     [
         "63dbd45917fff4dee40fe16e", // Level 1
         "65424185a57eea37ed6562e9", // Level 2
-        "6542435ea57eea37ed6562f0"  // Level 3
+        "6542435ea57eea37ed6562f0" // Level 3
     ];
 
     public void AddToHallOfFame(CustomItemConfig itemConfig, string itemId)
@@ -43,25 +44,17 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
     {
         var types = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
 
-        if (config.HallOfFameSlots == null) 
+        if (config.HallOfFameSlots == null)
             return types;
 
         foreach (var slot in config.HallOfFameSlots)
-        {
             if (string.Equals(slot, "all", StringComparison.OrdinalIgnoreCase))
-            {
                 foreach (var type in ValidTypes)
                     types.Add(type);
-            }
             else
-            {
                 foreach (var type in ValidTypes)
-                {
                     if (slot.Equals(type, StringComparison.OrdinalIgnoreCase))
                         types.Add(type);
-                }
-            }
-        }
 
         return types;
     }
@@ -73,7 +66,7 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
             if (string.IsNullOrWhiteSpace(slot.Name) || slot.Properties?.Filters == null)
                 continue;
 
-            string? slotType = GetMatchingSlotType(slot.Name);
+            var slotType = GetMatchingSlotType(slot.Name);
             if (!filterTypes.Contains(slotType))
                 continue;
 
@@ -84,10 +77,8 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
     private string? GetMatchingSlotType(string slotName)
     {
         foreach (var type in ValidTypes)
-        {
             if (type != null && slotName.StartsWith(type, StringComparison.OrdinalIgnoreCase))
                 return type;
-        }
         return null;
     }
 
@@ -98,10 +89,9 @@ public class HallOfFameHelper(ISptLogger<HallOfFameHelper> logger, DatabaseServi
             filter.Filter ??= new HashSet<MongoId>();
 
             if (filter.Filter.Add(itemId))
-                LogHelper.Debug(logger,$"[HallOfFame] Added {itemId} to slot '{slot.Name}' in {hallName}");
-            else
-                if (logger.IsLogEnabled(LogLevel.Debug))
-                    LogHelper.Debug(logger,$"[HallOfFame] {itemId} already in slot '{slot.Name}'");
+                LogHelper.Debug(logger, $"[HallOfFame] Added {itemId} to slot '{slot.Name}' in {hallName}");
+            else if (logger.IsLogEnabled(LogLevel.Debug))
+                LogHelper.Debug(logger, $"[HallOfFame] {itemId} already in slot '{slot.Name}'");
         }
     }
 }

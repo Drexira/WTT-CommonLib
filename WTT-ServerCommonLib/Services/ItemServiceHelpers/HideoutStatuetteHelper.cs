@@ -27,7 +27,8 @@ public class HideoutStatuetteHelper(ISptLogger<HideoutStatuetteHelper> logger, D
         var items = databaseService.GetItems();
         foreach (var statuetteSlotId in StatuetteSlotIds)
         {
-            if (!items.TryGetValue(CustomizationItem, out var statuetteParent) || statuetteParent.Properties?.Slots == null)
+            if (!items.TryGetValue(CustomizationItem, out var statuetteParent) ||
+                statuetteParent.Properties?.Slots == null)
                 continue;
 
             AddItemToStatuetteSlots(itemId, statuetteParent, statuetteSlotId);
@@ -41,7 +42,7 @@ public class HideoutStatuetteHelper(ISptLogger<HideoutStatuetteHelper> logger, D
             if (string.IsNullOrWhiteSpace(slot.Name) || slot.Properties?.Filters == null)
                 continue;
 
-            string? slotType = GetMatchingSlotType(slot.Name);
+            var slotType = GetMatchingSlotType(slot.Name);
             if (statuetteSlotId != slotType)
                 continue;
 
@@ -55,7 +56,7 @@ public class HideoutStatuetteHelper(ISptLogger<HideoutStatuetteHelper> logger, D
         {
             filter.Filter ??= new HashSet<MongoId>();
 
-            LogHelper.Debug(logger,filter.Filter.Add(itemId)
+            LogHelper.Debug(logger, filter.Filter.Add(itemId)
                 ? $"[Statuette] Added {itemId} to slot '{slot.Name}' in {slotName}"
                 : $"[Statuette] {itemId} already in slot '{slot.Name}'");
         }
@@ -64,10 +65,8 @@ public class HideoutStatuetteHelper(ISptLogger<HideoutStatuetteHelper> logger, D
     private string? GetMatchingSlotType(string slotName)
     {
         foreach (var type in StatuetteSlotIds)
-        {
             if (type != null && slotName.StartsWith(type, StringComparison.OrdinalIgnoreCase))
                 return type;
-        }
         return null;
     }
 }

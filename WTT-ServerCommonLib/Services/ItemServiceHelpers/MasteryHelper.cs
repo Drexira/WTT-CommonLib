@@ -14,7 +14,7 @@ public class MasteryHelper(ISptLogger<MasteryHelper> logger, DatabaseService dat
         var masteries = masterySections.ToList();
         if (masteries.Count == 0)
         {
-            logger.Warning( $"No mastery sections defined for item {itemId}");
+            logger.Warning($"No mastery sections defined for item {itemId}");
             return;
         }
 
@@ -23,7 +23,7 @@ public class MasteryHelper(ISptLogger<MasteryHelper> logger, DatabaseService dat
         {
             if (string.IsNullOrEmpty(mastery.Name))
             {
-                logger.Error( "Mastery section has no name, skipping.");
+                logger.Error("Mastery section has no name, skipping.");
                 continue;
             }
 
@@ -45,12 +45,12 @@ public class MasteryHelper(ISptLogger<MasteryHelper> logger, DatabaseService dat
                     if (!templates.Contains(template))
                     {
                         templates.Add(template);
-                        LogHelper.Debug(logger,$"Added template {template} to mastery '{mastery.Name}'");
+                        LogHelper.Debug(logger, $"Added template {template} to mastery '{mastery.Name}'");
                     }
                 }
 
                 existing.Templates = templates.ToArray();
-                LogHelper.Debug(logger,$"[Mastery] Updated existing mastery '{mastery.Name}' for {itemId}");
+                LogHelper.Debug(logger, $"[Mastery] Updated existing mastery '{mastery.Name}' for {itemId}");
             }
             else
             {

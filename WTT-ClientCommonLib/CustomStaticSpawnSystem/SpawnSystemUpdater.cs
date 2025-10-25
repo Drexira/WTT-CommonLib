@@ -1,34 +1,32 @@
 ﻿using System;
 using UnityEngine;
 
-namespace WTTClientCommonLib.CustomStaticSpawnSystem
-{
-    public class SpawnSystemUpdater : MonoBehaviour
-    {
-        private SpawnCommands _spawnCommands;
+namespace WTTClientCommonLib.CustomStaticSpawnSystem;
 
-        public SpawnSystemUpdater()
+public class SpawnSystemUpdater : MonoBehaviour
+{
+    private readonly SpawnCommands _spawnCommands;
+
+    public SpawnSystemUpdater()
+    {
+        _spawnCommands = WTTClientCommonLib.Instance.SpawnCommands;
+    }
+
+    private void Update()
+    {
+        try
         {
-            _spawnCommands = WTTClientCommonLib.Instance.SpawnCommands;
-        }
-        private void Update()
-        {
-            try
-            {
-                _spawnCommands.UpdateEditMode();
-                
-                if (_spawnCommands.IsEditing)
+            _spawnCommands.UpdateEditMode();
+
+            if (_spawnCommands.IsEditing)
+                if (_spawnCommands.LastSpawnedObject != null)
                 {
-                    if (_spawnCommands.LastSpawnedObject != null)
-                    {
-                        Vector3 pos = _spawnCommands.LastSpawnedObject.transform.position;
-                    }
+                    var pos = _spawnCommands.LastSpawnedObject.transform.position;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Updater failed: {ex}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Updater failed: {ex}");
         }
     }
 }

@@ -4,195 +4,215 @@ using UnityEngine;
 using WTTClientCommonLib.CustomQuestZones.Models;
 using WTTClientCommonLib.CustomQuestZones.Services;
 
-namespace WTTClientCommonLib.CustomQuestZones.Configuration
+namespace WTTClientCommonLib.CustomQuestZones.Configuration;
+
+public static class ZoneUiHelpers
 {
-    public static class ZoneUiHelpers
+    public static readonly AcceptableValueList<string> AcceptableTypes =
+        new("placeitem", "visit", "flarezone", "botkillzone");
+
+    public static readonly AcceptableValueList<string> AcceptableFlareTypes =
+        new("", "Light", "Airdrop", "ExitActivate", "Quest", "AIFollowEvent");
+
+    public static List<CustomQuestZone> ExistingQuestZones = new();
+
+    public static void ViewZonesDrawer(ConfigEntryBase entry)
     {
-        public static readonly AcceptableValueList<string> AcceptableTypes = new(new[] { "placeitem", "visit", "flarezone", "botkillzone" });
-        public static readonly AcceptableValueList<string> AcceptableFlareTypes = new(new[] { "", "Light", "Airdrop", "ExitActivate", "Quest", "AIFollowEvent" });
+        if (GUILayout.Button("Add Existing Zones"))
+            ZoneService.AddExistingZones();
+    }
 
-        public static List<CustomQuestZone> ExistingQuestZones = new();
+    public static void NewZoneDrawer(ConfigEntryBase entry)
+    {
+        if (GUILayout.Button("New CustomQuestZone", GUILayout.Width(100)))
+            ZoneService.CreateNewZone();
+    }
 
-        public static void ViewZonesDrawer(ConfigEntryBase entry)
+    public static void SwitchZoneDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Prev", GUILayout.Width(45)))
+            ZoneService.PrevZone();
+        GUILayout.TextField(ZoneService.GetCurrentZoneName(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("Next", GUILayout.Width(45)))
+            ZoneService.NextZone();
+        GUILayout.EndHorizontal();
+    }
+
+    public static void PositionXDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
         {
-            if (GUILayout.Button("Add Existing Zones"))
-                ZoneService.AddExistingZones();
+            ZoneConfigManager.PositionConfigX.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustPosition();
         }
 
-        public static void NewZoneDrawer(ConfigEntryBase entry)
+        GUILayout.TextField(ZoneConfigManager.PositionConfigX.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
         {
-            if (GUILayout.Button("New CustomQuestZone", GUILayout.Width(100)))
-                ZoneService.CreateNewZone();
+            ZoneConfigManager.PositionConfigX.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustPosition();
         }
 
-        public static void SwitchZoneDrawer(ConfigEntryBase entry)
+        GUILayout.EndHorizontal();
+    }
+
+    public static void PositionYDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Prev", GUILayout.Width(45))) 
-                ZoneService.PrevZone();
-            GUILayout.TextField(ZoneService.GetCurrentZoneName(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("Next", GUILayout.Width(45))) 
-                ZoneService.NextZone();
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.PositionConfigY.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustPosition();
         }
 
-        public static void PositionXDrawer(ConfigEntryBase entry)
+        GUILayout.TextField(ZoneConfigManager.PositionConfigY.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.PositionConfigX.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustPosition();
-            }
-            GUILayout.TextField(ZoneConfigManager.PositionConfigX.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.PositionConfigX.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustPosition();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.PositionConfigY.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustPosition();
         }
 
-        public static void PositionYDrawer(ConfigEntryBase entry)
+        GUILayout.EndHorizontal();
+    }
+
+    public static void PositionZDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.PositionConfigY.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustPosition();
-            }
-            GUILayout.TextField(ZoneConfigManager.PositionConfigY.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.PositionConfigY.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustPosition();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.PositionConfigZ.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustPosition();
         }
 
-        public static void PositionZDrawer(ConfigEntryBase entry)
+        GUILayout.TextField(ZoneConfigManager.PositionConfigZ.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.PositionConfigZ.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustPosition();
-            }
-            GUILayout.TextField(ZoneConfigManager.PositionConfigZ.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.PositionConfigZ.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustPosition();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.PositionConfigZ.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustPosition();
         }
 
-        public static void ScaleXDrawer(ConfigEntryBase entry)
+        GUILayout.EndHorizontal();
+    }
+
+    public static void ScaleXDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.ScaleConfigX.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustScale();
-            }
-            GUILayout.TextField(ZoneConfigManager.ScaleConfigX.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.ScaleConfigX.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustScale();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.ScaleConfigX.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustScale();
         }
 
-        public static void ScaleYDrawer(ConfigEntryBase entry)
+        GUILayout.TextField(ZoneConfigManager.ScaleConfigX.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.ScaleConfigY.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustScale();
-            }
-            GUILayout.TextField(ZoneConfigManager.ScaleConfigY.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.ScaleConfigY.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustScale();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.ScaleConfigX.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustScale();
         }
 
-        public static void ScaleZDrawer(ConfigEntryBase entry)
+        GUILayout.EndHorizontal();
+    }
+
+    public static void ScaleYDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.ScaleConfigZ.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustScale();
-            }
-            GUILayout.TextField(ZoneConfigManager.ScaleConfigZ.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.ScaleConfigZ.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustScale();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.ScaleConfigY.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustScale();
         }
 
-        public static void RotationXDrawer(ConfigEntryBase entry)
+        GUILayout.TextField(ZoneConfigManager.ScaleConfigY.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.RotationConfigX.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustRotation();
-            }
-            GUILayout.TextField(ZoneConfigManager.RotationConfigX.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.RotationConfigX.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustRotation();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.ScaleConfigY.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustScale();
         }
 
-        public static void RotationYDrawer(ConfigEntryBase entry)
+        GUILayout.EndHorizontal();
+    }
+
+    public static void ScaleZDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.RotationConfigY.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustRotation();
-            }
-            GUILayout.TextField(ZoneConfigManager.RotationConfigY.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.RotationConfigY.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustRotation();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.ScaleConfigZ.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustScale();
         }
 
-        public static void RotationZDrawer(ConfigEntryBase entry)
+        GUILayout.TextField(ZoneConfigManager.ScaleConfigZ.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
         {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<--", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.RotationConfigZ.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustRotation();
-            }
-            GUILayout.TextField(ZoneConfigManager.RotationConfigZ.Value.ToString(), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("-->", GUILayout.Width(45))) 
-            {
-                ZoneConfigManager.RotationConfigZ.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
-                ZoneService.AdjustRotation();
-            }
-            GUILayout.EndHorizontal();
+            ZoneConfigManager.ScaleConfigZ.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustScale();
         }
 
-        public static void OutputDrawer(ConfigEntryBase entry)
+        GUILayout.EndHorizontal();
+    }
+
+    public static void RotationXDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
         {
-            if (GUILayout.Button("Output Zones", GUILayout.ExpandWidth(true)))
-                ZoneService.OutputZones();
+            ZoneConfigManager.RotationConfigX.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustRotation();
         }
+
+        GUILayout.TextField(ZoneConfigManager.RotationConfigX.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
+        {
+            ZoneConfigManager.RotationConfigX.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustRotation();
+        }
+
+        GUILayout.EndHorizontal();
+    }
+
+    public static void RotationYDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
+        {
+            ZoneConfigManager.RotationConfigY.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustRotation();
+        }
+
+        GUILayout.TextField(ZoneConfigManager.RotationConfigY.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
+        {
+            ZoneConfigManager.RotationConfigY.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustRotation();
+        }
+
+        GUILayout.EndHorizontal();
+    }
+
+    public static void RotationZDrawer(ConfigEntryBase entry)
+    {
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("<--", GUILayout.Width(45)))
+        {
+            ZoneConfigManager.RotationConfigZ.Value -= ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustRotation();
+        }
+
+        GUILayout.TextField(ZoneConfigManager.RotationConfigZ.Value.ToString(), GUILayout.ExpandWidth(true));
+        if (GUILayout.Button("-->", GUILayout.Width(45)))
+        {
+            ZoneConfigManager.RotationConfigZ.Value += ZoneConfigManager.ZoneAdjustmentValue.Value;
+            ZoneService.AdjustRotation();
+        }
+
+        GUILayout.EndHorizontal();
+    }
+
+    public static void OutputDrawer(ConfigEntryBase entry)
+    {
+        if (GUILayout.Button("Output Zones", GUILayout.ExpandWidth(true)))
+            ZoneService.OutputZones();
     }
 }

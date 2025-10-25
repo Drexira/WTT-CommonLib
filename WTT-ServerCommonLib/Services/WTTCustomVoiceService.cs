@@ -18,23 +18,20 @@ public class WTTCustomVoiceService(
     DatabaseServer databaseServer,
     ConfigHelper configHelper,
     ModHelper modHelper,
-    WTTCustomVoiceBundleRequestService customVoiceBundleRequestService  // Inject the new service
+    WTTCustomVoiceBundleRequestService customVoiceBundleRequestService // Inject the new service
 )
 {
     private DatabaseTables? _database;
 
     public async Task CreateCustomVoices(Assembly assembly, string? relativePath = null)
     {
-        if (_database == null)
-        {
-            _database = databaseServer.GetTables();
-        }
+        if (_database == null) _database = databaseServer.GetTables();
 
         try
         {
-            string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
-            string defaultDir = Path.Combine("db", "CustomVoices");
-            string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
+            var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+            var defaultDir = Path.Combine("db", "CustomVoices");
+            var finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
 
             if (!Directory.Exists(finalDir))
             {
@@ -50,26 +47,22 @@ public class WTTCustomVoiceService(
                 return;
             }
 
-            int totalVoicesCreated = 0;
+            var totalVoicesCreated = 0;
 
             foreach (var dict in voiceConfigDicts)
             {
                 if (dict.Count == 0) continue;
 
                 foreach (var (voiceId, config) in dict)
-                {
                     if (ProcessVoiceConfig(voiceId, config))
                     {
                         if (!string.IsNullOrEmpty(config.BundlePath))
-                        {
                             customVoiceBundleRequestService.RegisterVoiceBundle(config.Name, config.BundlePath);
-                        }
                         totalVoicesCreated++;
                     }
-                }
             }
 
-            LogHelper.Debug(logger,$"Created {totalVoicesCreated} custom voices from {voiceConfigDicts.Count} files");
+            LogHelper.Debug(logger, $"Created {totalVoicesCreated} custom voices from {voiceConfigDicts.Count} files");
         }
         catch (Exception ex)
         {
@@ -92,7 +85,7 @@ public class WTTCustomVoiceService(
             HandleLocale(voiceId, voiceConfig);
             ProcessBotVoices(voiceId, voiceConfig);
 
-            LogHelper.Debug(logger,$"Created custom voice {voiceId}");
+            LogHelper.Debug(logger, $"Created custom voice {voiceId}");
             return true;
         }
         catch (Exception ex)
@@ -123,12 +116,12 @@ public class WTTCustomVoiceService(
         };
 
         _database.Templates.Customization[voiceId] = voice;
-        LogHelper.Debug(logger,$"Added voice customization: {voiceId}");
+        LogHelper.Debug(logger, $"Added voice customization: {voiceId}");
 
         if (voiceConfig.AddVoiceToPlayer)
         {
             _database.Templates.Character.Add(voiceId);
-            LogHelper.Debug(logger,$"Added voice {voiceId} to player character");
+            LogHelper.Debug(logger, $"Added voice {voiceId} to player character");
         }
     }
 
@@ -137,7 +130,7 @@ public class WTTCustomVoiceService(
         if (_database == null) return;
 
         var customizationStorage = _database.Templates.CustomisationStorage;
-        
+
         var voiceStorage = new CustomisationStorage
         {
             Id = voiceId,
@@ -153,26 +146,20 @@ public class WTTCustomVoiceService(
         if (_database == null || voiceConfig.Locales == null) return;
 
         var globalLocales = _database.Locales.Global;
-        string voiceLocaleKey = $"{voiceId} Name";
+        var voiceLocaleKey = $"{voiceId} Name";
 
         foreach (var (localeCode, lazyLocale) in globalLocales)
-        {
             lazyLocale.AddTransformer(localeData =>
             {
                 if (localeData == null) return localeData;
 
                 if (voiceConfig.Locales.TryGetValue(localeCode, out var localizedName))
-                {
                     localeData[voiceLocaleKey] = localizedName;
-                }
                 else if (voiceConfig.Locales.TryGetValue("en", out var fallbackName))
-                {
                     localeData[voiceLocaleKey] = fallbackName;
-                }
 
                 return localeData;
             });
-        }
     }
 
     private void ProcessBotVoices(string voiceId, CustomVoiceConfig voiceConfig)
@@ -180,10 +167,9 @@ public class WTTCustomVoiceService(
         if (_database == null || voiceConfig.AddToBotTypes == null) return;
 
         foreach (var (botType, weight) in voiceConfig.AddToBotTypes)
-        {
             try
             {
-                string botTypeKey = botType.ToLower();
+                var botTypeKey = botType.ToLower();
 
                 if (!_database.Bots.Types.TryGetValue(botTypeKey, out var botDb))
                 {
@@ -193,12 +179,11 @@ public class WTTCustomVoiceService(
 
                 if (botDb != null) botDb.BotAppearance.Voice[voiceId] = weight;
 
-                LogHelper.Debug(logger,$"Added voice {voiceId} to bot type '{botTypeKey}' with weight {weight}");
+                LogHelper.Debug(logger, $"Added voice {voiceId} to bot type '{botTypeKey}' with weight {weight}");
             }
             catch (Exception ex)
             {
                 logger.Error($"Error adding voice {voiceId} to bot type '{botType}': {ex.Message}");
             }
-        }
     }
 }

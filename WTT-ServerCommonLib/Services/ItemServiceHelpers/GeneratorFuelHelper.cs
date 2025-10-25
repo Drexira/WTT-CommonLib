@@ -24,7 +24,6 @@ public class GeneratorFuelHelper(ISptLogger<GeneratorFuelHelper> logger, Databas
 
         if (generator.Stages != null)
             foreach (var stage in generator.Stages)
-            {
                 if (validStages != null)
                     foreach (var validStage in validStages)
                     {
@@ -46,6 +45,5 @@ public class GeneratorFuelHelper(ISptLogger<GeneratorFuelHelper> logger, Databas
                                     $"[GeneratorFuel] Added item {itemId} as fuel to generator at stage with bonus ID {bonus.Id}");
                             }
                     }
-            }
     }
 }
