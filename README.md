@@ -484,7 +484,9 @@ await wttCommon.CustomClothingService.CreateCustomClothing(assembly,
   "topId": "67480383b253d50226f3becd",
   "handsId": "67480396eda19f232a648533",
   "locales": {
-    "en": "Lara's Tattered Tank Top"
+    "en": {
+        "name": "Lara's Tattered Tank Top",
+        "description": "Women's Upper"
   },
   "topBundlePath": "clothing/lara_top.bundle",
   "handsBundlePath": "clothing/lara_hands.bundle",
