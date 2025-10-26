@@ -15,6 +15,7 @@ public class WTTResourcesRouter(
     WTTCustomStaticSpawnService staticSpawnService,
     WTTCustomVoiceBundleRequestService customVoiceBundleRequestService
 ) : DynamicRouter(jsonUtil, [
+    
     // Zones
     new RouteAction<EmptyRequestData>(
         "/wttcommonlib/zones/get", (_, _, _, _) =>

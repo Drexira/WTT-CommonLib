@@ -3,8 +3,8 @@ using System.Linq;
 using System.Reflection;
 using EFT;
 using SPT.Reflection.Patching;
-using WTTClientCommonLib.CustomQuestZones.Configuration;
-using WTTClientCommonLib.CustomQuestZones.Services;
+using WTTClientCommonLib.Configuration;
+using WTTClientCommonLib.Services;
 
 namespace WTTClientCommonLib.Patches;
 
