@@ -39,6 +39,8 @@ public class WTTServerCommonLib(
     WTTCustomRigLayoutService customRigLayoutService,
     WTTCustomSlotImageService customSlotImageService,
     WTTCustomStaticSpawnService customStaticSpawnService,
+    WTTCustomBuffService customBuffService,
+    WTTCustomProfileService customProfileService,
     ISptLogger<WTTServerCommonLib> logger
 ) : IOnLoad
 {
@@ -56,6 +58,8 @@ public class WTTServerCommonLib(
     public WTTCustomRigLayoutService CustomRigLayoutService { get; } = customRigLayoutService;
     public WTTCustomSlotImageService CustomSlotImageService { get; } = customSlotImageService;
     public WTTCustomStaticSpawnService CustomStaticSpawnService { get; } = customStaticSpawnService;
+    public WTTCustomBuffService CustomBuffService { get; } = customBuffService;
+    public WTTCustomProfileService CustomProfileService { get; } = customProfileService;
 
     public Task OnLoad()
     {

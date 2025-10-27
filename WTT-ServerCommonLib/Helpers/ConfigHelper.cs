@@ -7,6 +7,32 @@ namespace WTTServerCommonLib.Helpers;
 [Injectable]
 public class ConfigHelper(ISptLogger<ConfigHelper> logger, JsonUtil jsonUtil)
 {
+    public async Task<T?> LoadJsonFile<T>(string filePath) where T : class
+    {
+        if (!File.Exists(filePath))
+        {
+            logger.Warning($"File not found: {filePath}");
+            return null;
+        }
+
+        try
+        {
+            var data = await jsonUtil.DeserializeFromFileAsync<T>(filePath);
+        
+            if (data != null)
+                LogHelper.Debug(logger, $"Loaded file: {filePath}");
+            else
+                logger.Warning($"Failed to deserialize {filePath}");
+            
+            return data;
+        }
+        catch (Exception ex)
+        {
+            logger.Error($"Error loading file {filePath}: {ex.Message}");
+            return null;
+        }
+    }
+
     public async Task<List<T>> LoadAllJsonFiles<T>(string directoryPath)
     {
         var result = new List<T>();
