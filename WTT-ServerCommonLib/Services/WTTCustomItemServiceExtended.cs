@@ -36,7 +36,8 @@ public class WTTCustomItemServiceExtended(
     CaliberHelper caliberHelper,
     BotLootHelper botLootHelper,
     ConfigHelper configHelper,
-    StaticAmmoHelper staticAmmoHelper
+    StaticAmmoHelper staticAmmoHelper,
+    EmptyPropSlotHelper emptyPropSlotHelper
 )
 {
     private readonly List<(string newItemId, CustomItemConfig config)> _deferredModSlotConfigs = new();
@@ -161,6 +162,9 @@ public class WTTCustomItemServiceExtended(
 
         if (config.AddToStaticAmmo == true)
             staticAmmoHelper.AddAmmoToLocationStaticAmmo(config, newItemId);
+        
+        if (config.AddToEmptyPropSlots == true)
+            emptyPropSlotHelper.AddCustomSlots(config, newItemId);
     }
 
     private void AddDeferredModSlot(string newItemId, CustomItemConfig config)
