@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -27,14 +26,11 @@ public class WTTCustomHeadService(
     {
         try
         {
-            string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
-            string defaultDir = Path.Combine("db", "CustomHeads");
-            string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
+            var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+            var defaultDir = Path.Combine("db", "CustomHeads");
+            var finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
 
-            if (_database == null)
-            {
-                _database = databaseService.GetTables();
-            }
+            if (_database == null) _database = databaseService.GetTables();
 
             if (!Directory.Exists(finalDir))
             {
@@ -50,7 +46,7 @@ public class WTTCustomHeadService(
                 return;
             }
 
-            int totalHeadsCreated = 0;
+            var totalHeadsCreated = 0;
 
             foreach (var configDict in headConfigDicts)
             {
@@ -58,19 +54,18 @@ public class WTTCustomHeadService(
                     continue;
 
                 foreach (var (headId, customHeadConfig) in configDict)
-                {
                     if (ProcessCustomHeadConfig(headId, customHeadConfig))
                         totalHeadsCreated++;
-                }
             }
 
-            LogHelper.Debug(logger,$"Created {totalHeadsCreated} custom heads from {headConfigDicts.Count} files");
+            LogHelper.Debug(logger, $"Created {totalHeadsCreated} custom heads from {headConfigDicts.Count} files");
         }
         catch (Exception ex)
         {
             logger.Error($"Error loading head configs: {ex.Message}");
         }
     }
+
     private bool ProcessCustomHeadConfig(string headId, CustomHeadConfig customHeadConfig)
     {
         try
@@ -82,12 +77,12 @@ public class WTTCustomHeadService(
             }
 
             var customizationItem = GenerateHeadCustomizationItem(headId, customHeadConfig);
-            
+
             AddHeadToTemplates(headId, customizationItem, customHeadConfig.AddHeadToPlayer);
             AddHeadToCustomizationStorage(headId);
             AddHeadLocales(headId, customHeadConfig);
 
-            LogHelper.Debug(logger,$"Created custom head {headId}");
+            LogHelper.Debug(logger, $"Created custom head {headId}");
             return true;
         }
         catch (Exception ex)
@@ -105,7 +100,7 @@ public class WTTCustomHeadService(
             Name = "",
             Parent = "5cc085e214c02e000c6bea67",
             Type = "Item",
-            Properties = new CustomizationProperties()
+            Properties = new CustomizationProperties
             {
                 AvailableAsDefault = true,
                 Name = "",
@@ -151,7 +146,7 @@ public class WTTCustomHeadService(
         if (_database == null) return;
 
         var customizationStorage = _database.Templates.CustomisationStorage;
-        
+
         var headStorage = new CustomisationStorage
         {
             Id = headId,
@@ -169,10 +164,7 @@ public class WTTCustomHeadService(
         var templates = _database.Templates;
         templates.Customization[headId] = customizationItem;
 
-        if (addHeadToPlayer)
-        {
-            templates.Character.Add(headId);
-        }
+        if (addHeadToPlayer) templates.Character.Add(headId);
     }
 
     private void AddHeadLocales(string headId, CustomHeadConfig customHeadConfig)
@@ -180,25 +172,19 @@ public class WTTCustomHeadService(
         if (_database == null || customHeadConfig.Locales == null) return;
 
         var globalLocales = _database.Locales.Global;
-        string headLocaleKey = $"{headId} Name";
+        var headLocaleKey = $"{headId} Name";
 
         foreach (var (localeCode, lazyLocale) in globalLocales)
-        {
             lazyLocale.AddTransformer(localeData =>
             {
                 if (localeData == null) return localeData;
 
                 if (customHeadConfig.Locales.TryGetValue(localeCode, out var localizedName))
-                {
                     localeData[headLocaleKey] = localizedName;
-                }
                 else if (customHeadConfig.Locales.TryGetValue("en", out var fallbackName))
-                {
                     localeData[headLocaleKey] = fallbackName;
-                }
 
                 return localeData;
             });
-        }
     }
 }

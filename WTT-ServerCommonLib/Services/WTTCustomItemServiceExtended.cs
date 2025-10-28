@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Spt.Server;
@@ -31,30 +30,27 @@ public class WTTCustomItemServiceExtended(
     MasteryHelper masteryHelper,
     InventorySlotHelper inventorySlotHelper,
     HideoutStatuetteHelper hideoutStatuetteHelper,
-    HideoutPosterHelper  hideoutPosterHelper,
+    HideoutPosterHelper hideoutPosterHelper,
     HallOfFameHelper hallOfFameHelper,
-    GeneratorFuelHelper  generatorFuelHelper,
+    GeneratorFuelHelper generatorFuelHelper,
     CaliberHelper caliberHelper,
     BotLootHelper botLootHelper,
     ConfigHelper configHelper,
     StaticAmmoHelper staticAmmoHelper
-    )
+)
 {
     private readonly List<(string newItemId, CustomItemConfig config)> _deferredModSlotConfigs = new();
     private DatabaseTables? _database;
 
     public async Task CreateCustomItems(Assembly assembly, string? relativePath = null)
     {
-        if (_database == null)
-        {
-            _database = databaseServer.GetTables();
-        }
+        if (_database == null) _database = databaseServer.GetTables();
 
         try
         {
-            string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
-            string defaultDir = Path.Combine("db", "CustomItems");
-            string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
+            var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+            var defaultDir = Path.Combine("db", "CustomItems");
+            var finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
 
             if (!Directory.Exists(finalDir))
             {
@@ -70,19 +66,17 @@ public class WTTCustomItemServiceExtended(
                 return;
             }
 
-            int totalItemsCreated = 0;
+            var totalItemsCreated = 0;
 
             foreach (var configDict in itemConfigDicts)
+            foreach (var (itemId, configData) in configDict)
             {
-                foreach (var (itemId, configData) in configDict)
-                {
-                    configData.Validate();
-                    if (CreateItemFromConfig(itemId, configData))
-                        totalItemsCreated++;
-                }
+                configData.Validate();
+                if (CreateItemFromConfig(itemId, configData))
+                    totalItemsCreated++;
             }
 
-            LogHelper.Debug(logger,$"Created {totalItemsCreated} custom items from {itemConfigDicts.Count} files");
+            LogHelper.Debug(logger, $"Created {totalItemsCreated} custom items from {itemConfigDicts.Count} files");
         }
         catch (Exception ex)
         {
@@ -115,17 +109,14 @@ public class WTTCustomItemServiceExtended(
         }
         catch (Exception ex)
         {
-            logger.Error( $"Failed to create item {newItemId}: {ex.Message}");
+            logger.Error($"Failed to create item {newItemId}: {ex.Message}");
             return false;
         }
     }
 
     private void ProcessAdditionalProperties(string newItemId, CustomItemConfig config)
     {
-        if (_database == null)
-        {
-            return;
-        }
+        if (_database == null) return;
         if (config is { AddToTraders: true, Traders: not null })
             traderItemHelper.AddItem(config, newItemId);
 
@@ -155,10 +146,10 @@ public class WTTCustomItemServiceExtended(
 
         if (config.AddCaliberToAllCloneLocations == true)
             caliberHelper.AddNewCaliberToItems(config, newItemId);
-        
+
         if (config is { AddToGeneratorAsFuel: true, GeneratorFuelSlotStages: not null })
             generatorFuelHelper.AddGeneratorFuel(config, newItemId);
-        
+
         if (config.AddToHideoutPosterSlots == true)
             hideoutPosterHelper.AddToPosterSlot(newItemId);
 
@@ -167,20 +158,22 @@ public class WTTCustomItemServiceExtended(
 
         if (config.AddToStatuetteSlots == true)
             hideoutStatuetteHelper.AddToStatuetteSlot(newItemId);
-        
+
         if (config.AddToStaticAmmo == true)
             staticAmmoHelper.AddAmmoToLocationStaticAmmo(config, newItemId);
-
     }
+
     private void AddDeferredModSlot(string newItemId, CustomItemConfig config)
     {
         if (_deferredModSlotConfigs.Any(d => d.newItemId == newItemId))
         {
-            logger.Warning( $"Deferred modslot for {newItemId} already exists, skipping.");
+            logger.Warning($"Deferred modslot for {newItemId} already exists, skipping.");
             return;
         }
+
         _deferredModSlotConfigs.Add((newItemId, config));
     }
+
     public void ProcessDeferredModSlots()
     {
         if (_deferredModSlotConfigs.Count == 0)
@@ -192,28 +185,20 @@ public class WTTCustomItemServiceExtended(
         LogHelper.Debug(logger, $"Processing {_deferredModSlotConfigs.Count} deferred modslots...");
 
         foreach (var (newItemId, config) in _deferredModSlotConfigs)
-        {
             try
             {
-                if (_database == null)
-                {
-                    return;
-                }
+                if (_database == null) return;
                 modSlotHelper.ProcessModSlots(config, newItemId);
 
-                if (logger.IsLogEnabled(LogLevel.Debug))
-                {
-                    LogHelper.Debug(logger,$"Processed modslots for {newItemId}");
-                }
+                if (logger.IsLogEnabled(LogLevel.Debug)) LogHelper.Debug(logger, $"Processed modslots for {newItemId}");
             }
             catch (Exception ex)
             {
-                logger.Critical( $"Failed processing modslots for {newItemId}", ex);
+                logger.Critical($"Failed processing modslots for {newItemId}", ex);
             }
-        }
 
         _deferredModSlotConfigs.Clear();
-        
+
         LogHelper.Debug(logger, "Finished processing deferred modslots");
     }
 }

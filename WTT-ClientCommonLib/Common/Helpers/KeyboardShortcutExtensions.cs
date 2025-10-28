@@ -1,44 +1,29 @@
 ﻿using BepInEx.Configuration;
 using UnityEngine;
 
-namespace WTTClientCommonLib.Common.Helpers
+namespace WTTClientCommonLib.Common.Helpers;
+
+public static class KeyboardShortcutExtensions
 {
-    public static class KeyboardShortcutExtensions
+    public static bool BetterIsPressed(this KeyboardShortcut key)
     {
-        public static bool BetterIsPressed(this KeyboardShortcut key)
-        {
-            if (!Input.GetKey(key.MainKey))
-            {
+        if (!Input.GetKey(key.MainKey)) return false;
+
+        foreach (var modifier in key.Modifiers)
+            if (!Input.GetKey(modifier))
                 return false;
-            }
 
-            foreach (var modifier in key.Modifiers)
-            {
-                if (!Input.GetKey(modifier))
-                {
-                    return false;
-                }
-            }
+        return true;
+    }
 
-            return true;
-        }
+    public static bool BetterIsDown(this KeyboardShortcut key)
+    {
+        if (!Input.GetKeyDown(key.MainKey)) return false;
 
-        public static bool BetterIsDown(this KeyboardShortcut key)
-        {
-            if (!Input.GetKeyDown(key.MainKey))
-            {
+        foreach (var modifier in key.Modifiers)
+            if (!Input.GetKey(modifier))
                 return false;
-            }
 
-            foreach (var modifier in key.Modifiers)
-            {
-                if (!Input.GetKey(modifier))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return true;
     }
 }

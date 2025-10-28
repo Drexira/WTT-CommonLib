@@ -484,7 +484,9 @@ await wttCommon.CustomClothingService.CreateCustomClothing(assembly,
   "topId": "67480383b253d50226f3becd",
   "handsId": "67480396eda19f232a648533",
   "locales": {
-    "en": "Lara's Tattered Tank Top"
+    "en": {
+        "name": "Lara's Tattered Tank Top",
+        "description": "Women's Upper"
   },
   "topBundlePath": "clothing/lara_top.bundle",
   "handsBundlePath": "clothing/lara_hands.bundle",
@@ -1006,94 +1008,6 @@ Press **~** in-game to access the debug console:
 
 ---
 
-### CustomAssortSchemeService
-
-**Purpose**: Adds complex, fully-assembled items (like pre-modded weapons or armor with plates) to trader inventories with custom barter schemes. This service gives you complete control over item configuration and pricing.
-
-**Usage**:
-```csharp
-await wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
-// Or specify custom path
-await wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly, 
-    Path.Join("db", "MyCustomAssortSchemesFolder"));
-```
-
-**When to Use This**:
-- **Fully-modded weapons** with specific attachments pre-installed
-- **Armor with plates** already inserted
-- **Complex items** that require nested child items
-
-**Default Folder Structure**:
-
-```
-db/CustomAssortSchemes/
-├── peacekeeper_assort.json
-├── mechanic_assort.json
-└── ragman_assort.json
-```
-
-**Configuration Structure**:
-
-Each file defines trader assortments with three main sections:
-
-<details>
-<summary>Click to expand full configuration example</summary>
-
-```json
-{
-  "PEACEKEEPER": {
-    "items": [
-      {
-        "_id": "my_custom_weapon_root",
-        "_tpl": "5447a9cd4bdc2dbd208b4567",
-        "upd": {
-          "Repairable": {
-            "MaxDurability": 100,
-            "Durability": 100
-          },
-          "FireMode": {
-            "FireMode": "fullauto"
-          },
-          "UnlimitedCount": true,
-          "StackObjectsCount": 999999,
-          "BuyRestrictionMax": 0
-        },
-        "parentId": "hideout",
-        "slotId": "hideout"
-      },
-      {
-        "_id": "weapon_mod_magazine",
-        "_tpl": "55d480c04bdc2d1d4e8b456a",
-        "slotId": "mod_magazine",
-        "parentId": "my_custom_weapon_root"
-      },
-      {
-        "_id": "weapon_mod_stock",
-        "_tpl": "5649be884bdc2d79388b4577",
-        "slotId": "mod_stock",
-        "parentId": "my_custom_weapon_root"
-      }
-    ],
-    "barter_scheme": {
-      "my_custom_weapon_root": [
-        [
-          {
-            "count": 50000,
-            "_tpl": "5449016a4bdc2d6f028b456f"
-          }
-        ]
-      ]
-    },
-    "loyal_level_items": {
-      "my_custom_weapon_root": 2
-    }
-  }
-}
-```
-
-</details>
-
----
 ### CustomHideoutRecipeService
 
 **Purpose**: Creates custom crafting recipes for hideout production modules (Workbench, Lavatory, Medstation, etc.).

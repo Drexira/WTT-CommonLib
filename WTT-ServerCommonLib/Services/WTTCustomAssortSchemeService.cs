@@ -1,9 +1,7 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using WTTServerCommonLib.Helpers;
@@ -18,21 +16,19 @@ public class WTTCustomAssortSchemeService(
     ISptLogger<WTTCustomAssortSchemeService> logger,
     ModHelper modHelper,
     ConfigHelper configHelper
-    )
+)
 {
     private readonly List<Dictionary<string, TraderAssort>> _customAssortSchemes = new();
 
     public async Task CreateCustomAssortSchemes(Assembly assembly, string? relativePath = null)
     {
-        string assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
-        string defaultDir = Path.Combine("db", "CustomAssortSchemes");
-        string finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
-        
+        var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
+        var defaultDir = Path.Combine("db", "CustomAssortSchemes");
+        var finalDir = Path.Combine(assemblyLocation, relativePath ?? defaultDir);
+
         if (!Directory.Exists(finalDir))
-        {
             throw new DirectoryNotFoundException($"Config directory not found at {finalDir}");
-        }
-        
+
         var jsonFiles = Directory.GetFiles(finalDir, "*.json")
             .Concat(Directory.GetFiles(finalDir, "*.jsonc"))
             .ToArray();
@@ -44,12 +40,16 @@ public class WTTCustomAssortSchemeService(
 
         var assortList = await configHelper.LoadAllJsonFiles<Dictionary<string, TraderAssort>>(finalDir);
 
-        if (assortList.Count > 0)
+        if (assortList.Count == 0)
+        {
+            logger.Warning($"No assort data could be loaded from {finalDir}");
             return;
+        }
+
         foreach (var assortData in assortList)
         {
             _customAssortSchemes.Add(assortData);
-            LogHelper.Debug(logger,$"Loaded {assortData.Count} trader assort(s)");
+            LogHelper.Debug(logger, $"Loaded {assortData.Count} trader assort(s)");
         }
 
         ApplyAssorts();
@@ -57,41 +57,34 @@ public class WTTCustomAssortSchemeService(
 
     private void ApplyAssorts()
     {
-        DatabaseTables tables = databaseServer.GetTables();
+        var tables = databaseServer.GetTables();
 
         foreach (var schemeDict in _customAssortSchemes)
+        foreach (var kvp in schemeDict)
         {
-            foreach (var kvp in schemeDict)
+            var traderKey = kvp.Key;
+            var newAssort = kvp.Value;
+
+            if (!TraderIds.TraderMap.TryGetValue(traderKey.ToLower(), out var traderId))
             {
-                var traderKey = kvp.Key;
-                var newAssort = kvp.Value;
-
-                if (!TraderIds.TraderMap.TryGetValue(traderKey.ToLower(), out var traderId))
-                {
-                    logger.Warning($"Unknown trader key '{traderKey}'");
-                    continue;
-                }
-
-                if (!tables.Traders.TryGetValue(traderId, out var trader))
-                {
-                    logger.Warning($"Trader not found in DB: ({traderId})");
-                    continue;
-                }
-
-                trader.Assort.Items.AddRange(newAssort.Items);
-
-                foreach (var scheme in newAssort.BarterScheme)
-                {
-                    trader.Assort.BarterScheme[scheme.Key] = scheme.Value;
-                }
-
-                foreach (var levelItem in newAssort.LoyalLevelItems)
-                {
-                    trader.Assort.LoyalLevelItems[levelItem.Key] = levelItem.Value;
-                }
-
-                LogHelper.Debug(logger,$"Merged {newAssort.Items.Count} items into trader");
+                logger.Warning($"Unknown trader key '{traderKey}'");
+                continue;
             }
+
+            if (!tables.Traders.TryGetValue(traderId, out var trader))
+            {
+                logger.Warning($"Trader not found in DB: ({traderId})");
+                continue;
+            }
+
+            trader.Assort.Items.AddRange(newAssort.Items);
+
+            foreach (var scheme in newAssort.BarterScheme) trader.Assort.BarterScheme[scheme.Key] = scheme.Value;
+
+            foreach (var levelItem in newAssort.LoyalLevelItems)
+                trader.Assort.LoyalLevelItems[levelItem.Key] = levelItem.Value;
+
+            LogHelper.Debug(logger, $"Merged {newAssort.Items.Count} items into trader");
         }
     }
 }

@@ -22,23 +22,28 @@ public class GeneratorFuelHelper(ISptLogger<GeneratorFuelHelper> logger, Databas
             return;
         }
 
-        if (generator.Stages == null) return;
-        foreach (var stage in generator.Stages)
-        {
-            if (validStages == null) continue;
-            foreach (var validStage in validStages)
-            {
-                if (stage.Value.Bonuses == null || stage.Key != validStage) continue;
-                foreach (var bonus in stage.Value.Bonuses)
-                {
-                    if (bonus is not
-                        { Type: BonusType.AdditionalSlots, Filter: { } filter }) continue;
-                    if (filter.Contains(itemId)) continue;
+        if (generator.Stages != null)
+            foreach (var stage in generator.Stages)
+                if (validStages != null)
+                    foreach (var validStage in validStages)
+                    {
+                        if (stage.Key != validStage)
+                        {
+                            logger.Error($"Stage {validStage} not found in generator fuel.");
+                            break;
+                        }
 
-                    filter.Add(itemId);
-                    logger.Info($"[GeneratorFuel] Added item {itemId} as fuel to generator at stage with bonus ID {bonus.Id}");
-                }
-            }
-        }
+                        if (stage.Value.Bonuses != null)
+                            foreach (var bonus in stage.Value.Bonuses)
+                            {
+                                if (bonus is not
+                                    { Type: BonusType.AdditionalSlots, Filter: { } filter }) continue;
+                                if (filter.Contains(itemId)) continue;
+
+                                filter.Add(itemId);
+                                LogHelper.Debug(logger,
+                                    $"[GeneratorFuel] Added item {itemId} as fuel to generator at stage with bonus ID {bonus.Id}");
+                            }
+                    }
     }
 }

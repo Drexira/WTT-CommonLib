@@ -18,13 +18,12 @@ public class WeaponPresetHelper(ISptLogger<WeaponPresetHelper> logger, DatabaseS
 
         if (itemConfig.WeaponPresets == null)
         {
-            logger.Warning( "WeaponPresets list is null. Skipping.");
+            logger.Warning("WeaponPresets list is null. Skipping.");
             return;
         }
 
         foreach (var presetData in itemConfig.WeaponPresets)
         {
-
             if (presetData.Items.Count == 0)
             {
                 logger.Warning($"Preset {presetData.Id} has no items defined. Skipping.");

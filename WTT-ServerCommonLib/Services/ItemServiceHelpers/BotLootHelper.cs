@@ -5,44 +5,38 @@ using SPTarkov.Server.Core.Utils.Logger;
 using WTTServerCommonLib.Helpers;
 using WTTServerCommonLib.Models;
 
-namespace WTTServerCommonLib.Services.ItemServiceHelpers
+namespace WTTServerCommonLib.Services.ItemServiceHelpers;
+
+[Injectable]
+public class BotLootHelper(DatabaseService databaseService, SptLogger<BotLootHelper> logger)
 {
-    [Injectable]
-    public class BotLootHelper(DatabaseService databaseService, SptLogger<BotLootHelper> logger)
+    public void AddToBotLoot(CustomItemConfig itemConfig, string newItemId)
     {
-        public void AddToBotLoot(CustomItemConfig itemConfig, string newItemId)
+        var cloneItemId = itemConfig.ItemTplToClone;
+        var bots = databaseService.GetBots();
+
+        foreach (var (_, bot) in bots.Types)
         {
+            var items = bot?.BotInventory.Items;
+            if (items == null) continue;
 
-            string cloneItemId = itemConfig.ItemTplToClone;
-            var bots = databaseService.GetBots();
-
-            foreach (var (_, bot) in bots.Types)
+            var containers = new[]
             {
-                var items = bot?.BotInventory.Items;
-                if (items == null) continue;
+                items.Backpack,
+                items.Pockets,
+                items.SecuredContainer,
+                items.SpecialLoot,
+                items.TacticalVest
+            };
 
-                var containers = new[]
+            foreach (var container in containers)
+            foreach (var (existingItem, chance) in container)
+                if (existingItem.ToString() == cloneItemId)
                 {
-                    items.Backpack,
-                    items.Pockets,
-                    items.SecuredContainer,
-                    items.SpecialLoot,
-                    items.TacticalVest
-                };
-
-                foreach (var container in containers)
-                {
-                    foreach (var (existingItem, chance) in container)
-                    {
-                        if (existingItem.ToString() == cloneItemId)
-                        {
-                            container[new MongoId(newItemId)] = chance;
-                            LogHelper.Debug(logger,$"Added {newItemId} to {container[new MongoId(newItemId)]}");
-                            break;
-                        }
-                    }
+                    container[new MongoId(newItemId)] = chance;
+                    LogHelper.Debug(logger, $"Added {newItemId} to {container[new MongoId(newItemId)]}");
+                    break;
                 }
-            }
         }
     }
 }

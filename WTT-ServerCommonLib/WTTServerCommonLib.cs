@@ -4,16 +4,18 @@ using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
 using WTTServerCommonLib.Services;
 using Range = SemanticVersioning.Range;
+using Version = SemanticVersioning.Version;
 
 namespace WTTServerCommonLib;
+
 public record ModMetadata : AbstractModMetadata
 {
     public override string ModGuid { get; init; } = "com.grooveypenguinx.WTT-ServerCommonLib";
     public override string Name { get; init; } = "WTT-ServerCommonLib";
     public override string Author { get; init; } = "GrooveypenguinX";
     public override List<string>? Contributors { get; init; }
-    public override SemanticVersioning.Version Version { get; init; } = new("1.0.0");
-    public override Range SptVersion { get; init; } = new("~4.0");
+    public override Version Version { get; init; } = new("1.0.0");
+    public override Range SptVersion { get; init; } = new("4.0.1");
     public override List<string>? Incompatibilities { get; init; }
     public override Dictionary<string, Range>? ModDependencies { get; init; }
     public override string? Url { get; init; }
@@ -23,8 +25,8 @@ public record ModMetadata : AbstractModMetadata
 
 [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 1)]
 public class WTTServerCommonLib(
-    WTTCustomItemServiceExtended customItemServiceExtended, 
-    WTTCustomAssortSchemeService customAssortSchemeService, 
+    WTTCustomItemServiceExtended customItemServiceExtended,
+    WTTCustomAssortSchemeService customAssortSchemeService,
     WTTCustomLootspawnService customLootspawnService,
     WTTCustomQuestService customQuestService,
     WTTCustomLocaleService customLocaleService,
@@ -38,7 +40,7 @@ public class WTTServerCommonLib(
     WTTCustomSlotImageService customSlotImageService,
     WTTCustomStaticSpawnService customStaticSpawnService,
     ISptLogger<WTTServerCommonLib> logger
-    ) : IOnLoad
+) : IOnLoad
 {
     public WTTCustomItemServiceExtended CustomItemServiceExtended { get; } = customItemServiceExtended;
     public WTTCustomAssortSchemeService CustomAssortSchemeService { get; } = customAssortSchemeService;
@@ -54,12 +56,13 @@ public class WTTServerCommonLib(
     public WTTCustomRigLayoutService CustomRigLayoutService { get; } = customRigLayoutService;
     public WTTCustomSlotImageService CustomSlotImageService { get; } = customSlotImageService;
     public WTTCustomStaticSpawnService CustomStaticSpawnService { get; } = customStaticSpawnService;
-    
+
     public Task OnLoad()
     {
         return Task.CompletedTask;
     }
 }
+
 [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PostSptModLoader + 1)]
 public class WTTServerCommonLibPostSptLoad(WTTCustomItemServiceExtended customItemServiceExtended) : IOnLoad
 {

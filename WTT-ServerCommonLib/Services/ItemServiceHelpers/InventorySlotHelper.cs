@@ -15,7 +15,7 @@ public class InventorySlotHelper(ISptLogger<InventorySlotHelper> logger, Databas
             return;
 
         const string pmcInventoryTemplateId = "55d7217a4bdc2d86028b456d";
-        
+
         var items = databaseService.GetItems();
         var defaultInventorySlots = items[pmcInventoryTemplateId].Properties?.Slots;
         if (defaultInventorySlots == null)
@@ -42,9 +42,7 @@ public class InventorySlotHelper(ISptLogger<InventorySlotHelper> logger, Databas
                     continue;
 
                 if (firstFilter.Filter.Add(itemId))
-                {
-                    LogHelper.Debug(logger,$"[InventorySlots] Added {itemId} to inventory slot '{slot.Name}'");
-                }
+                    LogHelper.Debug(logger, $"[InventorySlots] Added {itemId} to inventory slot '{slot.Name}'");
             }
         }
     }

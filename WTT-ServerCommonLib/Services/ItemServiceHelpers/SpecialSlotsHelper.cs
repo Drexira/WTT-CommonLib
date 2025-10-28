@@ -11,15 +11,12 @@ public class SpecialSlotsHelper(ISptLogger<SpecialSlotsHelper> logger, DatabaseS
 {
     public void AddToSpecialSlots(CustomItemConfig itemConfig, string itemId)
     {
-        if (itemConfig.AddToSpecialSlots != true)
-        {
-            return;
-        }
+        if (itemConfig.AddToSpecialSlots != true) return;
 
         var pocketIds = new[]
         {
             "627a4e6b255f7527fb05a0f6", // normal pockets
-            "65e080be269cbd5c5005e529"  // unheard pockets
+            "65e080be269cbd5c5005e529" // unheard pockets
         };
 
         var items = databaseService.GetItems();
@@ -27,13 +24,13 @@ public class SpecialSlotsHelper(ISptLogger<SpecialSlotsHelper> logger, DatabaseS
         {
             if (!items.TryGetValue(pocketsId, out var pockets))
             {
-                logger.Warning( $"[SpecialSlots] Could not find pockets template with id {pocketsId}");
+                logger.Warning($"[SpecialSlots] Could not find pockets template with id {pocketsId}");
                 continue;
             }
 
             if (pockets.Properties?.Slots == null)
             {
-                logger.Warning( $"[SpecialSlots] Pockets template {pocketsId} has no slots.");
+                logger.Warning($"[SpecialSlots] Pockets template {pocketsId} has no slots.");
                 continue;
             }
 
@@ -47,9 +44,7 @@ public class SpecialSlotsHelper(ISptLogger<SpecialSlotsHelper> logger, DatabaseS
                     continue;
 
                 if (firstFilter.Filter.Add(itemId))
-                {
-                    LogHelper.Debug(logger,$"[SpecialSlots] Added {itemId} to pockets slot in {pocketsId}");
-                }
+                    LogHelper.Debug(logger, $"[SpecialSlots] Added {itemId} to pockets slot in {pocketsId}");
             }
         }
     }

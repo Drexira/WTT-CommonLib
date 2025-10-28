@@ -42,7 +42,7 @@ public class HideoutPosterHelper(ISptLogger<HideoutPosterHelper> logger, Databas
             if (string.IsNullOrWhiteSpace(slot.Name) || slot.Properties?.Filters == null)
                 continue;
 
-            string? slotType = GetMatchingSlotType(slot.Name);
+            var slotType = GetMatchingSlotType(slot.Name);
             if (posterSlotId != slotType)
                 continue;
 
@@ -57,20 +57,17 @@ public class HideoutPosterHelper(ISptLogger<HideoutPosterHelper> logger, Databas
             filter.Filter ??= new HashSet<MongoId>();
 
             if (filter.Filter.Add(itemId))
-                LogHelper.Debug(logger,$"[Poster] Added {itemId} to slot '{slot.Name}' in {slotName}");
-            else
-                if (logger.IsLogEnabled(LogLevel.Debug))
-                    LogHelper.Debug(logger,$"[Poster] {itemId} already in slot '{slot.Name}'");
+                LogHelper.Debug(logger, $"[Poster] Added {itemId} to slot '{slot.Name}' in {slotName}");
+            else if (logger.IsLogEnabled(LogLevel.Debug))
+                LogHelper.Debug(logger, $"[Poster] {itemId} already in slot '{slot.Name}'");
         }
     }
 
     private static string? GetMatchingSlotType(string slotName)
     {
         foreach (var type in PosterSlotIds)
-        {
             if (type != null && slotName.StartsWith(type, StringComparison.OrdinalIgnoreCase))
                 return type;
-        }
         return null;
     }
 }
