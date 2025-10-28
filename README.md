@@ -160,6 +160,41 @@ await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly,
     "fleaPriceRoubles": 10900,
     "handbookPriceRoubles": 7250,
     "addtoInventorySlots": ["ArmBand"],
+    "addtoHideoutPosterSlots": true,
+    "addPosterToMaps": true,
+    "posterSpawnProbability": 10,
+    "addtoStatuetteSlots": true,
+    "addCaliberToAllCloneLocations": true,
+    "addtoStaticAmmo": true,
+    "staticAmmoProbability": 5,
+    "addtoBots": true,
+    "addtoSpecialSlots": true,
+    "addtoModSlots": true,
+    "modSlot": ["mod_muzzle"],
+    "addtoHallOfFame": true,
+    "hallOfFameSlots": [
+      "bigTrophies", 
+      "smallTrophies", 
+      "dogTags"
+    ],
+    "addtoGeneratorAsFuel": true,
+    "generatorFuelSlotStages": [
+      "1",
+      "2",
+      "3"
+    ],
+    "addtoEmptyPropSlots": true,
+    "emptyPropSlot": {
+      "itemToAddTo": "628a66b41d5e41750e314f34",
+      "modSlot": "mod_muzzle"
+    },
+    "addtoStaticLootContainers": true,
+    "StaticLootContainers": [
+      {
+        "ContainerName": "LOOTCONTAINER_DEAD_SCAV",
+        "Probability": 54
+      }
+    ],
     "addtoTraders": true,
     "traders": {
       "RAGMAN": {
@@ -197,6 +232,7 @@ await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly,
 - Special slot support
 - Caliber-based weapon compatibility
 - Mod slot propagation (based on the cloned item's locations)
+- Add to slots that are empty by default (e.g., mod_muzzle on Keymount muzzles)
 
 ---
 
@@ -554,7 +590,6 @@ await wttCommon.CustomBotLoadoutService.CreateCustomBotLoadouts(assembly,
 </details>
 
 ---
-
 
 ### CustomLootspawnService
 
@@ -1060,7 +1095,6 @@ await wttCommon.CustomHideoutRecipeService.CreateHideoutRecipes(assembly,
 - Invalid recipe structure will throw errors and prevent loading
 
 ---
-
 
 ### CustomRigLayoutService
 
