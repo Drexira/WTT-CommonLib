@@ -18,7 +18,7 @@ public class WeaponPresetHelper(ISptLogger<WeaponPresetHelper> logger, DatabaseS
 
         if (itemConfig.WeaponPresets == null)
         {
-            logger.Warning("WeaponPresets list is null. Skipping.");
+            logger.Warning($"WeaponPresets list is null when trying {itemId}. Skipping.");
             return;
         }
 

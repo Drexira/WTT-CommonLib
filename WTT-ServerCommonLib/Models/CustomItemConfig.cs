@@ -121,6 +121,13 @@ public class CustomItemConfig
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? StaticAmmoProbability { get; set; }
 
+    [JsonPropertyName("addtoEmptyPropSlots")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? AddToEmptyPropSlots { get; set; }
+        
+    [JsonPropertyName("emptyPropSlot")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public EmptySlotScheme? EmptyPropSlot { get; set; }
 
     public void Validate()
     {
@@ -281,6 +288,8 @@ public class CustomItemConfig
         if (StaticAmmoProbability is < 0)
             throw new InvalidDataException("locationStaticAmmoProbability must be >= 0");
 
+        if (AddToEmptyPropSlots == true && EmptyPropSlot == null)
+            throw new InvalidDataException("emptyPropSlot is required when addToEmptyPropSlots is true");
 
         if (AddWeaponPreset == true && WeaponPresets != null)
         {
@@ -372,4 +381,13 @@ public class ConfigStaticLootContainer
     [JsonPropertyName("containerName")] public required string ContainerName { get; set; } = string.Empty;
 
     [JsonPropertyName("probability")] public required int Probability { get; set; }
+}
+
+public class EmptySlotScheme
+{
+    [JsonPropertyName("itemToAddTo")]
+    public string ItemToAddTo { get; set; } = string.Empty;
+        
+    [JsonPropertyName("modSlot")]
+    public string ModSlot { get; set; } = string.Empty;
 }
