@@ -106,10 +106,6 @@
         </None>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Common\"/>
-    </ItemGroup>
-
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <Exec Command="REM Copy to BepInEx plugins directory&#xA;set MODNAME=$(TargetName)&#xA;set DLLPATH=$(TargetDir)$(TargetName).dll&#xA;set OUTDIR=..\..\..\BepInEx\plugins\%MODNAME%&#xA;if not exist &quot;%OUTDIR%&quot; mkdir &quot;%OUTDIR%&quot;&#xA;copy /Y &quot;%DLLPATH%&quot; &quot;%OUTDIR%\&quot;&#xA;&#xA;REM Copy to Build/BepInEx/plugins directory&#xA;set BUILDOUTDIR=..\Build\BepInEx\plugins\%MODNAME%&#xA;if not exist &quot;%BUILDOUTDIR%&quot; mkdir &quot;%BUILDOUTDIR%&quot;&#xA;copy /Y &quot;%DLLPATH%&quot; &quot;%BUILDOUTDIR%\&quot;&#xA;"/>
     </Target>

@@ -131,9 +131,7 @@ public class WTTCustomLootspawnService(
 
             foreach (var (locationId, location) in locations)
             {
-                if (location.LooseLoot == null) continue;
-
-                location.LooseLoot.AddTransformer(looseLoot =>
+                location.LooseLoot?.AddTransformer(looseLoot =>
                 {
                     if (looseLoot == null) return looseLoot;
 

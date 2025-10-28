@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Server;
@@ -261,22 +263,32 @@ public class WTTCustomClothingService(
     {
         if (_database == null) return;
 
-        if (!TraderIds.TraderMap.TryGetValue(config.TraderId.ToLower(), out var traderId))
+        MongoId actualTraderId;
+
+        if (TraderIds.TraderMap.TryGetValue(config.TraderId.ToLower(), out var traderId))
         {
-            logger.Warning($"Unknown trader key '{config.TraderId}'");
+            actualTraderId = traderId;
+        }
+        else if (config.TraderId.IsValidMongoId())
+        {
+            actualTraderId = config.TraderId;
+        }
+        else
+        {
+            logger.Error( $"Invalid trader key: {config.TraderId}");
             return;
         }
 
         string currencyId = ItemTplResolver.ResolveId(config.CurrencyId);
 
-        _database.Traders[traderId].Base.CustomizationSeller = true;
+        _database.Traders[actualTraderId].Base.CustomizationSeller = true;
 
-        _database.Traders[traderId].Suits ??= [];
+        _database.Traders[actualTraderId].Suits ??= [];
 
         var traderSuit = new Suit
         {
             Id = config.OutfitId!,
-            Tid = traderId,
+            Tid = actualTraderId,
             SuiteId = config.SuiteId!,
             IsActive = true,
             IsHiddenInPVE = false,
@@ -301,11 +313,11 @@ public class WTTCustomClothingService(
                         OnlyFunctional = true
                     }
                 ],
-                RequiredTid = traderId
+                RequiredTid = actualTraderId
             }
         };
 
-        _database.Traders[traderId].Suits?.Add(traderSuit);
+        _database.Traders[actualTraderId].Suits?.Add(traderSuit);
         LogHelper.Debug(logger, $"Added suite {config.SuiteId} to trader {config.TraderId}");
     }
 

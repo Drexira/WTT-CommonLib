@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
@@ -65,15 +67,25 @@ public class WTTCustomAssortSchemeService(
             var traderKey = kvp.Key;
             var newAssort = kvp.Value;
 
-            if (!TraderIds.TraderMap.TryGetValue(traderKey.ToLower(), out var traderId))
+            MongoId actualTraderId;
+
+            if (TraderIds.TraderMap.TryGetValue(traderKey.ToLower(), out var traderId))
             {
-                logger.Warning($"Unknown trader key '{traderKey}'");
+                actualTraderId = traderId;
+            }
+            else if (traderKey.IsValidMongoId())
+            {
+                actualTraderId = traderKey;
+            }
+            else
+            {
+                logger.Error($"Invalid trader key: {traderKey}");
                 continue;
             }
 
-            if (!tables.Traders.TryGetValue(traderId, out var trader))
+            if (!tables.Traders.TryGetValue(actualTraderId, out var trader))
             {
-                logger.Warning($"Trader not found in DB: ({traderId})");
+                logger.Warning($"Trader not found in DB: ({actualTraderId})");
                 continue;
             }
 

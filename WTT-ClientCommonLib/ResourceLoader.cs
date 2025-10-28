@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using BepInEx.Logging;
 using EFT.UI.DragAndDrop;
 using UnityEngine;
-using WTTClientCommonLib.Common.Helpers;
-using WTTClientCommonLib.CustomStaticSpawnSystem;
+using WTTClientCommonLib.Helpers;
+using WTTClientCommonLib.Services;
 
 namespace WTTClientCommonLib;
 
@@ -28,7 +28,7 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
             logger.LogError($"Error loading resources from server: {ex}");
         }
     }
-
+    
     private void LoadVoicesFromServer()
     {
         try

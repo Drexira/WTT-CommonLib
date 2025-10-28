@@ -3,17 +3,19 @@ using BepInEx;
 using Comfort.Common;
 using EFT;
 using UnityEngine;
-using WTTClientCommonLib.Common.Helpers;
-using WTTClientCommonLib.CustomQuestZones.Configuration;
-using WTTClientCommonLib.CustomStaticSpawnSystem;
+using WTTClientCommonLib.CommandProcessor;
+using WTTClientCommonLib.Components;
+using WTTClientCommonLib.Configuration;
+using WTTClientCommonLib.Helpers;
 using WTTClientCommonLib.Patches;
+using WTTClientCommonLib.Services;
 
 namespace WTTClientCommonLib;
 
 [BepInPlugin("com.WTT.ClientCommonLib", "WTT-ClientCommonLib", "1.0.0")]
 public class WTTClientCommonLib : BaseUnityPlugin
 {
-    public static CommandProcessor CommandProcessor;
+    public static CommandProcessor.CommandProcessor CommandProcessor;
     public static GameWorld GameWorld;
     public static Player Player;
     private ResourceLoader _resourceLoader;
@@ -32,9 +34,14 @@ public class WTTClientCommonLib : BaseUnityPlugin
             AssetLoader = new AssetLoader(Logger);
             SpawnCommands = new SpawnCommands(Logger, AssetLoader);
             PlayerWorldStats = new PlayerWorldStats(Logger);
-
+            
+            // Initialize universal config first (Developer Mode)
+            UniversalConfigManager.Initialize(Config);
+            
+            // Initialize feature configs - they check DeveloperMode internally
             ZoneConfigManager.Initialize(Config);
             StaticSpawnSystemConfigManager.Initialize(Config);
+            
             new OnGameStarted().Enable();
             new ClothingBundleRendererPatch().Enable();
 
@@ -65,7 +72,7 @@ public class WTTClientCommonLib : BaseUnityPlugin
     {
         if (CommandProcessor == null)
         {
-            CommandProcessor = new CommandProcessor(PlayerWorldStats, SpawnCommands);
+            CommandProcessor = new CommandProcessor.CommandProcessor(PlayerWorldStats, SpawnCommands);
             CommandProcessor.RegisterCommandProcessor();
         }
 
