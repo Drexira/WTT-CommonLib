@@ -15,14 +15,13 @@ namespace WTTClientCommonLib;
 [BepInPlugin("com.WTT.ClientCommonLib", "WTT-ClientCommonLib", "1.0.0")]
 public class WTTClientCommonLib : BaseUnityPlugin
 {
-    public static CommandProcessor.CommandProcessor CommandProcessor;
-    public static GameWorld GameWorld;
+    private static CommandProcessor.CommandProcessor _commandProcessor;
+    private static GameWorld _gameWorld;
     public static Player Player;
-    private ResourceLoader _resourceLoader;
 
     private GameObject _updaterObject;
     public AssetLoader AssetLoader;
-    public PlayerWorldStats PlayerWorldStats;
+    private PlayerWorldStats _playerWorldStats;
     public SpawnCommands SpawnCommands;
     public static WTTClientCommonLib Instance { get; private set; }
 
@@ -33,7 +32,7 @@ public class WTTClientCommonLib : BaseUnityPlugin
         {
             AssetLoader = new AssetLoader(Logger);
             SpawnCommands = new SpawnCommands(Logger, AssetLoader);
-            PlayerWorldStats = new PlayerWorldStats(Logger);
+            _playerWorldStats = new PlayerWorldStats(Logger);
             
             // Initialize universal config first (Developer Mode)
             UniversalConfigManager.Initialize(Config);
@@ -61,19 +60,19 @@ public class WTTClientCommonLib : BaseUnityPlugin
 
     private void Update()
     {
-        if (Singleton<GameWorld>.Instantiated && (GameWorld == null || Player == null))
+        if (Singleton<GameWorld>.Instantiated && (_gameWorld == null || Player == null))
         {
-            GameWorld = Singleton<GameWorld>.Instance;
-            Player = GameWorld.MainPlayer;
+            _gameWorld = Singleton<GameWorld>.Instance;
+            Player = _gameWorld.MainPlayer;
         }
     }
 
-    internal void Init()
+    private void Init()
     {
-        if (CommandProcessor == null)
+        if (_commandProcessor == null)
         {
-            CommandProcessor = new CommandProcessor.CommandProcessor(PlayerWorldStats, SpawnCommands);
-            CommandProcessor.RegisterCommandProcessor();
+            _commandProcessor = new CommandProcessor.CommandProcessor(_playerWorldStats, SpawnCommands);
+            _commandProcessor.RegisterCommandProcessor();
         }
 
         if (_updaterObject == null)

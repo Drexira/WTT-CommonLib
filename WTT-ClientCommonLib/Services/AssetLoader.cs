@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
@@ -16,7 +15,6 @@ namespace WTTClientCommonLib.Services;
 
 public class AssetLoader(ManualLogSource logger)
 {
-    private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
     private bool _initialized;
     private readonly Dictionary<string, AssetBundle> _loadedBundles = new();
 
@@ -93,7 +91,7 @@ public class AssetLoader(ManualLogSource logger)
         }
 
         // Required quest statuses (multiple)
-        if (config.RequiredQuestStatuses != null && config.RequiredQuestStatuses.Count > 0)
+        if (config.RequiredQuestStatuses is { Count: > 0 })
         {
             if (quest == null)
             {
@@ -120,7 +118,7 @@ public class AssetLoader(ManualLogSource logger)
         }
 
         // Excluded quest statuses (multiple)
-        if (config.ExcludedQuestStatuses != null && config.ExcludedQuestStatuses.Count > 0)
+        if (config.ExcludedQuestStatuses is { Count: > 0 })
             if (quest != null)
                 foreach (var statusStr in config.ExcludedQuestStatuses)
                     if (Enum.TryParse<EQuestStatus>(statusStr, out var excludedStatus))
@@ -182,7 +180,7 @@ public class AssetLoader(ManualLogSource logger)
             }
 
             // Linked required statuses (multiple)
-            if (config.LinkedRequiredStatuses != null && config.LinkedRequiredStatuses.Count > 0)
+            if (config.LinkedRequiredStatuses is { Count: > 0 })
             {
                 if (linkedQuest == null)
                 {
@@ -209,7 +207,7 @@ public class AssetLoader(ManualLogSource logger)
             }
 
             // Linked excluded statuses (multiple)
-            if (config.LinkedExcludedStatuses != null && config.LinkedExcludedStatuses.Count > 0)
+            if (config.LinkedExcludedStatuses is { Count: > 0 })
                 if (linkedQuest != null)
                     foreach (var statusStr in config.LinkedExcludedStatuses)
                         if (Enum.TryParse<EQuestStatus>(statusStr, out var excludedStatus))
@@ -340,14 +338,7 @@ public class AssetLoader(ManualLogSource logger)
         return prefab;
     }
 
-    private GameObject LoadAssetFromBundle(AssetBundle bundle, string assetName, string bundleName)
-    {
-        var prefab = bundle.LoadAsset<GameObject>(assetName);
-        if (prefab == null) logger.LogError($"[ASSET LOADER] Prefab '{assetName}' not found in {bundleName}");
-        return prefab;
-    }
-
-    public void SpawnPrefab(GameObject prefab, Vector3 position, Quaternion rotation)
+    private void SpawnPrefab(GameObject prefab, Vector3 position, Quaternion rotation)
     {
         try
         {

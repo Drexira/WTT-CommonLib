@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Comfort.Common;
-using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -26,9 +24,9 @@ internal class QuestZones
 
         foreach (var zone in request)
         {
-            if (zone.Position.W == null) zone.Position.W = "0";
-            if (zone.Rotation.W == null) zone.Rotation.W = "0";
-            if (zone.Scale.W == null) zone.Scale.W = "0";
+            zone.Position.W ??= "0";
+            zone.Rotation.W ??= "0";
+            zone.Scale.W ??= "0";
         }
 #if DEBUG
         var loadedZoneCount = 0;
@@ -67,7 +65,7 @@ internal class QuestZones
         return request;
     }
 
-    public static GameObject ZoneCreateItem(CustomQuestZone customQuestZone)
+    private static void ZoneCreateItem(CustomQuestZone customQuestZone)
     {
         var newZone = new GameObject();
 
@@ -90,11 +88,9 @@ internal class QuestZones
 
         newZone.layer = LayerMask.NameToLayer("Triggers");
         newZone.name = customQuestZone.ZoneId;
-
-        return newZone;
     }
 
-    public static GameObject ZoneCreateVisit(CustomQuestZone customQuestZone)
+    private static void ZoneCreateVisit(CustomQuestZone customQuestZone)
     {
         var newZone = new GameObject();
 
@@ -117,11 +113,9 @@ internal class QuestZones
 
         newZone.layer = LayerMask.NameToLayer("Triggers");
         newZone.name = customQuestZone.ZoneId;
-
-        return newZone;
     }
 
-    public static GameObject ZoneCreateBotKillZone(CustomQuestZone customQuestZone)
+    private static void ZoneCreateBotKillZone(CustomQuestZone customQuestZone)
     {
         var newZone = new GameObject();
 
@@ -144,11 +138,9 @@ internal class QuestZones
 
         newZone.layer = LayerMask.NameToLayer("Triggers");
         newZone.name = customQuestZone.ZoneId;
-
-        return newZone;
     }
 
-    public static GameObject ZoneCreateFlareZone(CustomQuestZone customQuestZone)
+    private static void ZoneCreateFlareZone(CustomQuestZone customQuestZone)
     {
         // Thank you Groovey :)
         var newZone = new GameObject();
@@ -171,30 +163,31 @@ internal class QuestZones
         var flareTrigger = newZone.AddComponent<ZoneFlareTrigger>();
         flareTrigger.SetId(customQuestZone.ZoneId);
 
-        var moveObjectsToAdditionalPhysSceneMarker = newZone.AddComponent<MoveObjectsToAdditionalPhysSceneMarker>();
+        newZone.AddComponent<MoveObjectsToAdditionalPhysSceneMarker>();
 
         var flareDetector = newZone.AddComponent<FlareShootDetectorZone>();
 
         var flareDetectorType = typeof(FlareShootDetectorZone);
         var bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;
         var zoneIDField = flareDetectorType.GetField("zoneID", bindingFlags);
-        zoneIDField.SetValue(flareDetector, customQuestZone.ZoneId);
+        if (zoneIDField != null) zoneIDField.SetValue(flareDetector, customQuestZone.ZoneId);
 
         var flareType = (FlareEventType)Enum.Parse(typeof(FlareEventType), customQuestZone.FlareType);
         var flareTypeForHandleField = flareDetectorType.GetField("flareTypeForHandle", bindingFlags);
-        flareTypeForHandleField.SetValue(flareDetector, flareType);
+        if (flareTypeForHandleField != null) flareTypeForHandleField.SetValue(flareDetector, flareType);
 
         var triggerHandler = newZone.AddComponent<PhysicsTriggerHandler>();
         triggerHandler.trigger = boxCollider;
 
         var triggerHandlersField = flareDetectorType.GetField("_triggerHandlers", bindingFlags);
-        var triggerHandlers = (List<PhysicsTriggerHandler>)triggerHandlersField.GetValue(flareDetector);
-        triggerHandlers.Add(triggerHandler);
+        if (triggerHandlersField != null)
+        {
+            var triggerHandlers = (List<PhysicsTriggerHandler>)triggerHandlersField.GetValue(flareDetector);
+            triggerHandlers.Add(triggerHandler);
+        }
 
         newZone.layer = LayerMask.NameToLayer("Triggers");
         newZone.name = customQuestZone.ZoneId;
-
-        return newZone;
     }
 
 

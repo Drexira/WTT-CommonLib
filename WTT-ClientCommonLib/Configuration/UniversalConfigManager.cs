@@ -1,6 +1,4 @@
-﻿using System;
-using BepInEx.Configuration;
-using UnityEngine;
+﻿using BepInEx.Configuration;
 using WTTClientCommonLib.Attributes;
 
 namespace WTTClientCommonLib.Configuration;
@@ -8,8 +6,6 @@ namespace WTTClientCommonLib.Configuration;
 public static class UniversalConfigManager
 {
     internal static ConfigEntry<bool> DeveloperMode { get; private set; }
-    private static object _configManagerInstance;
-    private static Type _configManagerType;
 
     public static void Initialize(ConfigFile config)
     {

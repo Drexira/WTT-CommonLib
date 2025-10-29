@@ -111,7 +111,7 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
                     continue;
                 }
 
-                byte[] bundleData = null;
+                byte[] bundleData;
                 try
                 {
                     bundleData = Convert.FromBase64String(base64Data);
@@ -122,7 +122,7 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
                     continue;
                 }
 
-                if (bundleData == null || bundleData.Length == 0)
+                if (bundleData.Length == 0)
                 {
                     logger.LogWarning($"Bundle data is empty for rig layout: {bundleName}");
                     continue;
@@ -194,25 +194,26 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
             if (gameObjects == null || gameObjects.Length == 0)
                 logger.LogWarning($"No GameObjects loaded from bundle: {bundleName}");
 
-            foreach (var prefab in gameObjects)
-            {
-                if (prefab == null)
+            if (gameObjects != null)
+                foreach (var prefab in gameObjects)
                 {
-                    logger.LogWarning("Encountered null prefab in bundle.");
-                    continue;
-                }
+                    if (prefab == null)
+                    {
+                        logger.LogWarning("Encountered null prefab in bundle.");
+                        continue;
+                    }
 
-                var gridView = prefab.GetComponent<ContainedGridsView>();
-                if (gridView == null)
-                {
-                    logger.LogWarning($"Prefab {prefab.name} missing ContainedGridsView.");
-                    continue;
-                }
+                    var gridView = prefab.GetComponent<ContainedGridsView>();
+                    if (gridView == null)
+                    {
+                        logger.LogWarning($"Prefab {prefab.name} missing ContainedGridsView.");
+                        continue;
+                    }
 
-                ResourceHelper.AddEntry($"UI/Rig Layouts/{prefab.name}", gridView);
-                loadedCount++;
-                logger.LogDebug($"Added rig layout: {prefab.name}");
-            }
+                    ResourceHelper.AddEntry($"UI/Rig Layouts/{prefab.name}", gridView);
+                    loadedCount++;
+                    logger.LogDebug($"Added rig layout: {prefab.name}");
+                }
 
             bundle.Unload(false);
             logger.LogDebug($"Loaded {loadedCount} prefabs from bundle: {bundleName}");

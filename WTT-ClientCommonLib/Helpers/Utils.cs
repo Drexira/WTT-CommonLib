@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
@@ -15,6 +16,10 @@ namespace WTTClientCommonLib.Helpers;
 internal static class Utils
 
 {
+    private static readonly int SrcBlend = Shader.PropertyToID("_SrcBlend");
+    private static readonly int DstBlend = Shader.PropertyToID("_DstBlend");
+    private static readonly int ZWrite = Shader.PropertyToID("_ZWrite");
+
     public static Vector3? GetPlayerPosition()
     {
         if (!Singleton<GameWorld>.Instance.MainPlayer)
@@ -39,7 +44,7 @@ internal static class Utils
     }
 
     // Access a route from the server
-    public static T Get<T>(string url)
+    public static T? Get<T>(string url)
     {
         try
         {
@@ -65,7 +70,7 @@ internal static class Utils
 
 
     // Create and return a basic cube to represent a zone position
-    public static GameObject CreateNewZoneCube(string objectName)
+    public static GameObject? CreateNewZoneCube(string objectName)
     {
         var position = GetPlayerPosition();
         if (position == null) return null;
@@ -76,9 +81,9 @@ internal static class Utils
 
         // Thank you Timber for this 
         renderer.material.SetOverrideTag("RenderType", "Transparent");
-        renderer.material.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
-        renderer.material.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
-        renderer.material.SetInt("_ZWrite", 0);
+        renderer.material.SetInt(SrcBlend, (int)BlendMode.SrcAlpha);
+        renderer.material.SetInt(DstBlend, (int)BlendMode.OneMinusSrcAlpha);
+        renderer.material.SetInt(ZWrite, 0);
         renderer.material.DisableKeyword("_ALPHATEST_ON");
         renderer.material.EnableKeyword("_ALPHABLEND_ON");
         renderer.material.DisableKeyword("_ALPHAPREMULTIPLY_ON");

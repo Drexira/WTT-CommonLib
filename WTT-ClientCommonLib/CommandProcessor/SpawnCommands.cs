@@ -30,9 +30,6 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
     public GameObject LastSpawnedObject =>
         _currentSpawnedIndex >= 0 ? _spawnedObjects[_currentSpawnedIndex].Object : null;
 
-    private SpawnedObjectInfo CurrentSpawnedInfo =>
-        _currentSpawnedIndex >= 0 ? _spawnedObjects[_currentSpawnedIndex] : null;
-
     public bool IsEditing { get; private set; }
 
     public void SpawnObject(string bundleName, string prefabName, string[] args = null)
@@ -50,7 +47,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         var spawnRotation = Quaternion.identity;
 
         // Parse coordinates if provided
-        if (args != null && args.Length >= 3)
+        if (args is { Length: >= 3 })
         {
             if (float.TryParse(args[0], out var x) &&
                 float.TryParse(args[1], out var y) &&
@@ -203,7 +200,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         if (moveDirection.sqrMagnitude > 1f)
             moveDirection.Normalize();
 
-        _lastSpawnedObject.transform.position += moveDirection * MoveSpeed * speedMultiplier * Time.deltaTime;
+        _lastSpawnedObject.transform.position += moveDirection * (MoveSpeed * speedMultiplier * Time.deltaTime);
 
         // ROTATION SYSTEM - CORRECTED DIRECTIONS
         var rotationInput = Vector3.zero;
@@ -289,7 +286,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         }
     }
 
-    public void DeleteSelectedObject()
+    private void DeleteSelectedObject()
     {
         if (_spawnedObjects.Count == 0 || _currentSpawnedIndex < 0)
         {
@@ -319,7 +316,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         }
     }
 
-    public void CycleSpawnedObjects()
+    private void CycleSpawnedObjects()
     {
         if (_spawnedObjects.Count == 0)
         {
@@ -338,7 +335,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
             _editIndicator.transform.position = _lastSpawnedObject.transform.position;
     }
 
-    public void CyclePreviousSpawnedObject()
+    private void CyclePreviousSpawnedObject()
     {
         if (_spawnedObjects.Count == 0)
         {
