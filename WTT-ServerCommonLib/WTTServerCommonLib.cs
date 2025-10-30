@@ -1,4 +1,5 @@
-﻿using SPTarkov.DI.Annotations;
+﻿using System.Reflection;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
@@ -39,6 +40,7 @@ public class WTTServerCommonLib(
     WTTCustomRigLayoutService customRigLayoutService,
     WTTCustomSlotImageService customSlotImageService,
     WTTCustomStaticSpawnService customStaticSpawnService,
+    WTTCustomWeaponPresetService customWeaponPresetService,
     ISptLogger<WTTServerCommonLib> logger
 ) : IOnLoad
 {
@@ -56,6 +58,7 @@ public class WTTServerCommonLib(
     public WTTCustomRigLayoutService CustomRigLayoutService { get; } = customRigLayoutService;
     public WTTCustomSlotImageService CustomSlotImageService { get; } = customSlotImageService;
     public WTTCustomStaticSpawnService CustomStaticSpawnService { get; } = customStaticSpawnService;
+    public WTTCustomWeaponPresetService CustomWeaponPresetService { get; } = customWeaponPresetService; 
 
     public Task OnLoad()
     {

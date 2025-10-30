@@ -17,7 +17,15 @@ public class WTTCustomProfileService(
     ConfigHelper configHelper, 
     DatabaseService databaseService)
 {
+    /// <summary>
+    /// Loads custom player profile editions from JSON/JSONC files and registers them to the game database.
+    /// 
+    /// Profiles are loaded from the mod's "config/CustomProfiles" directory (or a custom path if specified).
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task AddCustomProfiles(Assembly assembly, string? relativePath = null)
+
     {
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         var defaultDir = Path.Combine("config", "CustomProfiles");

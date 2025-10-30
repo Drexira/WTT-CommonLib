@@ -17,12 +17,22 @@ public class WTTCustomVoiceService(
     ISptLogger<WTTCustomVoiceService> logger,
     DatabaseServer databaseServer,
     ConfigHelper configHelper,
-    ModHelper modHelper,
-    WTTCustomVoiceBundleRequestService customVoiceBundleRequestService // Inject the new service
+    ModHelper modHelper
 )
 {
     private DatabaseTables? _database;
+    private readonly Lock _lock = new();
+    private readonly Dictionary<string, string> _voiceBundleMappings = [];
 
+
+    /// <summary>
+    /// Loads custom voice configs from JSON/JSONC files and registers them to the game database.
+    /// 
+    /// Voices are loaded from the mod's "db/CustomVoices" directory (or a custom path if specified).
+    ///
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomVoices(Assembly assembly, string? relativePath = null)
     {
         if (_database == null) _database = databaseServer.GetTables();
@@ -57,7 +67,7 @@ public class WTTCustomVoiceService(
                     if (ProcessVoiceConfig(voiceId, config))
                     {
                         if (!string.IsNullOrEmpty(config.BundlePath))
-                            customVoiceBundleRequestService.RegisterVoiceBundle(config.Name, config.BundlePath);
+                            RegisterVoiceBundle(config.Name, config.BundlePath);
                         totalVoicesCreated++;
                     }
             }
@@ -185,5 +195,24 @@ public class WTTCustomVoiceService(
             {
                 logger.Error($"Error adding voice {voiceId} to bot type '{botType}': {ex.Message}");
             }
+    }
+
+    private void RegisterVoiceBundle(string voiceId, string bundlePath)
+    {
+        lock (_lock)
+        {
+            if (_voiceBundleMappings.TryAdd(voiceId, bundlePath))
+                LogHelper.Debug(logger, $"Registered voice bundle: {voiceId} -> {bundlePath}");
+            else
+                logger.Warning($"Voice bundle {voiceId} already registered");
+        }
+    }
+
+    public Dictionary<string, string> GetVoiceBundleMappings()
+    {
+        lock (_lock)
+        {
+            return _voiceBundleMappings;
+        }
     }
 }

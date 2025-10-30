@@ -23,7 +23,17 @@ public class WTTCustomLootspawnService(
     private readonly Dictionary<string, List<Spawnpoint>> _cachedGeneralSpawns = new();
     private bool _transformersRegistered;
 
+    /// <summary>
+    /// Loads custom loot spawn configurations from JSON/JSONC files and registers them to map locations.
+    /// 
+    /// General spawns are loaded from the mod's "db/CustomLootspawns/CustomSpawnpoints" directory.
+    /// Forced spawns are loaded from the mod's "db/CustomLootspawns/CustomSpawnpointsForced" directory.
+    /// Spawn configurations are organized by map name and merged with existing location data.
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomLootSpawns(Assembly assembly, string? relativePath = null)
+
     {
         try
         {

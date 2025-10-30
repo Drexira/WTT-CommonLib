@@ -21,7 +21,16 @@ public class WTTCustomHideoutRecipeService(
 {
     private DatabaseTables? _database;
 
+    /// <summary>
+    /// Loads custom hideout crafting recipes from JSON/JSONC files and registers them to the hideout production system.
+    /// 
+    /// Recipes are loaded from the mod's "db/CustomHideoutRecipes" directory (or a custom path if specified).
+    ///
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateHideoutRecipes(Assembly assembly, string? relativePath = null)
+
     {
         try
         {

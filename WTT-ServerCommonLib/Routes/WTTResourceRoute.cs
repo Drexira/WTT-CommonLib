@@ -13,7 +13,7 @@ public class WTTResourcesRouter(
     WTTCustomRigLayoutService rigService,
     WTTCustomSlotImageService slotService,
     WTTCustomStaticSpawnService staticSpawnService,
-    WTTCustomVoiceBundleRequestService customVoiceBundleRequestService
+    WTTCustomVoiceService voiceService
 ) : DynamicRouter(jsonUtil, [
     
     // Zones
@@ -85,7 +85,7 @@ public class WTTResourcesRouter(
     new RouteAction<EmptyRequestData>(
         "/wttcommonlib/voices/get", (_, _, _, _) =>
         {
-            var voiceMappings = customVoiceBundleRequestService.GetVoiceBundleMappings();
+            var voiceMappings = voiceService.GetVoiceBundleMappings();
             return ValueTask.FromResult(jsonUtil.Serialize(voiceMappings) ??
                                         throw new NullReferenceException("Could not serialize voice mappings!"));
         }

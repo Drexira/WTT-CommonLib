@@ -16,7 +16,16 @@ public class WTTCustomQuestZoneService(
     private readonly Lock _lock = new();
     private readonly List<CustomQuestZone> _zones = new();
 
+    /// <summary>
+    /// Loads custom quest zones from JSON/JSONC files and registers them for quest interactions.
+    /// 
+    /// Zones are loaded from the mod's "db/CustomQuestZones" directory (or a custom path if specified).
+    ///
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomQuestZones(Assembly assembly, string? relativePath = null)
+
     {
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         var defaultDir = Path.Combine("db", "CustomQuestZones");

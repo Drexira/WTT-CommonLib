@@ -18,7 +18,16 @@ public class WTTCustomLocaleService(
 {
     private DatabaseTables? _database;
 
+    /// <summary>
+    /// Loads custom locale translations from JSON/JSONC files and registers them globally.
+    /// 
+    /// Locales are loaded from the mod's "db/CustomLocales" directory (or a custom path if specified).
+    /// Translations are merged into all available game locales using English as fallback.
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomLocales(Assembly assembly, string? relativePath = null)
+
     {
         _database = databaseServer.GetTables();
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);

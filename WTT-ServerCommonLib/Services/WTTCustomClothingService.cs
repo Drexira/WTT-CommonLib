@@ -24,7 +24,16 @@ public class WTTCustomClothingService(
 {
     private DatabaseTables? _database;
 
+    /// <summary>
+    /// Loads custom clothing configs from JSON/JSONC files and registers them to the game database.
+    /// 
+    /// Clothing is loaded from the mod's "db/CustomClothing" directory (or a custom path if specified).
+    /// Supports both tops (with body and hands) and bottoms that can be sold by traders.
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomClothing(Assembly assembly, string? relativePath = null)
+
     {
         if (_database == null) _database = databaseService.GetTables();
 

@@ -12,7 +12,15 @@ namespace WTTServerCommonLib.Services;
 [Injectable(InjectionType.Singleton)]
 public class WTTCustomBuffService(ModHelper modHelper, ISptLogger<WTTCustomBuffService> logger, ConfigHelper configHelper, DatabaseService  databaseService)
 {
+    /// <summary>
+    /// Loads custom stimulator buff configurations from JSON/JSONC files and registers them to the game database.
+    /// 
+    /// Buffs are loaded from the mod's "db/CustomBuffs" directory (or a custom path if specified).
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomBuffs(Assembly assembly, string? relativePath = null)
+
     {
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         var defaultDir = Path.Combine("db", "CustomBuffs");

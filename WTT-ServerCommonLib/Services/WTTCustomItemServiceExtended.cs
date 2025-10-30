@@ -43,7 +43,17 @@ public class WTTCustomItemServiceExtended(
     private readonly List<(string newItemId, CustomItemConfig config)> _deferredModSlotConfigs = new();
     private DatabaseTables? _database;
 
+    /// <summary>
+    /// Loads custom item configurations from JSON/JSONC files and creates items with all associated properties.
+    /// 
+    /// Items are loaded from the mod's "db/CustomItems" directory (or a custom path if specified).
+    /// Each item is cloned from a base template and can be configured with traders, presets, masteries, slots, loot tables, and more.
+    ///
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomItems(Assembly assembly, string? relativePath = null)
+
     {
         if (_database == null) _database = databaseServer.GetTables();
 

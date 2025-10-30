@@ -25,7 +25,15 @@ public class WTTCustomBotLoadoutService(
 {
     private DatabaseTables? _database;
 
+    /// <summary>
+    /// Loads custom bot loadout configurations from JSON/JSONC files and applies them to bot types in the database.
+    /// 
+    /// Loadouts are loaded from the mod's "db/CustomBotLoadouts" directory (or a custom path if specified).
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomBotLoadouts(Assembly assembly, string? relativePath = null)
+
     {
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         var defaultDir = Path.Combine("db", "CustomBotLoadouts");

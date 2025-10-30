@@ -22,7 +22,15 @@ public class WTTCustomAssortSchemeService(
 {
     private readonly List<Dictionary<string, TraderAssort>> _customAssortSchemes = new();
 
+    /// <summary>
+    /// Loads custom trader assortment schemes from JSON/JSONC files and merges them into trader inventories.
+    /// 
+    /// Assort schemes are loaded from the mod's "db/CustomAssortSchemes" directory (or a custom path if specified).
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomAssortSchemes(Assembly assembly, string? relativePath = null)
+
     {
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
         var defaultDir = Path.Combine("db", "CustomAssortSchemes");

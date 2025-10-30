@@ -11,7 +11,15 @@ public class WTTCustomRigLayoutService(ModHelper modHelper, ISptLogger<WTTCustom
 {
     private readonly Dictionary<string, Dictionary<string, string>> _modBundles = [];
 
+    /// <summary>
+    /// Loads custom rig layout asset bundles and registers them for client access.
+    /// 
+    /// Bundles are loaded from the mod's "db/CustomRigLayouts" directory (or a custom path if specified).
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public void CreateRigLayouts(Assembly assembly, string? relativePath = null)
+
     {
         var modKey = assembly.GetName().Name ?? string.Empty;
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);

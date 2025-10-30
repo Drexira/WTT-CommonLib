@@ -18,7 +18,16 @@ public class WTTCustomStaticSpawnService(
 
     private readonly Dictionary<string, List<CustomSpawnConfig>> _modConfigs = new();
 
+    /// <summary>
+    /// Loads custom static spawn configs and asset bundles from JSON files and directories.
+    /// 
+    /// Configs are loaded from the mod's "db/CustomStaticSpawns/CustomSpawnConfigs" directory.
+    /// Bundles are loaded from the mod's "db/CustomStaticSpawns/StaticBundles" directory.
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder.</param>
     public async Task CreateCustomStaticSpawns(Assembly assembly, string? relativePath = null)
+
     {
         var modKey = assembly.GetName().Name!;
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);

@@ -31,7 +31,22 @@ public class WTTCustomQuestService(
     private DatabaseTables? _database;
     private Dictionary<string, CustomQuestTimeWindow> _timeWindows = new();
 
+    /// <summary>
+    /// Loads custom quests, quest assortments, locales, and images from a directory structure organized by trader.
+    /// 
+    /// Quests are loaded from the mod's "db/CustomQuests/{TraderName}/Quests" directory.
+    /// Assortments are loaded from "db/CustomQuests/{TraderName}/QuestAssort" directory.
+    /// Locales are loaded from "db/CustomQuests/{TraderName}/Locales" directory.
+    /// Images are loaded from "db/CustomQuests/{TraderName}/Images" directory.
+    /// 
+    /// (OPTIONAL) time-window and side-exclusive quest configs can be placed in the base directory.
+    /// "db/CustomQuests/QuestTimeData.json"
+    /// "db/CustomQuests/QuestSideData.json"
+    /// </summary>
+    /// <param name="assembly">The calling assembly, used to determine the mod folder location</param>
+    /// <param name="relativePath">(OPTIONAL) Custom path relative to the mod folder</param>
     public async Task CreateCustomQuests(Assembly assembly, string? relativePath = null)
+
     {
         _database = databaseServer.GetTables();
         var assemblyLocation = modHelper.GetAbsolutePathToModFolder(assembly);
