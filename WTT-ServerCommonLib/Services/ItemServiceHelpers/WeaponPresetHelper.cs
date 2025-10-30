@@ -1,6 +1,4 @@
 ﻿using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Models.Eft.Common;
-using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using WTTServerCommonLib.Models;
@@ -12,46 +10,20 @@ public class WeaponPresetHelper(ISptLogger<WeaponPresetHelper> logger, DatabaseS
 {
     public void ProcessWeaponPresets(CustomItemConfig itemConfig, string itemId)
     {
-        var globals = databaseService.GetGlobals();
+        var itemPresets = databaseService.GetGlobals().ItemPresets;
 
-        var itemPresets = globals.ItemPresets;
-
-        if (itemConfig.WeaponPresets == null)
+        if (itemConfig.WeaponPresets == null || itemConfig.WeaponPresets.Count == 0)
         {
-            logger.Warning($"WeaponPresets list is null when trying {itemId}. Skipping.");
+            logger.Warning($"WeaponPresets list is null or empty when trying {itemId}. Skipping.");
             return;
         }
 
-        foreach (var presetData in itemConfig.WeaponPresets)
+        foreach (var preset in itemConfig.WeaponPresets)
         {
-            if (presetData.Items.Count == 0)
+            if (preset.Items.Count == 0)
             {
-                logger.Warning($"Preset {presetData.Id} has no items defined. Skipping.");
+                logger.Warning($"Preset {preset.Id} has no items defined. Skipping.");
                 continue;
-            }
-
-            var preset = new Preset
-            {
-                Id = presetData.Id,
-                Name = presetData.Name,
-                Parent = presetData.Parent,
-                ChangeWeaponName = presetData.ChangeWeaponName,
-                Encyclopedia = string.IsNullOrEmpty(presetData.Encyclopedia) ? null : presetData.Encyclopedia,
-                Type = "Preset",
-                Items = new List<Item>()
-            };
-
-            foreach (var itemData in presetData.Items)
-            {
-                var item = new Item
-                {
-                    Id = itemData.Id,
-                    Template = itemData.Template,
-                    ParentId = string.IsNullOrEmpty(itemData.ParentId) ? null : itemData.ParentId,
-                    SlotId = string.IsNullOrEmpty(itemData.SlotId) ? null : itemData.SlotId
-                };
-
-                preset.Items.Add(item);
             }
 
             itemPresets[preset.Id] = preset;
