@@ -6,7 +6,7 @@ A comprehensive modding library for SPT that simplifies adding custom content to
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Available Services](#available-services)
+- [Available Server Services](#available-server-services)
   - [CustomItemServiceExtended](#customitemserviceextended)
   - [CustomLocaleService](#customlocaleservice)
   - [CustomQuestService](#customquestservice)
@@ -25,6 +25,8 @@ A comprehensive modding library for SPT that simplifies adding custom content to
   - [CustomProfileService](#customprofileservice)
   - [CustomWeaponPresetService](#customweaponpresetservice)
 - [Example Mod Structure](#example-mod-structure)
+- [Available Client Services](#available-client-services)
+  - [CustomTemplateIdToObjectService](#customtemplateidtoobjectservice) 
 
 ## Features
 
@@ -98,7 +100,7 @@ public class YourMod(
 
 ---
 
-## Available Services
+## Available Server Services
 
 ### CustomItemServiceExtended
 
@@ -1429,4 +1431,108 @@ MyWeaponMod/
 └── MyWeaponMod.dll
 ```
 
+***
+
+## Available Client Services
+
+### CustomTemplateIdToObjectService
+
+**Purpose**: Allows other mods to register custom item template mappings at runtime, enabling the game to properly instantiate custom item types with their corresponding inventory logic classes.
+
+**Usage**:
+```csharp
+// Create your new template and item classes
+
+// TEMPLATE TYPE
+public class GameBoyModTemplateType(string romName, string cartridgeImage, string accessoryType)
+    : CompoundItemTemplateClass
+{
+    public readonly string RomName = romName;
+    public readonly string CartridgeImage = cartridgeImage;
+    public readonly string AccessoryType = accessoryType;
+}
+
+
+// ITEM TYPE
+public class GameBoyModItemType(string id, GameBoyModTemplateType template) : CompoundItem(id, template)
+{
+}
+
+// ITEM
+public class GameBoyAccessory : GameBoyModItemType
+{
+    public GameBoyAccessory(string id, GameBoyModTemplateType template) : base(id, template)
+    {
+        AccessoryType = template.AccessoryType;
+        Components.Add(_tag = new TagComponent(this));
+    }
+
+    public string AccessoryType { get; }
+
+
+    public override IEnumerable<EItemInfoButton> ItemInteractionButtons
+    {
+        get
+        {
+            foreach (var itemInfoButton in GetBaseInteractions())
+            {
+                yield return itemInfoButton;
+            }
+            yield return EItemInfoButton.Install;
+            yield return EItemInfoButton.Uninstall;
+            if (!string.IsNullOrEmpty(_tag?.Name))
+            {
+                yield return EItemInfoButton.ResetTag;
+            }
+        }
+    }
+
+// Define your custom template mappings
+public static readonly List<TemplateIdToObjectType> CustomMappings =
+[
+    // Add GameBoyCartridge Template
+    new(
+        "66f16b85ed966fb78f5563d8", // Template ID
+        null,   // Item type
+        typeof(GameBoyModTemplateType),         // Template type
+        null // Constructor
+    ),
+    // Add GameBoyCartridge Item
+    new(
+        "66f17b4cb59dbccbf12990e6", // Template ID
+        typeof(GameBoyCartridge),   // Item type
+        typeof(GameBoyModTemplateType),         // Template type
+        (id, template) => new GameBoyCartridge(id, (GameBoyModTemplateType)template) // Constructor
+    ),
+];
+
+// Register with CommonLib
+CustomTemplateIdToObjectService.AddNewTemplateIdToObjectMapping(CustomMappings);
+```
+
+**Mapping Properties**:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `TemplateId` | string | Custom item template ID that matches your item template ID in the database |
+| `ItemType` | Type | C# class that inherits from `Item` |
+| `TemplateType` | Type | C# class that represents the template data structure |
+| `Constructor` | Delegate | Function that instantiates your custom item: `(id, parent) => new YourItem(id, parent)` |
+
+**What Gets Registered**:
+
+The service registers your mappings into three internal tables:
+
+- **TypeTable**: Maps template IDs to their `ItemType` classes for inventory object creation
+- **TemplateTypeTable**: Maps template IDs to their `TemplateType` classes for data representation
+- **ItemConstructors**: Maps template IDs to constructor functions for instantiation
+
+**Example Use Cases**:
+- Creating custom templates and item types for belts and cases with unique layouts (SEE PACK N STRAP)
+- Creating custom templates and item types for a unique usable item and unique mods for it (SEE KOMRADE KID)
+
+**Important Notes**:
+- Both `ItemType` and `TemplateType` must be properly defined classes
+- Only register custom items - this won't override vanilla Escape from Tarkov items
+- You still must add your new templates and items to the server database/templates/items. This is just a helper to add to the client `TemplateIdToObjectMappingClass`.
 ***
