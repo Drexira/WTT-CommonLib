@@ -6,7 +6,7 @@ A comprehensive modding library for SPT that simplifies adding custom content to
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Available Services](#available-services)
+- [Available Server Services](#available-server-services)
   - [CustomItemServiceExtended](#customitemserviceextended)
   - [CustomLocaleService](#customlocaleservice)
   - [CustomQuestService](#customquestservice)
@@ -21,9 +21,12 @@ A comprehensive modding library for SPT that simplifies adding custom content to
   - [CustomHideoutRecipeService](#customhideoutrecipeservice)
   - [CustomRigLayoutService](#customriglayoutservice)
   - [CustomSlotImageService](#customslotimageservice)
+  - [CustomBuffService](#custombuffservice)
+  - [CustomProfileService](#customprofileservice)
+  - [CustomWeaponPresetService](#customweaponpresetservice)
 - [Example Mod Structure](#example-mod-structure)
-- [Debugging](#debugging)
-- [Support](#support)
+- [Available Client Services](#available-client-services)
+  - [CustomTemplateIdToObjectService](#customtemplateidtoobjectservice) 
 
 ## Features
 
@@ -97,7 +100,7 @@ public class YourMod(
 
 ---
 
-## Available Services
+## Available Server Services
 
 ### CustomItemServiceExtended
 
@@ -1133,6 +1136,284 @@ wttCommon.CustomSlotImageService.CreateSlotImages(assembly,
 
 ***
 
+### CustomBuffService
+
+**Purpose**: Registers custom stimulator buff configurations to the game database, allowing you to create new buff effects for stimulators and other consumables.
+
+**Usage**:
+```csharp
+// Use default path (db/CustomBuffs/)
+await wttCommon.CustomBuffService.CreateCustomBuffs(assembly);
+
+// Or specify custom path
+await wttCommon.CustomBuffService.CreateCustomBuffs(assembly, 
+    Path.Join("db", "MyCustomBuffsFolder"));
+```
+
+<details>
+<summary> Example Buff Configuration (Click to expand)</summary>
+
+```json
+{
+    "Geeked": [
+        {
+            "BuffType": "StaminaRate",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": 200,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        },
+        {
+            "BuffType": "WeightLimit",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": 50,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        },
+        {
+            "BuffType": "DamageModifier",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": -15,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        },
+        {
+            "BuffType": "HealthRate",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": 3,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        }
+    ]
+}
+```
+</details>
+
+
+***
+
+
+### CustomProfileService
+
+**Purpose**: Registers custom player profile editions to the game database, allowing you to create alternative starting profiles with custom inventory, skills, and appearance configurations for different PMC factions.
+
+**Usage**:
+```csharp
+// Use default path (config/CustomProfiles/)
+await wttCommon.CustomProfileService.AddCustomProfiles(assembly);
+
+// Or specify custom path
+await wttCommon.CustomProfileService.AddCustomProfiles(assembly, 
+    Path.Join("config", "MyCustomProfilesFolder"));
+```
+
+**Configuration**: Place profile configuration files in `config/CustomProfiles/`:
+
+
+**Features**:
+- Create faction-specific starting profiles (BEAR/USEC)
+- Define custom starting inventory and equipment
+- Set initial skill levels and health values
+- Configure player stats and progression data
+
+**File Naming**:
+- File name (without extension) becomes the profile ID
+
+**Important Notes**:
+- Profile structures **must match SPT's ProfileSides model exactly** - invalid data will cause errors
+
+***
+
+
+### CustomWeaponPresetService
+
+**Purpose**: Registers custom weapon presets to the game database, allowing you to create pre-configured weapon builds with specific attachments that players and bots can select and use.
+
+**Usage**:
+```csharp
+// Use default path (db/CustomWeaponPresets/)
+await wttCommon.CustomWeaponPresetService.CreateCustomWeaponPresets(assembly);
+
+// Or specify custom path
+await wttCommon.CustomWeaponPresetService.CreateCustomWeaponPresets(assembly, 
+    Path.Join("db", "MyCustomWeaponPresetsFolder"));
+```
+
+<details>
+<summary> Example Weapon Preset Configuration (Click to expand)</summary>
+
+```json
+{
+    "5a32808386f774764a3226d9": {
+      "_changeWeaponName": true,
+      "_id": "5a32808386f774764a3226d9",
+      "_items": [
+        {
+          "_id": "5a2fa9c4c4a282000d72204f",
+          "_tpl": "5447a9cd4bdc2dbd208b4567"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d722051",
+          "_tpl": "59db3a1d86f77429e05b4e92",
+          "parentId": "5a2fa9c4c4a282000d72204f",
+          "slotId": "mod_pistol_grip"
+        },
+        {
+          "_id": "5a32808386f774764a3226ce",
+          "_tpl": "59c1383d86f774290a37e0ca",
+          "parentId": "5a2fa9c4c4a282000d72204f",
+          "slotId": "mod_magazine"
+        },
+        {
+          "_id": "5a32808386f774764a3226d1",
+          "_tpl": "59e6920f86f77411d82aa167",
+          "parentId": "5a32808386f774764a3226ce",
+          "slotId": "cartridges",
+          "upd": {
+            "StackObjectsCount": 60
+          }
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d722053",
+          "_tpl": "59bfe68886f7746004266202",
+          "parentId": "5a2fa9c4c4a282000d72204f",
+          "slotId": "mod_reciever"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d722058",
+          "_tpl": "57adff4f24597737f373b6e6",
+          "parentId": "5a2fa9c4c4a282000d722053",
+          "slotId": "mod_scope"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d722059",
+          "_tpl": "55d35ee94bdc2d61338b4568",
+          "parentId": "5a2fa9c4c4a282000d722053",
+          "slotId": "mod_barrel"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d72205b",
+          "_tpl": "59bffc1f86f77435b128b872",
+          "parentId": "5a2fa9c4c4a282000d722059",
+          "slotId": "mod_muzzle"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d722060",
+          "_tpl": "59bffbb386f77435b379b9c2",
+          "parentId": "5a2fa9c4c4a282000d72205b",
+          "slotId": "mod_muzzle"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d72205c",
+          "_tpl": "56eabcd4d2720b66698b4574",
+          "parentId": "5a2fa9c4c4a282000d722059",
+          "slotId": "mod_gas_block"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d72205a",
+          "_tpl": "595cf16b86f77427440c32e2",
+          "parentId": "5a2fa9c4c4a282000d722053",
+          "slotId": "mod_handguard"
+        },
+        {
+          "_id": "5a32808386f774764a3226d2",
+          "_tpl": "5649a2464bdc2d91118b45a8",
+          "parentId": "5a2fa9c4c4a282000d72205a",
+          "slotId": "mod_scope"
+        },
+        {
+          "_id": "5a32808386f774764a3226d4",
+          "_tpl": "58d39d3d86f77445bb794ae7",
+          "parentId": "5a32808386f774764a3226d2",
+          "slotId": "mod_scope"
+        },
+        {
+          "_id": "5a32808386f774764a3226d8",
+          "_tpl": "58d399e486f77442e0016fe7",
+          "parentId": "5a32808386f774764a3226d4",
+          "slotId": "mod_scope"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d72205d",
+          "_tpl": "59e0bed186f774156f04ce84",
+          "parentId": "5a2fa9c4c4a282000d72205a",
+          "slotId": "mod_mount_000"
+        },
+        {
+          "_id": "5a32808386f774764a3226d5",
+          "_tpl": "59f8a37386f7747af3328f06",
+          "parentId": "5a2fa9c4c4a282000d72205d",
+          "slotId": "mod_foregrip"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d72205e",
+          "_tpl": "59e0bdb186f774156f04ce82",
+          "parentId": "5a2fa9c4c4a282000d72205a",
+          "slotId": "mod_mount_002"
+        },
+        {
+          "_id": "5a32808386f774764a3226d6",
+          "_tpl": "56def37dd2720bec348b456a",
+          "parentId": "5a2fa9c4c4a282000d72205e",
+          "slotId": "mod_tactical"
+        },
+        {
+          "_id": "5a2fa9c4c4a282000d72205f",
+          "_tpl": "59e0be5d86f7742d48765bd2",
+          "parentId": "5a2fa9c4c4a282000d72205a",
+          "slotId": "mod_mount_003"
+        },
+        {
+          "_id": "5a32808386f774764a3226d7",
+          "_tpl": "544909bb4bdc2d6f028b4577",
+          "parentId": "5a2fa9c4c4a282000d72205f",
+          "slotId": "mod_tactical"
+        },
+        {
+          "_id": "5a32808386f774764a3226d3",
+          "_tpl": "59e0be5d86f7742d48765bd2",
+          "parentId": "5a2fa9c4c4a282000d72205a",
+          "slotId": "mod_mount_004"
+        },
+        {
+          "_id": "5a32808386f774764a3226cf",
+          "_tpl": "5947e98b86f774778f1448bc",
+          "parentId": "5a2fa9c4c4a282000d72204f",
+          "slotId": "mod_stock"
+        },
+        {
+          "_id": "5a32808386f774764a3226d0",
+          "_tpl": "56ea7165d2720b6e518b4583",
+          "parentId": "5a2fa9c4c4a282000d72204f",
+          "slotId": "mod_charge"
+        }
+      ],
+      "_name": "M4A1 2017 New year",
+      "_parent": "5a2fa9c4c4a282000d72204f",
+      "_type": "Preset"
+    }
+}
+```
+</details>
+
+**Features**:
+- Create complete weapon builds with all attachments pre-configured
+- Multiple presets per configuration file
+
+**Important Notes**:
+- Preset structures **must match SPT's Preset model exactly** - invalid preset data will cause errors
+- If you are expecting to have a unique named preset, you must also push a locale for that preset for the name to be applied properly
+
+***
+
 ## Example Mod Structure
 
 ### Custom Weapon Mod Structure
@@ -1149,3 +1430,109 @@ MyWeaponMod/
 ├── bundles.json
 └── MyWeaponMod.dll
 ```
+
+***
+
+## Available Client Services
+
+### CustomTemplateIdToObjectService
+
+**Purpose**: Allows other mods to register custom item template mappings at runtime, enabling the game to properly instantiate custom item types with their corresponding inventory logic classes.
+
+**Usage**:
+```csharp
+// Create your new template and item classes
+
+// TEMPLATE TYPE
+public class GameBoyModTemplateType(string romName, string cartridgeImage, string accessoryType)
+    : CompoundItemTemplateClass
+{
+    public readonly string RomName = romName;
+    public readonly string CartridgeImage = cartridgeImage;
+    public readonly string AccessoryType = accessoryType;
+}
+
+
+// ITEM TYPE
+public class GameBoyModItemType(string id, GameBoyModTemplateType template) : CompoundItem(id, template)
+{
+}
+
+// ITEM
+public class GameBoyAccessory : GameBoyModItemType
+{
+    public GameBoyAccessory(string id, GameBoyModTemplateType template) : base(id, template)
+    {
+        AccessoryType = template.AccessoryType;
+        Components.Add(_tag = new TagComponent(this));
+    }
+
+    public string AccessoryType { get; }
+
+
+    public override IEnumerable<EItemInfoButton> ItemInteractionButtons
+    {
+        get
+        {
+            foreach (var itemInfoButton in GetBaseInteractions())
+            {
+                yield return itemInfoButton;
+            }
+            yield return EItemInfoButton.Install;
+            yield return EItemInfoButton.Uninstall;
+            if (!string.IsNullOrEmpty(_tag?.Name))
+            {
+                yield return EItemInfoButton.ResetTag;
+            }
+        }
+    }
+
+// Define your custom template mappings
+public static readonly List<TemplateIdToObjectType> CustomMappings =
+[
+    // Add GameBoyCartridge Template
+    new(
+        "66f16b85ed966fb78f5563d8", // Template ID
+        null,   // Item type
+        typeof(GameBoyModTemplateType),         // Template type
+        null // Constructor
+    ),
+    // Add GameBoyCartridge Item
+    new(
+        "66f17b4cb59dbccbf12990e6", // Template ID
+        typeof(GameBoyCartridge),   // Item type
+        typeof(GameBoyModTemplateType),         // Template type
+        (id, template) => new GameBoyCartridge(id, (GameBoyModTemplateType)template) // Constructor
+    ),
+];
+
+// Register with CommonLib
+CustomTemplateIdToObjectService.AddNewTemplateIdToObjectMapping(CustomMappings);
+```
+
+**Mapping Properties**:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `TemplateId` | string | Custom item template ID that matches your item template ID in the database |
+| `ItemType` | Type | C# class that inherits from `Item` |
+| `TemplateType` | Type | C# class that represents the template data structure |
+| `Constructor` | Delegate | Function that instantiates your custom item: `(id, parent) => new YourItem(id, parent)` |
+
+**What Gets Registered**:
+
+The service registers your mappings into three internal tables:
+
+- **TypeTable**: Maps template IDs to their `ItemType` classes for inventory object creation
+- **TemplateTypeTable**: Maps template IDs to their `TemplateType` classes for data representation
+- **ItemConstructors**: Maps template IDs to constructor functions for instantiation
+
+**Example Use Cases**:
+- Creating custom templates and item types for belts and cases with unique layouts (SEE PACK N STRAP)
+- Creating custom templates and item types for a unique usable item and unique mods for it (SEE KOMRADE KID)
+
+**Important Notes**:
+- Both `ItemType` and `TemplateType` must be properly defined classes
+- Only register custom items - this won't override vanilla Escape from Tarkov items
+- You still must add your new templates and items to the server database/templates/items. This is just a helper to add to the client `TemplateIdToObjectMappingClass`.
+***
