@@ -41,6 +41,8 @@ public class WTTServerCommonLib(
     WTTCustomSlotImageService customSlotImageService,
     WTTCustomStaticSpawnService customStaticSpawnService,
     WTTCustomWeaponPresetService customWeaponPresetService,
+    WTTCustomBuffService customBuffService,
+    WTTCustomProfileService  customProfileService,
     ISptLogger<WTTServerCommonLib> logger
 ) : IOnLoad
 {
@@ -59,6 +61,8 @@ public class WTTServerCommonLib(
     public WTTCustomSlotImageService CustomSlotImageService { get; } = customSlotImageService;
     public WTTCustomStaticSpawnService CustomStaticSpawnService { get; } = customStaticSpawnService;
     public WTTCustomWeaponPresetService CustomWeaponPresetService { get; } = customWeaponPresetService; 
+    public WTTCustomBuffService CustomBuffService { get; } = customBuffService;
+    public WTTCustomProfileService CustomProfileService { get; } = customProfileService;
 
     public Task OnLoad()
     {
