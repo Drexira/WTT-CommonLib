@@ -5,8 +5,13 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <OutputType>Library</OutputType>
+        <PackageId>WTT-ServerCommonLib</PackageId>
         <Version>1.0.0</Version>
-        <!-- The two lines below will set the output path for the binaries -->
+        <Authors>GrooveypenguinX</Authors>
+        <IsPackable>true</IsPackable>
+        <Description>WTT Common Library - Server components</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <OutputPath>bin\$(Configuration)\$(ProjectName)\$(AssemblyName)-$(Version)\</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <RootNamespace>WTTServerCommonLib</RootNamespace>
@@ -19,9 +24,15 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DocumentationFile>bin\Release\WTT-ServerCommonLib-1.0.0\WTT-ServerCommonLib.xml</DocumentationFile>
     </PropertyGroup>
+    <PropertyGroup>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="SPTarkov.Server.Core" Version="4.0.1-pre.202510120800"/>
+        <None Include="../README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="SPTarkov.Server.Core" Version="4.0.2" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

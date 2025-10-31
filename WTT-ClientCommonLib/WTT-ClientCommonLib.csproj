@@ -4,7 +4,12 @@
         <TargetFramework>net472</TargetFramework>
         <AssemblyName>WTT-ClientCommonLib</AssemblyName>
         <Description>A common library for adding slot images, rig layouts, and voices to the client</Description>
-        <Version>1.1.11</Version>
+        <PackageId>WTT-ClientCommonLib</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>GrooveypenguinX</Authors>
+        <Description>WTT Common Library - Client components</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <Configurations>Debug;Release;UNITY_EDITOR</Configurations>
@@ -18,7 +23,13 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DefineConstants>$(DefineConstants);CHEATMODE</DefineConstants>
     </PropertyGroup>
+    <PropertyGroup>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
 
+    <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
     <ItemGroup>
         <Compile Remove="build\**"/>
         <Compile Remove="Interfaces\**"/>
