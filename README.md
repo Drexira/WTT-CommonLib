@@ -1153,46 +1153,44 @@ await wttCommon.CustomBuffService.CreateCustomBuffs(assembly,
 
 ```json
 {
-    "Buffs": {
-        "Geeked": [
-            {
-                "BuffType": "StaminaRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": 200,
-                "AbsoluteValue": true,
-                "SkillName": ""
-            },
-            {
-                "BuffType": "WeightLimit",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": 50,
-                "AbsoluteValue": true,
-                "SkillName": ""
-            },
-            {
-                "BuffType": "DamageModifier",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": -15,
-                "AbsoluteValue": true,
-                "SkillName": ""
-            },
-            {
-                "BuffType": "HealthRate",
-                "Chance": 1,
-                "Delay": 1,
-                "Duration": 180,
-                "Value": 3,
-                "AbsoluteValue": true,
-                "SkillName": ""
-            }
-        ]
-    }
+    "Geeked": [
+        {
+            "BuffType": "StaminaRate",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": 200,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        },
+        {
+            "BuffType": "WeightLimit",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": 50,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        },
+        {
+            "BuffType": "DamageModifier",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": -15,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        },
+        {
+            "BuffType": "HealthRate",
+            "Chance": 1,
+            "Delay": 1,
+            "Duration": 180,
+            "Value": 3,
+            "AbsoluteValue": true,
+            "SkillName": ""
+        }
+    ]
 }
 ```
 </details>
