@@ -55,7 +55,7 @@ internal static class Utils
                 req == "null" ||
                 (req.TrimStart().StartsWith("{") && (req.Contains("\"err\"") || req.Contains("\"error\""))))
             {
-                Console.WriteLine($"Invalid/empty/error response from {url}: {req}");
+                LogHelper.LogError($"Invalid/empty/error response from {url}: {req}");
                 return default;
             }
 
@@ -63,7 +63,7 @@ internal static class Utils
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching {url}: {ex.Message}");
+            LogHelper.LogError($"Error fetching {url}: {ex.Message}");
             return default;
         }
     }

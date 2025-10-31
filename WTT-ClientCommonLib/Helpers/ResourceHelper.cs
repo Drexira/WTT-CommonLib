@@ -9,13 +9,11 @@ public static class ResourceHelper
         if (!CacheResourcesPopAbstractClass.Dictionary_0.ContainsKey(key))
         {
             CacheResourcesPopAbstractClass.Dictionary_0.Add(key, value);
-#if DEBUG
-            Console.WriteLine($"[WTT-ClientCommonLib] Registered {key}.");
-#endif
+            LogHelper.LogDebug($"[WTT-ClientCommonLib] Registered {key}.");
         }
         else
         {
-            Console.WriteLine($"[WTT-ClientCommonLib] Duplicate key ignored: {key}");
+            LogHelper.LogDebug($"[WTT-ClientCommonLib] Duplicate key ignored: {key}");
         }
     }
 }

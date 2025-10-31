@@ -14,14 +14,14 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
     {
         try
         {
-            logger.LogDebug("Loading resources from server...");
+            LogHelper.LogDebug("Loading resources from server...");
             LoadVoicesFromServer();
             LoadSlotImagesFromServer();
             LoadRigLayoutsFromServer();
             assetLoader.InitializeBundles("/wttcommonlib/spawnsystem/bundles/get");
             assetLoader.SpawnConfigs = assetLoader.FetchSpawnConfigs("/wttcommonlib/spawnsystem/configs/get");
-            logger.LogDebug($"Loaded {assetLoader.SpawnConfigs.Count} spawn configurations");
-            logger.LogDebug("All resources loaded successfully from server");
+            LogHelper.LogDebug($"Loaded {assetLoader.SpawnConfigs.Count} spawn configurations");
+            LogHelper.LogDebug("All resources loaded successfully from server");
         }
         catch (Exception ex)
         {
@@ -44,10 +44,10 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
                 if (!ResourceKeyManagerAbstractClass.Dictionary_0.ContainsKey(kvp.Key))
                 {
                     ResourceKeyManagerAbstractClass.Dictionary_0[kvp.Key] = kvp.Value;
-                    logger.LogDebug($"Added voice key: {kvp.Key}");
+                    LogHelper.LogDebug($"Added voice key: {kvp.Key}");
                 }
 
-            logger.LogDebug($"Loaded {voiceResponse.Count} voice mappings from server");
+            LogHelper.LogDebug($"Loaded {voiceResponse.Count} voice mappings from server");
         }
         catch (Exception ex)
         {
@@ -99,7 +99,7 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
                 return;
             }
 
-            logger.LogDebug($"Received {bundleMap.Count} rig layouts from server");
+            LogHelper.LogDebug($"Received {bundleMap.Count} rig layouts from server");
 
             foreach (var kvp in bundleMap)
             {
@@ -131,7 +131,7 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
                 LoadBundleFromMemory(bundleData, bundleName);
             }
 
-            logger.LogDebug($"Loaded {bundleMap.Count} rig layouts from server");
+            LogHelper.LogDebug($"Loaded {bundleMap.Count} rig layouts from server");
         }
         catch (Exception ex)
         {
@@ -164,7 +164,7 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
             );
 
             ResourceHelper.AddEntry($"Slots/{slotID}", sprite);
-            logger.LogDebug($"Added slot sprite: {slotID}");
+            LogHelper.LogDebug($"Added slot sprite: {slotID}");
         }
         catch (Exception ex)
         {
@@ -212,11 +212,11 @@ public class ResourceLoader(ManualLogSource logger, AssetLoader assetLoader)
 
                     ResourceHelper.AddEntry($"UI/Rig Layouts/{prefab.name}", gridView);
                     loadedCount++;
-                    logger.LogDebug($"Added rig layout: {prefab.name}");
+                    LogHelper.LogDebug($"Added rig layout: {prefab.name}");
                 }
 
             bundle.Unload(false);
-            logger.LogDebug($"Loaded {loadedCount} prefabs from bundle: {bundleName}");
+            LogHelper.LogDebug($"Loaded {loadedCount} prefabs from bundle: {bundleName}");
         }
         catch (Exception ex)
         {

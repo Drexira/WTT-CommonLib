@@ -4,6 +4,7 @@ using System.Reflection;
 using EFT;
 using SPT.Reflection.Patching;
 using WTTClientCommonLib.Configuration;
+using WTTClientCommonLib.Helpers;
 using WTTClientCommonLib.Services;
 
 namespace WTTClientCommonLib.Patches;
@@ -24,7 +25,7 @@ internal class OnGameStarted : ModulePatch
             var questZones = QuestZones.GetZones();
             if (questZones == null || questZones.Count == 0)
             {
-                Logger.LogDebug("No zones data loaded; skipping initialization.");
+                LogHelper.LogDebug("No zones data loaded; skipping initialization.");
                 return;
             }
 

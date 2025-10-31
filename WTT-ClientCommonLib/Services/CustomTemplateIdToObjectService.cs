@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using EFT.InventoryLogic;
+using WTTClientCommonLib.Helpers;
 
 namespace WTTClientCommonLib.Services;
 
@@ -26,7 +27,7 @@ public abstract class CustomTemplateIdToObjectService
                 if (!typeTable.ContainsKey(mapping.TemplateId) && mapping.ItemType != null)
                 {
                     typeTable.Add(mapping.TemplateId, mapping.ItemType);
-                    Console.WriteLine($"Added {mapping.ItemType.Name} to TypeTable.");
+                    LogHelper.LogDebug($"Added {mapping.ItemType.Name} to TypeTable.");
                 }
             }
 
@@ -38,7 +39,7 @@ public abstract class CustomTemplateIdToObjectService
                 if (!templateTypeTable.ContainsKey(mapping.TemplateId))
                 {
                     templateTypeTable.Add(mapping.TemplateId, mapping.TemplateType);
-                    Console.WriteLine($"Added {mapping.TemplateType.Name} to TemplateTypeTable.");
+                    LogHelper.LogDebug($"Added {mapping.TemplateType.Name} to TemplateTypeTable.");
                 }
             }
 
@@ -52,7 +53,7 @@ public abstract class CustomTemplateIdToObjectService
                     if (!itemConstructors.ContainsKey(mapping.TemplateId))
                     {
                         itemConstructors.Add(mapping.TemplateId, mapping.Constructor);
-                        Console.WriteLine($"Added {mapping.ItemType.Name} constructor to ItemConstructors.");
+                        LogHelper.LogDebug($"Added {mapping.ItemType.Name} constructor to ItemConstructors.");
                     }
                 }
             }

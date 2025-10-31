@@ -18,7 +18,7 @@ internal class QuestZones
         var request = Utils.Get<List<CustomQuestZone>>("/wttcommonlib/zones/get");
         if (request == null || request.Count == 0)
         {
-            ConsoleScreen.Log("[QuestZones.GetZones] No zones data loaded.");
+            LogHelper.LogDebug("[QuestZones.GetZones] No zones data loaded.");
             return new List<CustomQuestZone>();
         }
 
@@ -34,33 +34,33 @@ internal class QuestZones
             foreach (var zone in request)
                 if (zone.ZoneLocation.ToLower() == Singleton<GameWorld>.Instance.MainPlayer.Location.ToLower())
                 {
-                    ConsoleScreen.Log("-------------------------------------");
-                    ConsoleScreen.Log("ZoneScale:");
-                    ConsoleScreen.Log($"Scale Z: {zone.Scale.Z}");
-                    ConsoleScreen.Log($"Scale Y: {zone.Scale.Y}");
-                    ConsoleScreen.Log($"Scale X: {zone.Scale.X}");
-                    ConsoleScreen.Log("ZonePosition:");
-                    ConsoleScreen.Log($"Position Z: {zone.Position.Z}");
-                    ConsoleScreen.Log($"Position Y: {zone.Position.Y}");
-                    ConsoleScreen.Log($"Position X: {zone.Position.X}");
-                    ConsoleScreen.Log("ZoneRotation:");
-                    ConsoleScreen.Log($"Rotation Z: {zone.Rotation.Z}");
-                    ConsoleScreen.Log($"Rotation Y: {zone.Rotation.Y}");
-                    ConsoleScreen.Log($"Rotation X: {zone.Rotation.X}");
-                    ConsoleScreen.Log($"Rotation W: {zone.Rotation.W}");
-                    ConsoleScreen.Log($"ZoneType: {zone.ZoneType}");
-                    if (!string.IsNullOrEmpty(zone.FlareType)) ConsoleScreen.Log($"FlareType: {zone.FlareType}");
-                    else ConsoleScreen.Log("FlareType: N/A");
-                    ConsoleScreen.Log($"ZoneLocation: {zone.ZoneLocation}");
-                    ConsoleScreen.Log($"ZoneId: {zone.ZoneId}");
-                    ConsoleScreen.Log($"ZoneName: {zone.ZoneName}");
-                    ConsoleScreen.Log("-------------------------------------");
+                    LogHelper.LogDebug("-------------------------------------");
+                    LogHelper.LogDebug("ZoneScale:");
+                    LogHelper.LogDebug($"Scale Z: {zone.Scale.Z}");
+                    LogHelper.LogDebug($"Scale Y: {zone.Scale.Y}");
+                    LogHelper.LogDebug($"Scale X: {zone.Scale.X}");
+                    LogHelper.LogDebug("ZonePosition:");
+                    LogHelper.LogDebug($"Position Z: {zone.Position.Z}");
+                    LogHelper.LogDebug($"Position Y: {zone.Position.Y}");
+                    LogHelper.LogDebug($"Position X: {zone.Position.X}");
+                    LogHelper.LogDebug("ZoneRotation:");
+                    LogHelper.LogDebug($"Rotation Z: {zone.Rotation.Z}");
+                    LogHelper.LogDebug($"Rotation Y: {zone.Rotation.Y}");
+                    LogHelper.LogDebug($"Rotation X: {zone.Rotation.X}");
+                    LogHelper.LogDebug($"Rotation W: {zone.Rotation.W}");
+                    LogHelper.LogDebug($"ZoneType: {zone.ZoneType}");
+                    if (!string.IsNullOrEmpty(zone.FlareType)) LogHelper.LogDebug($"FlareType: {zone.FlareType}");
+                    else LogHelper.LogDebug("FlareType: N/A");
+                    LogHelper.LogDebug($"ZoneLocation: {zone.ZoneLocation}");
+                    LogHelper.LogDebug($"ZoneId: {zone.ZoneId}");
+                    LogHelper.LogDebug($"ZoneName: {zone.ZoneName}");
+                    LogHelper.LogDebug("-------------------------------------");
                     loadedZoneCount++;
                 }
 
-        ConsoleScreen.Log("-------------------------------------");
-        ConsoleScreen.Log($"Loaded CustomQuestZone Count: {loadedZoneCount}");
-        ConsoleScreen.Log($"Player Map Location: {Singleton<GameWorld>.Instance.MainPlayer.Location}");
+        LogHelper.LogDebug("-------------------------------------");
+        LogHelper.LogDebug($"Loaded CustomQuestZone Count: {loadedZoneCount}");
+        LogHelper.LogDebug($"Player Map Location: {Singleton<GameWorld>.Instance.MainPlayer.Location}");
 #endif
         return request;
     }

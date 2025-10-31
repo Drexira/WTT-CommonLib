@@ -12,6 +12,14 @@
         <RootNamespace>WTTServerCommonLib</RootNamespace>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\WTT-ServerCommonLib-1.0.0\WTT-ServerCommonLib.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\WTT-ServerCommonLib-1.0.0\WTT-ServerCommonLib.xml</DocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="SPTarkov.Server.Core" Version="4.0.1-pre.202510120800"/>
     </ItemGroup>

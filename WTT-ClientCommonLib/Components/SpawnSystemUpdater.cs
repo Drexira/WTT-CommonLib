@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using WTTClientCommonLib.CommandProcessor;
+using WTTClientCommonLib.Helpers;
 
 namespace WTTClientCommonLib.Components;
 
@@ -27,7 +28,7 @@ public class SpawnSystemUpdater : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Updater failed: {ex}");
+            LogHelper.LogError($"Updater failed: {ex}");
         }
     }
 }

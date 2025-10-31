@@ -38,7 +38,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         var player = Singleton<GameWorld>.Instance.MainPlayer;
         if (player == null)
         {
-            logger.LogDebug("Player not found. Are you in a raid?");
+            LogHelper.LogDebug("Player not found. Are you in a raid?");
             return;
         }
 
@@ -66,7 +66,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         var prefab = assetLoader.LoadPrefabFromBundle(bundleName, prefabName);
         if (prefab == null)
         {
-            logger.LogDebug($"Failed to load prefab: {prefabName} from bundle: {bundleName}");
+            LogHelper.LogDebug($"Failed to load prefab: {prefabName} from bundle: {bundleName}");
             return;
         }
 
@@ -81,7 +81,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
             PrefabName = prefabName
         });
         _currentSpawnedIndex = _spawnedObjects.Count - 1;
-        logger.LogDebug($"Spawned {prefabName} at {spawnPosition}");
+        LogHelper.LogDebug($"Spawned {prefabName} at {spawnPosition}");
     }
 
 
@@ -89,7 +89,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
     {
         if (_lastSpawnedObject == null)
         {
-            logger.LogDebug("No object to edit. Spawn an object first.");
+            LogHelper.LogDebug("No object to edit. Spawn an object first.");
             return;
         }
 
@@ -112,13 +112,13 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
             arrow.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
         }
 
-        logger.LogDebug("Entering edit mode. Use WASD to move, Arrow Keys to rotate. Press Enter to confirm.");
-        logger.LogDebug("Current position: " + _lastSpawnedObject.transform.position);
+        LogHelper.LogDebug("Entering edit mode. Use WASD to move, Arrow Keys to rotate. Press Enter to confirm.");
+        LogHelper.LogDebug("Current position: " + _lastSpawnedObject.transform.position);
     }
 
     public void ExitEditMode()
     {
-        logger.LogDebug("Exiting edit mode.");
+        LogHelper.LogDebug("Exiting edit mode.");
         IsEditing = false;
         _gamePlayerOwner = WTTClientCommonLib.Player.GetComponentInChildren<GamePlayerOwner>();
         _gamePlayerOwner.enabled = true;
@@ -274,9 +274,9 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         if (StaticSpawnSystemConfigManager.ConfirmPositionKey.Value.BetterIsDown())
         {
             ExitEditMode();
-            logger.LogDebug("Position confirmed!");
-            logger.LogDebug($"Position: {_lastSpawnedObject.transform.position}");
-            logger.LogDebug($"Rotation: {_lastSpawnedObject.transform.rotation.eulerAngles}");
+            LogHelper.LogDebug("Position confirmed!");
+            LogHelper.LogDebug($"Position: {_lastSpawnedObject.transform.position}");
+            LogHelper.LogDebug($"Rotation: {_lastSpawnedObject.transform.rotation.eulerAngles}");
         }
 
         if (_editIndicator != null)
@@ -290,7 +290,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
     {
         if (_spawnedObjects.Count == 0 || _currentSpawnedIndex < 0)
         {
-            logger.LogDebug("No object to delete.");
+            LogHelper.LogDebug("No object to delete.");
             return;
         }
 
@@ -298,7 +298,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         Object.Destroy(currentInfo.Object);
         _spawnedObjects.RemoveAt(_currentSpawnedIndex);
 
-        logger.LogDebug($"Deleted object: {currentInfo.PrefabName}");
+        LogHelper.LogDebug($"Deleted object: {currentInfo.PrefabName}");
 
         // Update selection
         if (_spawnedObjects.Count > 0)
@@ -320,7 +320,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
     {
         if (_spawnedObjects.Count == 0)
         {
-            logger.LogDebug("No spawned objects to cycle.");
+            LogHelper.LogDebug("No spawned objects to cycle.");
             return;
         }
 
@@ -328,7 +328,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         var currentInfo = _spawnedObjects[_currentSpawnedIndex];
         _lastSpawnedObject = currentInfo.Object;
 
-        logger.LogDebug($"Switched to object #{_currentSpawnedIndex}: " +
+        LogHelper.LogDebug($"Switched to object #{_currentSpawnedIndex}: " +
                         $"{currentInfo.PrefabName} [Bundle: {currentInfo.BundleName}]");
 
         if (IsEditing && _editIndicator != null)
@@ -339,7 +339,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
     {
         if (_spawnedObjects.Count == 0)
         {
-            logger.LogDebug("No spawned objects to cycle.");
+            LogHelper.LogDebug("No spawned objects to cycle.");
             return;
         }
 
@@ -347,7 +347,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
         var currentInfo = _spawnedObjects[_currentSpawnedIndex];
         _lastSpawnedObject = currentInfo.Object;
 
-        logger.LogDebug($"Switched to object #{_currentSpawnedIndex}: " +
+        LogHelper.LogDebug($"Switched to object #{_currentSpawnedIndex}: " +
                         $"{currentInfo.PrefabName} [Bundle: {currentInfo.BundleName}]");
 
         if (IsEditing && _editIndicator != null)
@@ -359,7 +359,7 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
     {
         if (_spawnedObjects == null || _spawnedObjects.Count == 0)
         {
-            logger.LogDebug("No spawned objects to export.");
+            LogHelper.LogDebug("No spawned objects to export.");
             return;
         }
 
@@ -396,6 +396,6 @@ public class SpawnCommands(ManualLogSource logger, AssetLoader assetLoader)
             $"WTT-ClientCommonLib-CustomStaticSpawnConfig-Output-{DateTime.Now:yyyyMMddHHmmssffff}.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(exportList, Formatting.Indented));
 
-        logger.LogDebug($"Exported {_spawnedObjects.Count} spawned objects to {path}");
+        LogHelper.LogDebug($"Exported {_spawnedObjects.Count} spawned objects to {path}");
     }
 }

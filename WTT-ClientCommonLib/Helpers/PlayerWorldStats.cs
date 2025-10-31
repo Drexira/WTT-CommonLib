@@ -15,9 +15,9 @@ public class PlayerWorldStats(ManualLogSource logger)
 
     private void LogPlayerStats(string playerType, Player player)
     {
-        logger.LogDebug(
+        LogHelper.LogDebug(
             $"{playerType} Position X: {player.Transform.position.x} Y: {player.Transform.position.y} Z: {player.Transform.position.z}");
-        logger.LogDebug(
+        LogHelper.LogDebug(
             $"{playerType} Rotation X: {player.gameObject.transform.rotation.eulerAngles.x} Y: {player.gameObject.transform.rotation.eulerAngles.y} Z: {player.gameObject.transform.rotation.eulerAngles.z}");
     }
 }

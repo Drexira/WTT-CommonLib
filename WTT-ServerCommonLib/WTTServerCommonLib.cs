@@ -11,7 +11,7 @@ namespace WTTServerCommonLib;
 
 public record ModMetadata : AbstractModMetadata
 {
-    public override string ModGuid { get; init; } = "com.grooveypenguinx.WTT-ServerCommonLib";
+    public override string ModGuid { get; init; } = "com.WTT.ServerCommonLib";
     public override string Name { get; init; } = "WTT-ServerCommonLib";
     public override string Author { get; init; } = "GrooveypenguinX";
     public override List<string>? Contributors { get; init; }

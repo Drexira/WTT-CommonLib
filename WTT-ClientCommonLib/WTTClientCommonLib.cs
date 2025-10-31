@@ -28,6 +28,8 @@ public class WTTClientCommonLib : BaseUnityPlugin
     private void Awake()
     {
         Instance = this;
+     
+        LogHelper.SetLogger(Logger);
         try
         {
             AssetLoader = new AssetLoader(Logger);

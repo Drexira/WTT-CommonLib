@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Diz.Jobs;
 using SPT.Reflection.Patching;
 using UnityEngine;
+using WTTClientCommonLib.Helpers;
 using Object = UnityEngine.Object;
 
 namespace WTTClientCommonLib.Patches;
@@ -173,7 +174,7 @@ internal class ClothingBundleRendererPatch : ModulePatch
                 }
             }
 
-            Logger.LogDebug($"Rendering with {validMeshCount} valid meshes. Bounds size: {combinedBounds.size}");
+            LogHelper.LogDebug($"Rendering with {validMeshCount} valid meshes. Bounds size: {combinedBounds.size}");
 
 
             if (validMeshCount == 0)

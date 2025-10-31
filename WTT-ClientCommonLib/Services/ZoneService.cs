@@ -55,7 +55,7 @@ public static class ZoneService
         if (obj == null) return;
 
         Zones.Add(new CustomZoneContainer(obj, type, flare));
-        Console.WriteLine($"Created new zone: {name}, total zones: {Zones.Count}");
+        LogHelper.LogDebug($"Created new zone: {name}, total zones: {Zones.Count}");
     }
 
     public static void NextZone()
@@ -149,7 +149,7 @@ public static class ZoneService
             serializer.Serialize(streamWriter, convertedZones);
         }
 
-        Console.WriteLine($"WTT-ClientCommonLib: Output zones to file: {path}");
+        LogHelper.LogDebug($"WTT-ClientCommonLib: Output zones to file: {path}");
     }
 
     private static void AdjustConfigValues()
